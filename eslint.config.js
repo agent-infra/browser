@@ -7,6 +7,7 @@ const typescript = require('@typescript-eslint/eslint-plugin');
 const typescriptParser = require('@typescript-eslint/parser');
 const react = require('eslint-plugin-react');
 const importPlugin = require('eslint-plugin-import');
+const globals = require('globals');
 
 module.exports = [
   {
@@ -34,15 +35,9 @@ module.exports = [
         },
       },
       globals: {
-        console: 'readonly',
-        process: 'readonly',
-        Buffer: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        global: 'readonly',
-        module: 'readonly',
-        require: 'readonly',
-        exports: 'readonly',
+        ...globals.browser,
+        ...globals.node,
+        ...globals.es2021,
       },
     },
     plugins: {
