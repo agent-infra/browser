@@ -9,7 +9,6 @@ const react = require('eslint-plugin-react');
 const importPlugin = require('eslint-plugin-import');
 
 module.exports = [
-  // 忽略的文件和目录
   {
     ignores: [
       'node_modules/**',
@@ -21,10 +20,8 @@ module.exports = [
     ],
   },
 
-  // 基础 JavaScript 配置
   js.configs.recommended,
 
-  // TypeScript 和 React 文件配置
   {
     files: ['**/*.{js,jsx,ts,tsx,cjs,mjs,cts,mts}'],
     languageOptions: {
@@ -54,13 +51,11 @@ module.exports = [
       import: importPlugin,
     },
     rules: {
-      // TypeScript 规则
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-shadow': 'off',
 
-      // React 规则
       'react/display-name': 'off',
       'react/react-in-jsx-scope': 'off',
       'react/destructuring-assignment': 'off',
@@ -70,7 +65,6 @@ module.exports = [
       'react/jsx-props-no-spreading': 'off',
       'react/prop-types': 'off',
 
-      // Import 规则
       'import/no-extraneous-dependencies': 'off',
       'import/extensions': 'off',
       'import/no-unresolved': 'off',
@@ -78,7 +72,6 @@ module.exports = [
       'import/order': 'off',
       'import/prefer-default-export': 'off',
 
-      // 通用规则
       camelcase: 'off',
       'no-shadow': 'off',
       'class-methods-use-this': 'off',
