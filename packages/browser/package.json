@@ -1,7 +1,7 @@
 {
-  "name": "@agent-infra/browser-finder",
-  "description": "find browser in your system",
-  "version": "0.0.1",
+  "name": "@agent-infra/browser",
+  "description": "A tiny Browser Control library, built for Agent Tars.",
+  "version": "0.1.1",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -27,12 +27,12 @@
     "test:e2e:local": "vitest --config vitest.e2e.config.ts local-browser.e2e.test.ts"
   },
   "dependencies": {
-    "which": "5.0.0",
-    "edge-paths": "3.0.5",
-    "@agent-infra/logger": "0.0.2-beta.2"
+    "puppeteer-core": "24.7.2",
+    "@agent-infra/logger": "0.0.2-beta.2",
+    "@agent-infra/shared": "0.0.2",
+    "@agent-infra/browser-finder": "workspace:*"
   },
   "devDependencies": {
-    "@types/which": "3.0.4",
     "@types/node": "24.1.0",
     "typescript": "5.8.3",
     "vitest": "3.2.4",

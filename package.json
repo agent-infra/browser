@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "vitest",
+    "bootstrap": "pnpm install --prefer-offline && npm run build",
+    "build": "pnpm run -r build",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint . --fix",
     "prepare": "husky"
   },
