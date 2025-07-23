@@ -94,6 +94,7 @@ export default class MessageManager {
         // @ts-ignore
         description: 'Navigate to the page and click on the element',
         parameters: zodToJsonSchema(
+          // @ts-ignore
           z.object({
             current_state: z.object({
               page_summary: z.string(),
