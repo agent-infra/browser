@@ -10,6 +10,8 @@ import { getAnyFirefoxStable } from './firefox-paths';
 
 import { BrowserType } from './types';
 
+export type { BrowserType };
+
 export class BrowserFinder {
   private logger: Logger;
 
