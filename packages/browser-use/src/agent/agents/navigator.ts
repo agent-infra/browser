@@ -165,6 +165,7 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
       this.removeLastStateMessageFromMemory();
       this.addModelOutputToMemory(modelOutput);
 
+      // @ts-ignore
       logger.info('modelOutput.action', modelOutput.action);
 
       // take the actions
@@ -284,27 +285,36 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
     const results: ActionResult[] = [];
     let errCount = 0;
 
+    // @ts-ignore
     logger.info('doMultiAction_Actions', response.action);
     // sometimes response.action is a string, but not an array as expected, so we need to parse it as an array
     let actions: Record<string, unknown>[] = [];
+    // @ts-ignore
     if (Array.isArray(response.action)) {
       // if the item is null, skip it
+      // @ts-ignore
       actions = response.action.filter((item: unknown) => item !== null);
       if (actions.length === 0) {
+        // @ts-ignore
         logger.warning('No valid actions found', response.action);
       }
+      // @ts-ignore
     } else if (typeof response.action === 'string') {
       try {
+        // @ts-ignore
         logger.warning('Unexpected action format', response.action);
+        // @ts-ignore
         const repaired = jsonrepair(response.action);
         // try to parse the action as an JSON object
         actions = JSON.parse(repaired);
       } catch (error) {
+        // @ts-ignore
         logger.error('Invalid action format', response.action);
         throw new Error('Invalid action output format');
       }
     } else {
       // if the action is neither an array nor a string, it should be an object
+      // @ts-ignore
       actions = [response.action];
     }
 

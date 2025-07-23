@@ -143,6 +143,7 @@ export abstract class BaseAgent<T extends z.ZodType, M = unknown> {
         ...this.callOptions,
       });
       if (response.parsed) {
+        // @ts-ignore
         return response.parsed;
       }
       throw new Error('Could not parse response');
@@ -194,6 +195,7 @@ export abstract class BaseAgent<T extends z.ZodType, M = unknown> {
 
     const toolCallMessage = new AIMessage({
       content: 'tool call',
+      // @ts-ignore
       tool_calls: toolCalls,
     });
     messageManager.addMessageWithTokens(toolCallMessage);

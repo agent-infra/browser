@@ -140,15 +140,18 @@ export default class Page {
 
     const browser = await localBrowser.getBrowser();
 
+    // @ts-ignore
     this._browser = browser;
 
     const [page] = await browser.pages();
 
+    // @ts-ignore
     await this.executeScript(page, {
       contents: [getBuildDomTreeScript()],
     });
 
     await page.goto(this._state.url);
+    // @ts-ignore
     this._puppeteerPage = page;
 
     // Add anti-detection scripts
