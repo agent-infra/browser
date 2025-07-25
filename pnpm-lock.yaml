@@ -108,6 +108,9 @@ importers:
 
   packages/browser-context:
     dependencies:
+      defuddle:
+        specifier: ^0.6.4
+        version: 0.6.4(jsdom@26.1.0)
       puppeteer-core:
         specifier: 24.14.0
         version: 24.14.0
@@ -1641,6 +1644,10 @@ packages:
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
 
+  '@xmldom/xmldom@0.8.10':
+    resolution: {integrity: sha512-2WALfTl4xo2SkGCYRt6rDTFfk9R1czmBvUQy12gK2KuRKIpWEhcbbzy8EZXtz/jkRqHX8bFEc6FC1HjX4TUWYw==}
+    engines: {node: '>=10.0.0'}
+
   JSONStream@1.3.5:
     resolution: {integrity: sha512-E+iruNOY8VV9s4JEbe1aNEm6MiszPRr/UfcHMz0TQh1BXSxHK+ASV1R6W4HpjBhSeS+54PIsAMCBmwD06LLsqQ==}
     hasBin: true
@@ -2058,6 +2065,11 @@ packages:
   define-properties@1.2.1:
     resolution: {integrity: sha512-8QmQKqEASLd5nx0U1B1okLElbUuuttJ/AnYmRXbbbGDWh6uS208EjD4Xqq/I9wK7u0v6O08XhTWnt5XtEbR6Dg==}
     engines: {node: '>= 0.4'}
+
+  defuddle@0.6.4:
+    resolution: {integrity: sha512-T8qopOu0hLaFHIVX/cKrNxwbcRWi9rCg002YUApNNdfHm7kFSn9719+diEIaSu61AJp6nbyAyK8E0nW20jc/PA==}
+    peerDependencies:
+      jsdom: ^24.0.0
 
   degenerator@5.0.1:
     resolution: {integrity: sha512-TllpMR/t0M5sqCXfj85i4XaAzxmS5tVA16dqvdkMwGmzI+dXLXnw3J+3Vdv7VKw+ThlTMboK6i9rnZ6Nntj5CQ==}
@@ -2974,6 +2986,9 @@ packages:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
 
+  mathml-to-latex@1.5.0:
+    resolution: {integrity: sha512-rrWn0eEvcEcdMM4xfHcSGIy+i01DX9byOdXTLWg+w1iJ6O6ohP5UXY1dVzNUZLhzfl3EGcRekWLhY7JT5Omaew==}
+
   meow@12.1.1:
     resolution: {integrity: sha512-BhXM0Au22RwUneMPwSCnyhTOizdWoIEPU9sp0Aqa1PnDMR5Wv2FGXYDjuzJEIX+Eo2Rb8xuYe5jrnm5QowQFkw==}
     engines: {node: '>=16.10'}
@@ -3631,6 +3646,10 @@ packages:
 
   tar-stream@3.1.7:
     resolution: {integrity: sha512-qJj60CXt7IU1Ffyc3NJMjh6EkuCFej46zUqJ4J7pqYlThyd9bO0XBTmcOIhSzZJVWfsLks0+nle/j538YAW9RQ==}
+
+  temml@0.11.9:
+    resolution: {integrity: sha512-+k+J6u+OGRroUAE07ynDc6jtmRocEYrRIIJvA182OBoY60nrosSA6hBvLPWdKwgXZNJQeUEdX5maJYICkCLjjw==}
+    engines: {node: '>=18.13.0'}
 
   term-size@2.2.1:
     resolution: {integrity: sha512-wK0Ri4fOGjv/XPy8SBHZChl8CM7uMc5VML7SqiQ0zG7+J5Vr+RMQDoHa2CNT6KHUnTGIXH34UDMkPzAUyapBZg==}
@@ -6020,6 +6039,9 @@ snapshots:
       loupe: 3.1.4
       tinyrainbow: 2.0.0
 
+  '@xmldom/xmldom@0.8.10':
+    optional: true
+
   JSONStream@1.3.5:
     dependencies:
       jsonparse: 1.3.1
@@ -6442,6 +6464,14 @@ snapshots:
       define-data-property: 1.1.4
       has-property-descriptors: 1.0.2
       object-keys: 1.1.1
+
+  defuddle@0.6.4(jsdom@26.1.0):
+    dependencies:
+      jsdom: 26.1.0
+    optionalDependencies:
+      mathml-to-latex: 1.5.0
+      temml: 0.11.9
+      turndown: 7.2.0
 
   degenerator@5.0.1:
     dependencies:
@@ -7518,6 +7548,11 @@ snapshots:
 
   math-intrinsics@1.1.0: {}
 
+  mathml-to-latex@1.5.0:
+    dependencies:
+      '@xmldom/xmldom': 0.8.10
+    optional: true
+
   meow@12.1.1: {}
 
   merge2@1.4.1: {}
@@ -8240,6 +8275,9 @@ snapshots:
       b4a: 1.6.7
       fast-fifo: 1.3.2
       streamx: 2.22.1
+
+  temml@0.11.9:
+    optional: true
 
   term-size@2.2.1: {}
 
