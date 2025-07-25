@@ -3,9 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import type { Page } from 'puppeteer-core';
+import { Defuddle, DefuddleOptions } from 'defuddle/node';
 import { READABILITY_SCRIPT } from './readability-script.js';
+import { toMarkdown } from './to-markdown.js';
 
-export const extractContent = async (page: Page) => {
+export const extractWithReadability = async (
+  page: Page,
+  options: {
+    markdown?: boolean;
+  } = {},
+): Promise<{ title: string; content: string }> => {
   // Extract content using Readability algorithm on a document clone to prevent DOM flickering
   const extractionResult = await page.evaluate((readabilityScript) => {
     // Initialize Readability from script
@@ -32,9 +39,48 @@ export const extractContent = async (page: Page) => {
     return {
       content,
       title: article?.title || title,
-      fullContent: content,
     };
   }, READABILITY_SCRIPT);
 
-  return extractionResult;
+  return options?.markdown
+    ? {
+        title: extractionResult.title,
+        content: toMarkdown(extractionResult.content),
+      }
+    : extractionResult;
+};
+
+export const extractWithDefuddle = async (
+  html: string,
+  url: string,
+  options: DefuddleOptions,
+): Promise<{ title: string; content: string }> => {
+  const { title, content } = await Defuddle(html, url, options);
+
+  return {
+    title,
+    content,
+  };
+};
+
+/**
+ * Extract content from a page using Defuddle or Readability
+ * page html -> markdown
+ * @param page - The page to extract content from
+ * @returns The title and content of the page
+ */
+export const extractContent = async (
+  page: Page,
+): Promise<{ title: string; content: string }> => {
+  const pageSourceHTML = await page.content();
+
+  try {
+    return await extractWithDefuddle(pageSourceHTML, page.url(), {
+      markdown: true,
+    });
+  } catch (e) {
+    return await extractWithReadability(page as any, {
+      markdown: true,
+    });
+  }
 };

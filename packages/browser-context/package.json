@@ -30,6 +30,7 @@
     "test:e2e:local": "vitest --config vitest.e2e.config.ts local-browser.e2e.test.ts"
   },
   "dependencies": {
+    "defuddle": "^0.6.4",
     "puppeteer-core": "24.14.0",
     "turndown": "^7.2.0",
     "turndown-plugin-gfm": "^1.0.2"
