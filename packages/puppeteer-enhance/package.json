@@ -28,7 +28,8 @@
   },
   "dependencies": {
     "@agent-infra/logger": "0.0.2-beta.2",
-    "puppeteer-core": "24.15.0"
+    "puppeteer-core": "24.15.0",
+    "delay": "6.0.0"
   },
   "devDependencies": {
     "@types/which": "3.0.4",

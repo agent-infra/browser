@@ -1,18 +1,28 @@
-export type OSPlatform = 'Windows' | 'macOS' | 'Linux' | 'Android' | 'iOS' | 'Unknown';
+export type OSType = 'Windows' | 'macOS' | 'Linux' | 'Android' | 'iOS' | 'Unknown';
+
+export type BrowserType = 'chrome' | 'edge' | 'firefox' | 'Unknown';
 
 export interface OSInfo {
-  platform: OSPlatform;
+  os: OSType;
   isNode: boolean;
   isBrowser: boolean;
   userAgent?: string;
   nodeVersion?: string;
 }
 
+export interface BrowserInfo {
+  browser: BrowserType;
+  isNode: boolean;
+  isBrowser: boolean;
+  userAgent?: string;
+  version?: string;
+}
+
 export function detectOS(): OSInfo {
   const isNode = typeof window === 'undefined' && typeof process !== 'undefined';
   const isBrowser = typeof window !== 'undefined';
 
-  let platform: OSPlatform = 'Unknown';
+  let platform: OSType = 'Unknown';
   let userAgent: string | undefined;
   let nodeVersion: string | undefined;
 
@@ -52,30 +62,40 @@ export function detectOS(): OSInfo {
   }
 
   return {
-    platform,
+    os: platform,
     isNode,
     isBrowser,
     userAgent,
-    nodeVersion
+    nodeVersion,
   };
 }
 
-export function isWindows(): boolean {
-  return detectOS().platform === 'Windows';
-}
+export function detectBrowser(browserType?: BrowserType): BrowserInfo {
+  const isNode = typeof window === 'undefined' && typeof process !== 'undefined';
+  const isBrowser = typeof window !== 'undefined';
 
-export function isMacOS(): boolean {
-  return detectOS().platform === 'macOS';
-}
+  let browser: BrowserType = 'Unknown';
+  let userAgent: string | undefined;
 
-export function isLinux(): boolean {
-  return detectOS().platform === 'Linux';
-}
+  if (isNode) {
+    browser = browserType || 'Unknown';
+  } else if (isBrowser) {
+    userAgent = navigator.userAgent;
+    const ua = userAgent.toLowerCase();
 
-export function isAndroid(): boolean {
-  return detectOS().platform === 'Android';
-}
+    if (ua.includes('edg/') || ua.includes('edge/')) {
+      browser = 'edge';
+    } else if (ua.includes('chrome/') && !ua.includes('edg')) {
+      browser = 'chrome';
+    } else if (ua.includes('firefox/')) {
+      browser = 'firefox';
+    }
+  }
 
-export function isIOS(): boolean {
-  return detectOS().platform === 'iOS';
+  return {
+    browser,
+    isNode,
+    isBrowser,
+    userAgent,
+  };
 }

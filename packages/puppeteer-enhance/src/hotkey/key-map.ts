@@ -1,10 +1,53 @@
-import { isMacOS } from "../utils/os";
-
 import type { KeyInput } from 'puppeteer-core';
 
 
+/**
+ * Only adapt for common macOS system hotkeys
+ * 
+ * See issues:
+ * - https://github.com/bytedance/UI-TARS-desktop/pull/560
+ * 
+ * References:
+ * - Mac shortcuts list: https://support.apple.com/zh-cn/102650
+ * - Chrome: https://support.google.com/chrome/answer/157179
+ * - CDP: https://chromedevtools.github.io/devtools-protocol/tot/Input/#method-dispatchKeyEvent
+ * - Commands: https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/editing/commands/editor_command_names.h
+ */
+export const MAC_SYSTEM_HOTKEY_MAP = new Map<string, { key: KeyInput; commands: string }>([
+  ['CorM+KeyA', { key: 'KeyA', commands: 'SelectAll' }],
+  ['CorM+KeyX', { key: 'KeyX', commands: 'Cut' }],
+  ['CorM+KeyC', { key: 'KeyC', commands: 'Copy' }],
+  ['CorM+KeyV', { key: 'KeyV', commands: 'Paste' }],
+  ['CorM+KeyZ', { key: 'KeyZ', commands: 'Undo' }],
+  ['CorM+KeyY', { key: 'KeyY', commands: 'Redo' }],
+  ['CorM+Shift+KeyZ', { key: 'KeyZ', commands: 'Redo' }],
+  ['Shift+CorM+KeyZ', { key: 'KeyZ', commands: 'Redo' }],
+]);
+
+export const KEY_ABBR_TO_STANDARD_MAP: Readonly<Record<string, KeyInput>> = {
+  // modifier keys
+  ctrl: 'Control',
+  cmd: 'Meta', // macOS only
+  command: 'Meta', // macOS only
+  opt: 'Alt', // macOS only
+  option: 'Alt', // macOS only
+  // arraw keys
+  up: 'ArrowUp',
+  down: 'ArrowDown',
+  left: 'ArrowLeft',
+  right: 'ArrowRight',
+  // others
+  esc: 'Escape',
+  del: 'Delete',
+  ins: 'Insert',
+  pgup: 'PageUp',
+  pgdown: 'PageDown',
+  return: 'Enter',
+};
+
+
 // Auto-generated form puppeteer-core/src/common/USKeyboardLayout.ts _keyDefinitions
-export const keyMap: Readonly<Record<string, KeyInput>> = {
+export const KEY_LOW_TO_STANDARD_MAP: Readonly<Record<string, KeyInput>> = {
   '0': '0',
   '1': '1',
   '2': '2',
