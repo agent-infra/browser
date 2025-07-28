@@ -1,1 +1,1 @@
-console.log('init');
+export * from './hotkey';
