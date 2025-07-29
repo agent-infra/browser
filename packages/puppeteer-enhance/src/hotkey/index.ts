@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import delay from 'delay';
+import { Logger, ConsoleLogger } from '@agent-infra/logger';
+
 import {
   MAC_SYSTEM_HOTKEY_MAP,
   KEY_ABBR_TO_STANDARD_MAP,
@@ -17,11 +19,18 @@ export interface HotkeyOptions {
 }
 
 export class Hotkey {
-  #osName: OSType;
-  #browserName: BrowserType;
-  constructor(osName: OSType, browserName: BrowserType) {
-    this.#osName = osName;
-    this.#browserName = browserName;
+  private osName: OSType;
+  private browserName: BrowserType;
+  private logger: Logger;
+
+  constructor(
+    envInfo: { osName: OSType; browserName: BrowserType },
+    logger?: Logger,
+  ) {
+    this.osName = envInfo.osName;
+    this.browserName = envInfo.browserName;
+
+    this.logger = logger ?? new ConsoleLogger('Hotkey:');
   }
 
   /**
@@ -31,11 +40,11 @@ export class Hotkey {
    * - example2: 'control+c' -> ['Control', 'C']
    * - example3: 'Control+C' -> ['Control', 'C']
    */
-  #formatHotkey(hotkey: string): KeyInput[] {
+  private formatHotkey(hotkey: string): KeyInput[] {
     const lowerCaseHotkey = hotkey.toLowerCase();
     const keys = lowerCaseHotkey.split(/[\s+]+/);
 
-    console.log('lowerCase keys', keys);
+    this.logger.info('lowerCase keys', keys);
 
     const formattedKeys = keys.map((key) => {
       if (KEY_ABBR_TO_STANDARD_MAP[key]) {
@@ -51,7 +60,7 @@ export class Hotkey {
       }
     });
 
-    console.log('format keys', formattedKeys);
+    this.logger.info('format keys', formattedKeys);
 
     return formattedKeys;
   }
@@ -63,7 +72,7 @@ export class Hotkey {
    *
    * example: 'Ctrl+C' -> CDP: { key: 'KeyC', commands: 'Copy' }
    */
-  async #macOSCDPHotKey(
+  private async macOSCDPHotKey(
     page: Page,
     keys: KeyInput[],
     options: Readonly<HotkeyOptions>,
@@ -95,14 +104,10 @@ export class Hotkey {
     hotkey: string,
     options: Readonly<HotkeyOptions> = { delay: 100 },
   ): Promise<void> {
-    const formattedHotkey = this.#formatHotkey(hotkey);
+    const formattedHotkey = this.formatHotkey(hotkey);
 
-    if (this.#osName === 'macOS' && this.#browserName === 'chrome') {
-      const success = await this.#macOSCDPHotKey(
-        page,
-        formattedHotkey,
-        options,
-      );
+    if (this.osName === 'macOS' && this.browserName === 'chrome') {
+      const success = await this.macOSCDPHotKey(page, formattedHotkey, options);
       if (success) {
         return;
       }

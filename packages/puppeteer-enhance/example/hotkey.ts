@@ -12,7 +12,7 @@ async function launchChrome(os: OSType, path: string) {
     headless: false,
     executablePath: path,
   });
-  const hotkey = new Hotkey(os, 'chrome');
+  const hotkey = new Hotkey({ osName: os, browserName: 'chrome' });
 
   const page = await browser.newPage();
   page.goto('https://www.baidu.com');
