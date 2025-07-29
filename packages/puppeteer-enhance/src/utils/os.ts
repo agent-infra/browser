@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export type OSType = 'Windows' | 'macOS' | 'Linux' | 'Unknown';
 
 export type BrowserType = 'chrome' | 'edge' | 'firefox' | 'Unknown';
@@ -19,7 +24,8 @@ export interface BrowserInfo {
 }
 
 export function detectOS(): OSInfo {
-  const isNode = typeof window === 'undefined' && typeof process !== 'undefined';
+  const isNode =
+    typeof window === 'undefined' && typeof process !== 'undefined';
   const isBrowser = typeof window !== 'undefined';
 
   let platform: OSType = 'Unknown';
@@ -48,7 +54,11 @@ export function detectOS(): OSInfo {
     userAgent = navigator.userAgent;
     const ua = userAgent.toLowerCase();
 
-    if (ua.includes('windows') || ua.includes('win32') || ua.includes('win64')) {
+    if (
+      ua.includes('windows') ||
+      ua.includes('win32') ||
+      ua.includes('win64')
+    ) {
       platform = 'Windows';
     } else if (ua.includes('mac os x') || ua.includes('macos')) {
       platform = 'macOS';
@@ -67,7 +77,8 @@ export function detectOS(): OSInfo {
 }
 
 export function detectBrowser(browserType?: BrowserType): BrowserInfo {
-  const isNode = typeof window === 'undefined' && typeof process !== 'undefined';
+  const isNode =
+    typeof window === 'undefined' && typeof process !== 'undefined';
   const isBrowser = typeof window !== 'undefined';
 
   let browser: BrowserType = 'Unknown';

@@ -1,12 +1,15 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import type { KeyInput } from 'puppeteer-core';
-
 
 /**
  * Only adapt for common macOS system hotkeys
- * 
+ *
  * See issues:
  * - https://github.com/bytedance/UI-TARS-desktop/pull/560
- * 
+ *
  * References:
  * - Mac shortcuts list: https://support.apple.com/zh-cn/102650
  * - Chrome: https://support.google.com/chrome/answer/157179
@@ -55,7 +58,6 @@ export const KEY_ABBR_TO_STANDARD_MAP: Readonly<Record<string, KeyInput>> = {
   pgdown: 'PageDown',
   return: 'Enter',
 };
-
 
 // Auto-generated form puppeteer-core/src/common/USKeyboardLayout.ts _keyDefinitions
 export const KEY_LOW_TO_STANDARD_MAP: Readonly<Record<string, KeyInput>> = {

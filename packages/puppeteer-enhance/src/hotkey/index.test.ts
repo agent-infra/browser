@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Hotkey } from './index';
 import type { Page } from 'puppeteer-core';
@@ -52,7 +56,7 @@ describe('Hotkey', () => {
   describe('press method', () => {
     it('should handle simple key combinations', async () => {
       const hotkey = new Hotkey('Windows', 'chrome');
-      
+
       await hotkey.press(mockPage, 'ctrl+c');
 
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
@@ -63,7 +67,7 @@ describe('Hotkey', () => {
 
     it('should handle abbreviations correctly', async () => {
       const hotkey = new Hotkey('Windows', 'chrome');
-      
+
       await hotkey.press(mockPage, 'ctrl+esc');
 
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
@@ -72,7 +76,7 @@ describe('Hotkey', () => {
 
     it('should handle multiple modifier keys', async () => {
       const hotkey = new Hotkey('Windows', 'chrome');
-      
+
       await hotkey.press(mockPage, 'ctrl+shift+z');
 
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
@@ -85,7 +89,7 @@ describe('Hotkey', () => {
 
     it('should handle case insensitive input', async () => {
       const hotkey = new Hotkey('Windows', 'chrome');
-      
+
       await hotkey.press(mockPage, 'CTRL+C');
 
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
@@ -95,7 +99,7 @@ describe('Hotkey', () => {
     it('should handle custom delay option', async () => {
       const hotkey = new Hotkey('Windows', 'chrome');
       const delay = await import('delay');
-      
+
       await hotkey.press(mockPage, 'ctrl+c', { delay: 200 });
 
       expect(delay.default).toHaveBeenCalledWith(200);
@@ -104,7 +108,7 @@ describe('Hotkey', () => {
     it('should use default delay when no options provided', async () => {
       const hotkey = new Hotkey('Windows', 'chrome');
       const delay = await import('delay');
-      
+
       await hotkey.press(mockPage, 'ctrl+c');
 
       expect(delay.default).toHaveBeenCalledWith(100);
@@ -112,34 +116,40 @@ describe('Hotkey', () => {
 
     it('should throw error for unsupported keys', async () => {
       const hotkey = new Hotkey('Windows', 'chrome');
-      
-      await expect(hotkey.press(mockPage, 'unsupported+key')).rejects.toThrow('Unsupported key: unsupported');
+
+      await expect(hotkey.press(mockPage, 'unsupported+key')).rejects.toThrow(
+        'Unsupported key: unsupported',
+      );
     });
   });
 
   describe('macOS Chrome special handling', () => {
     it('should use CDP commands for common macOS shortcuts', async () => {
       const hotkey = new Hotkey('macOS', 'chrome');
-      
+
       await hotkey.press(mockPage, 'cmd+c');
 
       // Should use CDP command instead of regular key press
-      expect(mockKeyboard.down).toHaveBeenCalledWith('KeyC', { commands: ['Copy'] });
+      expect(mockKeyboard.down).toHaveBeenCalledWith('KeyC', {
+        commands: ['Copy'],
+      });
       expect(mockKeyboard.up).toHaveBeenCalledWith('KeyC');
       expect(mockKeyboard.down).toHaveBeenCalledTimes(1);
     });
 
     it('should handle Control key as Meta on macOS', async () => {
       const hotkey = new Hotkey('macOS', 'chrome');
-      
+
       await hotkey.press(mockPage, 'ctrl+c');
 
-      expect(mockKeyboard.down).toHaveBeenCalledWith('KeyC', { commands: ['Copy'] });
+      expect(mockKeyboard.down).toHaveBeenCalledWith('KeyC', {
+        commands: ['Copy'],
+      });
     });
 
     it('should handle various macOS shortcuts', async () => {
       const hotkey = new Hotkey('macOS', 'chrome');
-      
+
       const shortcuts = [
         { input: 'cmd+a', expectedCommand: 'SelectAll' },
         { input: 'cmd+x', expectedCommand: 'Cut' },
@@ -159,19 +169,18 @@ describe('Hotkey', () => {
 
       for (const { input, expectedCommand } of shortcuts) {
         vi.clearAllMocks();
-        
+
         await hotkey.press(mockPage, input);
-        
-        expect(mockKeyboard.down).toHaveBeenCalledWith(
-          expect.any(String),
-          { commands: [expectedCommand] }
-        );
+
+        expect(mockKeyboard.down).toHaveBeenCalledWith(expect.any(String), {
+          commands: [expectedCommand],
+        });
       }
     });
 
     it('should fallback to regular key press for unsupported macOS shortcuts', async () => {
       const hotkey = new Hotkey('macOS', 'chrome');
-      
+
       await hotkey.press(mockPage, 'cmd+f');
 
       // Should fallback to regular key press
@@ -183,31 +192,35 @@ describe('Hotkey', () => {
 
     it('should not use CDP commands for non-macOS systems', async () => {
       const hotkey = new Hotkey('Windows', 'chrome');
-      
+
       await hotkey.press(mockPage, 'ctrl+c');
 
       // Should use regular key press
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
       expect(mockKeyboard.down).toHaveBeenCalledWith('C');
-      expect(mockKeyboard.down).not.toHaveBeenCalledWith('C', { commands: ['Copy'] });
+      expect(mockKeyboard.down).not.toHaveBeenCalledWith('C', {
+        commands: ['Copy'],
+      });
     });
 
     it('should not use CDP commands for non-Chrome browsers on macOS', async () => {
       const hotkey = new Hotkey('macOS', 'firefox');
-      
+
       await hotkey.press(mockPage, 'cmd+c');
 
       // Should use regular key press
       expect(mockKeyboard.down).toHaveBeenCalledWith('Meta');
       expect(mockKeyboard.down).toHaveBeenCalledWith('C');
-      expect(mockKeyboard.down).not.toHaveBeenCalledWith('C', { commands: ['Copy'] });
+      expect(mockKeyboard.down).not.toHaveBeenCalledWith('C', {
+        commands: ['Copy'],
+      });
     });
   });
 
   describe('key formatting', () => {
     it('should handle spaces in hotkey string', async () => {
       const hotkey = new Hotkey('Windows', 'chrome');
-      
+
       await hotkey.press(mockPage, 'ctrl + c');
 
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
@@ -216,7 +229,7 @@ describe('Hotkey', () => {
 
     it('should handle different key abbreviations', async () => {
       const hotkey = new Hotkey('Windows', 'chrome');
-      
+
       const keyMappings = [
         { input: 'cmd+c', expectedKeys: ['Meta', 'C'] },
         { input: 'command+c', expectedKeys: ['Meta', 'C'] },
@@ -236,10 +249,10 @@ describe('Hotkey', () => {
 
       for (const { input, expectedKeys } of keyMappings) {
         vi.clearAllMocks();
-        
+
         await hotkey.press(mockPage, input);
-        
-        expectedKeys.forEach(key => {
+
+        expectedKeys.forEach((key) => {
           expect(mockKeyboard.down).toHaveBeenCalledWith(key);
         });
       }
@@ -247,7 +260,7 @@ describe('Hotkey', () => {
 
     it('should handle function keys', async () => {
       const hotkey = new Hotkey('Windows', 'chrome');
-      
+
       await hotkey.press(mockPage, 'ctrl+f1');
 
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
@@ -256,7 +269,7 @@ describe('Hotkey', () => {
 
     it('should handle number keys', async () => {
       const hotkey = new Hotkey('Windows', 'chrome');
-      
+
       await hotkey.press(mockPage, 'ctrl+1');
 
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
@@ -267,7 +280,7 @@ describe('Hotkey', () => {
   describe('key press sequence', () => {
     it('should press keys in correct order and release in reverse order', async () => {
       const hotkey = new Hotkey('Windows', 'chrome');
-      
+
       await hotkey.press(mockPage, 'ctrl+shift+a');
 
       // Check press order

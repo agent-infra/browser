@@ -1,7 +1,15 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import delay from 'delay';
-import { MAC_SYSTEM_HOTKEY_MAP, KEY_ABBR_TO_STANDARD_MAP, KEY_LOW_TO_STANDARD_MAP } from './key-map';
+import {
+  MAC_SYSTEM_HOTKEY_MAP,
+  KEY_ABBR_TO_STANDARD_MAP,
+  KEY_LOW_TO_STANDARD_MAP,
+} from './key-map';
 
-import type { Page, KeyInput } from "puppeteer-core";
+import type { Page, KeyInput } from 'puppeteer-core';
 import type { OSType, BrowserType } from '../utils';
 
 export interface HotkeyOptions {
