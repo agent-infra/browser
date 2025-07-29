@@ -40,7 +40,7 @@ await hotkey.press(page, 'ctrl+a', { delay: 200 });
 
 ```typescript
 export type OSType = 'Windows' | 'macOS' | 'Linux' | 'Unknown';
-export type BrowserType = 'chrome' | 'edge' | 'firefox' | 'Unknown';
+export type BrowserType = 'Chrome' | 'Edge' | 'Firefox' | 'Unknown';
 
 new Hotkey(
   envInfo: { osName: OSType; browserName: BrowserType },

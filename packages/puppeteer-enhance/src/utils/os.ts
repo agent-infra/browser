@@ -5,7 +5,7 @@
 
 export type OSType = 'Windows' | 'macOS' | 'Linux' | 'Unknown';
 
-export type BrowserType = 'chrome' | 'edge' | 'firefox' | 'Unknown';
+export type BrowserType = 'Chrome' | 'Edge' | 'Firefox' | 'Unknown';
 
 export interface OSInfo {
   os: OSType;
@@ -91,11 +91,11 @@ export function detectBrowser(browserType?: BrowserType): BrowserInfo {
     const ua = userAgent.toLowerCase();
 
     if (ua.includes('edg/') || ua.includes('edge/')) {
-      browser = 'edge';
+      browser = 'Edge';
     } else if (ua.includes('chrome/') && !ua.includes('edg')) {
-      browser = 'chrome';
+      browser = 'Chrome';
     } else if (ua.includes('firefox/')) {
-      browser = 'firefox';
+      browser = 'Firefox';
     }
   }
 

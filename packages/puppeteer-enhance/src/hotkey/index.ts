@@ -106,7 +106,7 @@ export class Hotkey {
   ): Promise<void> {
     const formattedHotkey = this.formatHotkey(hotkey);
 
-    if (this.osName === 'macOS' && this.browserName === 'chrome') {
+    if (this.osName === 'macOS' && this.browserName === 'Chrome') {
       const success = await this.macOSCDPHotKey(page, formattedHotkey, options);
       if (success) {
         return;

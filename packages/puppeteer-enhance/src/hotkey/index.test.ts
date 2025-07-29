@@ -34,20 +34,20 @@ describe('Hotkey', () => {
 
   describe('constructor', () => {
     it('should create instance with correct OS and browser', () => {
-      const hotkey = new Hotkey('macOS', 'chrome');
+      const hotkey = new Hotkey({ osName: 'macOS', browserName: 'Chrome'});
       expect(hotkey).toBeInstanceOf(Hotkey);
     });
 
     it('should work with different OS and browser combinations', () => {
       const combinations: Array<[OSType, BrowserType]> = [
-        ['Windows', 'chrome'],
-        ['Linux', 'firefox'],
-        ['macOS', 'edge'],
+        ['Windows', 'Chrome'],
+        ['Linux', 'Firefox'],
+        ['macOS', 'Edge'],
         ['Unknown', 'Unknown'],
       ];
 
       combinations.forEach(([os, browser]) => {
-        const hotkey = new Hotkey(os, browser);
+        const hotkey = new Hotkey({ osName: os, browserName: browser });
         expect(hotkey).toBeInstanceOf(Hotkey);
       });
     });
@@ -55,7 +55,7 @@ describe('Hotkey', () => {
 
   describe('press method', () => {
     it('should handle simple key combinations', async () => {
-      const hotkey = new Hotkey('Windows', 'chrome');
+      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
 
       await hotkey.press(mockPage, 'ctrl+c');
 
@@ -66,7 +66,7 @@ describe('Hotkey', () => {
     });
 
     it('should handle abbreviations correctly', async () => {
-      const hotkey = new Hotkey('Windows', 'chrome');
+      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
 
       await hotkey.press(mockPage, 'ctrl+esc');
 
@@ -75,7 +75,7 @@ describe('Hotkey', () => {
     });
 
     it('should handle multiple modifier keys', async () => {
-      const hotkey = new Hotkey('Windows', 'chrome');
+      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
 
       await hotkey.press(mockPage, 'ctrl+shift+z');
 
@@ -88,7 +88,7 @@ describe('Hotkey', () => {
     });
 
     it('should handle case insensitive input', async () => {
-      const hotkey = new Hotkey('Windows', 'chrome');
+      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
 
       await hotkey.press(mockPage, 'CTRL+C');
 
@@ -97,7 +97,7 @@ describe('Hotkey', () => {
     });
 
     it('should handle custom delay option', async () => {
-      const hotkey = new Hotkey('Windows', 'chrome');
+      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
       const delay = await import('delay');
 
       await hotkey.press(mockPage, 'ctrl+c', { delay: 200 });
@@ -106,7 +106,7 @@ describe('Hotkey', () => {
     });
 
     it('should use default delay when no options provided', async () => {
-      const hotkey = new Hotkey('Windows', 'chrome');
+      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
       const delay = await import('delay');
 
       await hotkey.press(mockPage, 'ctrl+c');
@@ -115,7 +115,7 @@ describe('Hotkey', () => {
     });
 
     it('should throw error for unsupported keys', async () => {
-      const hotkey = new Hotkey('Windows', 'chrome');
+      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
 
       await expect(hotkey.press(mockPage, 'unsupported+key')).rejects.toThrow(
         'Unsupported key: unsupported',
@@ -125,7 +125,7 @@ describe('Hotkey', () => {
 
   describe('macOS Chrome special handling', () => {
     it('should use CDP commands for common macOS shortcuts', async () => {
-      const hotkey = new Hotkey('macOS', 'chrome');
+      const hotkey = new Hotkey({ osName: 'macOS', browserName: 'Chrome'});
 
       await hotkey.press(mockPage, 'cmd+c');
 
@@ -138,7 +138,7 @@ describe('Hotkey', () => {
     });
 
     it('should handle Control key as Meta on macOS', async () => {
-      const hotkey = new Hotkey('macOS', 'chrome');
+      const hotkey = new Hotkey({ osName: 'macOS', browserName: 'Chrome' });
 
       await hotkey.press(mockPage, 'ctrl+c');
 
@@ -148,7 +148,7 @@ describe('Hotkey', () => {
     });
 
     it('should handle various macOS shortcuts', async () => {
-      const hotkey = new Hotkey('macOS', 'chrome');
+      const hotkey = new Hotkey({ osName: 'macOS', browserName: 'Chrome' });
 
       const shortcuts = [
         { input: 'cmd+a', expectedCommand: 'SelectAll' },
@@ -179,7 +179,7 @@ describe('Hotkey', () => {
     });
 
     it('should fallback to regular key press for unsupported macOS shortcuts', async () => {
-      const hotkey = new Hotkey('macOS', 'chrome');
+      const hotkey = new Hotkey({ osName: 'macOS', browserName: 'Chrome' });
 
       await hotkey.press(mockPage, 'cmd+f');
 
@@ -191,7 +191,7 @@ describe('Hotkey', () => {
     });
 
     it('should not use CDP commands for non-macOS systems', async () => {
-      const hotkey = new Hotkey('Windows', 'chrome');
+      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
 
       await hotkey.press(mockPage, 'ctrl+c');
 
@@ -204,7 +204,7 @@ describe('Hotkey', () => {
     });
 
     it('should not use CDP commands for non-Chrome browsers on macOS', async () => {
-      const hotkey = new Hotkey('macOS', 'firefox');
+      const hotkey = new Hotkey({ osName: 'macOS', browserName: 'Firefox' });
 
       await hotkey.press(mockPage, 'cmd+c');
 
@@ -219,7 +219,7 @@ describe('Hotkey', () => {
 
   describe('key formatting', () => {
     it('should handle spaces in hotkey string', async () => {
-      const hotkey = new Hotkey('Windows', 'chrome');
+      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
 
       await hotkey.press(mockPage, 'ctrl + c');
 
@@ -228,7 +228,7 @@ describe('Hotkey', () => {
     });
 
     it('should handle different key abbreviations', async () => {
-      const hotkey = new Hotkey('Windows', 'chrome');
+      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
 
       const keyMappings = [
         { input: 'cmd+c', expectedKeys: ['Meta', 'C'] },
@@ -259,7 +259,7 @@ describe('Hotkey', () => {
     });
 
     it('should handle function keys', async () => {
-      const hotkey = new Hotkey('Windows', 'chrome');
+      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
 
       await hotkey.press(mockPage, 'ctrl+f1');
 
@@ -268,7 +268,7 @@ describe('Hotkey', () => {
     });
 
     it('should handle number keys', async () => {
-      const hotkey = new Hotkey('Windows', 'chrome');
+      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
 
       await hotkey.press(mockPage, 'ctrl+1');
 
@@ -279,7 +279,7 @@ describe('Hotkey', () => {
 
   describe('key press sequence', () => {
     it('should press keys in correct order and release in reverse order', async () => {
-      const hotkey = new Hotkey('Windows', 'chrome');
+      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
 
       await hotkey.press(mockPage, 'ctrl+shift+a');
 
