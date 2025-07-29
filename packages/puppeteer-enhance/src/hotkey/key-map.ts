@@ -21,20 +21,25 @@ export const MAC_SYSTEM_HOTKEY_MAP = new Map<
   { key: KeyInput; commands: string }
 >([
   ['CorM+A', { key: 'KeyA', commands: 'SelectAll' }],
-  ['CorM+X', { key: 'KeyX', commands: 'Cut' }],
-  ['CorM+C', { key: 'KeyC', commands: 'Copy' }],
-  ['CorM+V', { key: 'KeyV', commands: 'Paste' }],
-  ['CorM+Z', { key: 'KeyZ', commands: 'Undo' }],
-  ['CorM+Y', { key: 'KeyY', commands: 'Redo' }],
-  ['CorM+Shift+Z', { key: 'KeyZ', commands: 'Redo' }],
-  ['Shift+CorM+Z', { key: 'KeyZ', commands: 'Redo' }],
   ['CorM+KeyA', { key: 'KeyA', commands: 'SelectAll' }],
+
+  ['CorM+X', { key: 'KeyX', commands: 'Cut' }],
   ['CorM+KeyX', { key: 'KeyX', commands: 'Cut' }],
+
+  ['CorM+C', { key: 'KeyC', commands: 'Copy' }],
   ['CorM+KeyC', { key: 'KeyC', commands: 'Copy' }],
+
+  ['CorM+V', { key: 'KeyV', commands: 'Paste' }],
   ['CorM+KeyV', { key: 'KeyV', commands: 'Paste' }],
+
+  ['CorM+Z', { key: 'KeyZ', commands: 'Undo' }],
   ['CorM+KeyZ', { key: 'KeyZ', commands: 'Undo' }],
+
+  ['CorM+Y', { key: 'KeyY', commands: 'Redo' }],
   ['CorM+KeyY', { key: 'KeyY', commands: 'Redo' }],
+  ['CorM+Shift+Z', { key: 'KeyZ', commands: 'Redo' }],
   ['CorM+Shift+KeyZ', { key: 'KeyZ', commands: 'Redo' }],
+  ['Shift+CorM+Z', { key: 'KeyZ', commands: 'Redo' }],
   ['Shift+CorM+KeyZ', { key: 'KeyZ', commands: 'Redo' }],
 ]);
 
