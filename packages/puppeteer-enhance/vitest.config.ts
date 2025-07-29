@@ -7,11 +7,17 @@ import { resolve } from 'path';
 
 export default defineConfig({
   test: {
-    include: ['**/__tests__/**/*.e2e.{test,spec}.ts'],
+    include: ['src/**/*.{test,spec}.ts'],
     testTimeout: 30000, // Increased from default
     hookTimeout: 30000, // Increased from default
     globals: true,
     environment: 'node',
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*'],
+      reporter: ['text'],
+      reportsDirectory: './coverage',
+    },
   },
   resolve: {
     alias: {
