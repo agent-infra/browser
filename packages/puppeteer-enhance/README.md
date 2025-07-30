@@ -34,6 +34,26 @@ await hotkey.press(page, 'ctrl+a', { delay: 200 });
 
 ## API Reference
 
+### Env
+
+#### Methods: getEnvInfo
+
+Automatically detect the operating system and browser type from a Puppeteer browser instance.
+
+```typescript
+import type { Browser } from 'puppeteer-core';
+
+export type OSType = 'Windows' | 'macOS' | 'Linux' | 'Unknown';
+export type BrowserType = 'Chrome' | 'Edge' | 'Firefox' | 'Unknown';
+
+export interface EnvInfo {
+  osName: OSType;
+  browserName: BrowserType;
+}
+
+export async function getEnvInfo(browser: Browser): Promise<EnvInfo>
+```
+
 ### Hotkey
 
 #### Constructor
