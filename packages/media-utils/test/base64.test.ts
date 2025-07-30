@@ -93,15 +93,12 @@ describe('Base64ImageTool', () => {
       let originalAtob: any;
 
       beforeEach(() => {
-        // 保存原始的 Buffer 和 atob
         originalBuffer = globalThis.Buffer;
         originalAtob = globalThis.atob;
         
-        // 模拟浏览器环境：删除 Buffer，添加 atob
         // @ts-ignore
         delete globalThis.Buffer;
         
-        // 如果 atob 不存在，添加一个模拟实现
         if (!globalThis.atob) {
           globalThis.atob = (base64: string) => {
             return Buffer.from(base64, 'base64').toString('binary');
@@ -110,7 +107,6 @@ describe('Base64ImageTool', () => {
       });
 
       afterEach(() => {
-        // 恢复原始环境
         if (originalBuffer) {
           globalThis.Buffer = originalBuffer;
         }
@@ -130,7 +126,6 @@ describe('Base64ImageTool', () => {
           expect(buffer).toBeInstanceOf(Uint8Array);
           expect(buffer.length).toBeGreaterThan(0);
           
-          // 验证浏览器环境下的结果与 Node.js 环境一致
           const expectedBuffer = originalBuffer.from(base64, 'base64');
           expect(Array.from(buffer)).toEqual(Array.from(expectedBuffer));
         });
