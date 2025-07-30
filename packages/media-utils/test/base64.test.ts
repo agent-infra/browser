@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi, beforeEach, afterEach } from 'vitest';
 import { Base64ImageTool } from '../src';
 
 interface TestImageData {
@@ -87,6 +87,71 @@ describe('Base64ImageTool', () => {
       
       expect(buffer1).toStrictEqual(buffer2);
     });
+
+    describe('browser environment simulation', () => {
+      let originalBuffer: any;
+      let originalAtob: any;
+
+      beforeEach(() => {
+        // 保存原始的 Buffer 和 atob
+        originalBuffer = globalThis.Buffer;
+        originalAtob = globalThis.atob;
+        
+        // 模拟浏览器环境：删除 Buffer，添加 atob
+        // @ts-ignore
+        delete globalThis.Buffer;
+        
+        // 如果 atob 不存在，添加一个模拟实现
+        if (!globalThis.atob) {
+          globalThis.atob = (base64: string) => {
+            return Buffer.from(base64, 'base64').toString('binary');
+          };
+        }
+      });
+
+      afterEach(() => {
+        // 恢复原始环境
+        if (originalBuffer) {
+          globalThis.Buffer = originalBuffer;
+        }
+        if (originalAtob) {
+          globalThis.atob = originalAtob;
+        } else {
+          // @ts-ignore
+          delete globalThis.atob;
+        }
+      });
+
+      it('should work correctly in browser environment', () => {
+        testImages.forEach(({ base64, name }) => {
+          const tool = new Base64ImageTool(base64);
+          const buffer = tool.getBuffer();
+          
+          expect(buffer).toBeInstanceOf(Uint8Array);
+          expect(buffer.length).toBeGreaterThan(0);
+          
+          // 验证浏览器环境下的结果与 Node.js 环境一致
+          const expectedBuffer = originalBuffer.from(base64, 'base64');
+          expect(Array.from(buffer)).toEqual(Array.from(expectedBuffer));
+        });
+      });
+
+      it('should handle empty base64 in browser environment', () => {
+        const tool = new Base64ImageTool('');
+        const buffer = tool.getBuffer();
+        
+        expect(buffer).toBeInstanceOf(Uint8Array);
+        expect(buffer.length).toBe(0);
+      });
+
+      it('should cache buffer in browser environment', () => {
+        const tool = new Base64ImageTool(testImages[0].base64);
+        const buffer1 = tool.getBuffer();
+        const buffer2 = tool.getBuffer();
+        
+        expect(buffer1).toStrictEqual(buffer2);
+      });
+    });
   });
 
   describe('getImageType()', () => {
@@ -118,8 +183,6 @@ describe('Base64ImageTool', () => {
       testImages.forEach(({ base64, expectedType, name, expectedWidth, expectedHeight }) => {
         const tool = new Base64ImageTool(base64);
         const dimensions = tool.getDimensions();
-
-        console.log(name, dimensions, `expected: ${expectedWidth}x${expectedHeight}`);
         
         expect(dimensions).not.toBeNull();
         expect(dimensions!.width).toBeGreaterThan(0);
