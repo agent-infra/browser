@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import type { ImageType, ImageDimensions } from '../type';
 
 export const IMAGE_TYPE_MAP = new Map<string, ImageType>([
@@ -7,6 +11,30 @@ export const IMAGE_TYPE_MAP = new Map<string, ImageType>([
   ['R0lGOD', 'gif'], // GIF: 47 49 46 38
   ['Qk', 'bmp'], // BMP: 42 4D
 ]);
+
+export function base64String2Uint8Array(base64: string) {
+  if (typeof Buffer !== 'undefined') {
+    // Node.js environment
+    return new Uint8Array(Buffer.from(base64, 'base64'));
+  } else {
+    // Browser environment
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    return bytes;
+  }
+}
+
+/**
+ * PNG: https://github.com/corkami/pics/blob/master/binary/PNG.png
+ * JPEG: https://github.com/corkami/pics/blob/master/binary/JPG.png
+ * WEBP: https://datatracker.ietf.org/doc/rfc9649/
+ * GIF: https://github.com/corkami/pics/blob/master/binary/GIF.png
+ * BMP: https://github.com/corkami/pics/blob/master/binary/bmp3.png
+ */
 
 export function parsePngDimensions(bytes: Uint8Array): ImageDimensions {
   // PNG dimensions are at bytes 16-23 (big-endian)
@@ -47,7 +75,13 @@ export function parseGifDimensions(bytes: Uint8Array): ImageDimensions {
 }
 
 export function parseWebpDimensions(bytes: Uint8Array): ImageDimensions {
-  // WebP format varies, check for VP8/VP8L/VP8X
+  /**
+   * WebP format varies, check for VP8/VP8L/VP8X
+   *
+   * - VP8 : Simple File Format (Lossy)
+   * - VP8L: Simple File Format (Lossless)
+   * - VP8X: Extended File Format
+   */
   const fourCC = String.fromCharCode(
     bytes[12],
     bytes[13],
@@ -59,51 +93,51 @@ export function parseWebpDimensions(bytes: Uint8Array): ImageDimensions {
     // VP8 format - dimensions are in the frame header
     // Skip chunk size (4 bytes) and frame tag (3 bytes) + key frame info (1 byte)
     const startByte = 20 + 3; // Start after VP8 chunk header + frame tag
-    
+
     // Read width and height from VP8 frame header
     const width = bytes[startByte + 3] | (bytes[startByte + 4] << 8);
     const height = bytes[startByte + 5] | (bytes[startByte + 6] << 8);
-    
-    return { 
-      width: width & 0x3fff, 
-      height: height & 0x3fff 
+
+    return {
+      width: width & 0x3fff,
+      height: height & 0x3fff,
     };
   } else if (fourCC === 'VP8L') {
     // VP8L format - dimensions are right after the signature
     // Skip chunk size (4 bytes) and VP8L signature (1 byte)
     const startByte = 20 + 1;
-    
+
     // Read 4 bytes containing width and height info
-    const bits = 
-      bytes[startByte] | 
-      (bytes[startByte + 1] << 8) | 
-      (bytes[startByte + 2] << 16) | 
+    const bits =
+      bytes[startByte] |
+      (bytes[startByte + 1] << 8) |
+      (bytes[startByte + 2] << 16) |
       (bytes[startByte + 3] << 24);
-    
+
     const width = (bits & 0x3fff) + 1;
     const height = ((bits >> 14) & 0x3fff) + 1;
-    
+
     return { width, height };
   } else if (fourCC === 'VP8X') {
     // VP8X format - extended format with dimensions in header
     // Skip chunk size (4 bytes) and flags (4 bytes)
     const startByte = 20 + 4;
-    
+
     // Width is stored in 3 bytes (little endian) + 1
-    const width = 
-      bytes[startByte] | 
-      (bytes[startByte + 1] << 8) | 
+    const width =
+      bytes[startByte] |
+      (bytes[startByte + 1] << 8) |
       (bytes[startByte + 2] << 16);
-    
-    // Height is stored in next 3 bytes (little endian) + 1  
-    const height = 
-      bytes[startByte + 3] | 
-      (bytes[startByte + 4] << 8) | 
+
+    // Height is stored in next 3 bytes (little endian) + 1
+    const height =
+      bytes[startByte + 3] |
+      (bytes[startByte + 4] << 8) |
       (bytes[startByte + 5] << 16);
-    
-    return { 
-      width: width + 1, 
-      height: height + 1 
+
+    return {
+      width: width + 1,
+      height: height + 1,
     };
   }
 

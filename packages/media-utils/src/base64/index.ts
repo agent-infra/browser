@@ -1,4 +1,9 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import {
+  base64String2Uint8Array,
   IMAGE_TYPE_MAP,
   parseBmpDimensions,
   parseGifDimensions,
@@ -25,20 +30,7 @@ export class Base64ImageTool {
   }
 
   public getBuffer(): Uint8Array {
-    // Check if we're in Node.js environment
-    if (typeof Buffer !== 'undefined') {
-      // Node.js environment
-      this.buffer = new Uint8Array(Buffer.from(this.pureBase64, 'base64'));
-    } else {
-      // Browser environment
-      const binaryString = atob(this.pureBase64);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-
-      this.buffer = bytes;
-    }
+    this.buffer = base64String2Uint8Array(this.pureBase64);
 
     return this.buffer;
   }
@@ -74,24 +66,32 @@ export class Base64ImageTool {
     }
 
     try {
-      const bytes = this.getBuffer();
-
       switch (imageType) {
-        case 'png':
+        case 'png': {
+          const bytes = this.getHeaderBuffer(32); // 16-23
           this.dimensions = parsePngDimensions(bytes);
           break;
-        case 'jpeg':
+        }
+        case 'jpeg': {
+          const bytes = this.getBuffer(); // SOF marker
           this.dimensions = parseJpegDimensions(bytes);
           break;
-        case 'webp':
+        }
+        case 'webp': {
+          const bytes = this.getHeaderBuffer(32); // 23 - 29
           this.dimensions = parseWebpDimensions(bytes);
           break;
-        case 'gif':
+        }
+        case 'gif': {
+          const bytes = this.getHeaderBuffer(24); // 6 - 9
           this.dimensions = parseGifDimensions(bytes);
           break;
-        case 'bmp':
+        }
+        case 'bmp': {
+          const bytes = this.getHeaderBuffer(40); // 18-25
           this.dimensions = parseBmpDimensions(bytes);
           break;
+        }
         default:
           return null;
       }
@@ -110,5 +110,24 @@ export class Base64ImageTool {
     }
 
     return null;
+  }
+
+  /**
+   * Get only the header bytes needed for dimension parsing
+   * This is much more memory efficient than converting the entire image
+   */
+  private getHeaderBuffer(maxBytes: number): Uint8Array {
+    if (this.buffer) {
+      return this.buffer;
+    }
+
+    // Calculate how much of the base64 we need to decode
+    // Base64 encoding: 4 characters represent 3 bytes
+    const base64CharsNeeded = Math.ceil((maxBytes * 4) / 3);
+    // Round up to nearest multiple of 4 to avoid padding issues
+    const alignedChars = Math.ceil(base64CharsNeeded / 4) * 4;
+    const headerBase64 = this.pureBase64.substring(0, alignedChars);
+
+    return base64String2Uint8Array(headerBase64);
   }
 }
