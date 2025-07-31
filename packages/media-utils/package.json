@@ -2,6 +2,7 @@
   "name": "@agent-infra/media-utils",
   "description": "media-utils",
   "version": "0.0.1",
+  "sideEffects": false,
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -26,10 +27,17 @@
   },
   "dependencies": {
     "@agent-infra/logger": "0.0.2-beta.2",
-    "delay": "6.0.0"
+    "delay": "6.0.0",
+    "imagemin": "9.0.1",
+    "imagemin-mozjpeg": "10.0.0",
+    "imagemin-pngquant": "10.0.0",
+    "imagemin-webp": "8.0.0"
   },
   "devDependencies": {
     "@types/node": "24.1.0",
+    "@types/imagemin": "9.0.1",
+    "@types/imagemin-mozjpeg": "8.0.4",
+    "@types/imagemin-webp": "7.0.3",
     "typescript": "5.8.3",
     "vitest": "3.2.4",
     "@vitest/coverage-v8": "3.2.4",

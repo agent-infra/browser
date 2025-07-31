@@ -63,6 +63,45 @@ console.log('Dimensions:', tool.getDimensions()); // { width: 1, height: 1 }
 console.log('Pure base64:', tool.getPureBase64Image()); // 'iVBORw0KGgo...'
 ```
 
+## ImageCompressor
+
+A high-performance image compression utility that supports multiple formats and quality settings.
+
+### Platform Compatibility
+
+Node.js only.
+
+### Basic Usage
+
+\`\`\`typescript
+import { ImageCompressor } from '@agent-infra/media-utils';
+
+// Create compressor with default options (WebP format, 80% quality)
+const compressor = new ImageCompressor();
+
+// Or with custom options
+const customCompressor = new ImageCompressor({
+  quality: 90,
+  format: 'jpeg'
+});
+
+// Compress image buffer
+const imageBuffer = new Uint8Array(/* your image data */);
+const compressedBuffer = await compressor.compressToBuffer(imageBuffer);
+\`\`\`
+
+
+### Configuration Options
+
+\`\`\`typescript
+interface ImageCompressionOptions {
+  quality?: number;    // 1-100, default: 80
+  format?: 'jpeg' | 'png' | 'webp';  // default: 'webp'
+  width?: number;      // optional width constraint
+  height?: number;     // optional height constraint
+}
+\`\`\`
+
 ## License
 
 ISC
