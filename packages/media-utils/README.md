@@ -16,7 +16,10 @@ A utility package for handling media files, specifically designed for processing
 npm install @agent-infra/media-utils
 ```
 
-## Usage
+## Base64ImageTool
+
+> [!NOTE]
+> Currently only supports parsing **static** base64 image formats: PNG, JPEG, WebP, GIF, and BMP
 
 ### Basic Usage
 
