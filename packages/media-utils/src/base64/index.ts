@@ -73,8 +73,13 @@ export class Base64ImageTool {
           break;
         }
         case 'jpeg': {
-          const bytes = this.getBuffer(); // SOF marker
-          this.dimensions = parseJpegDimensions(bytes);
+          try {
+            const headerBytes = this.getHeaderBuffer(1024); // SOF marker
+            this.dimensions = parseJpegDimensions(headerBytes);
+          } catch(e) {
+            const fullBuffer = this.getBuffer();
+            this.dimensions = parseJpegDimensions(fullBuffer);
+          }
           break;
         }
         case 'webp': {

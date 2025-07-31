@@ -53,13 +53,19 @@ export function parseJpegDimensions(bytes: Uint8Array): ImageDimensions {
       const marker = bytes[i + 1];
       // SOF0, SOF1, SOF2 markers contain dimensions
       if (marker >= 0xc0 && marker <= 0xc3) {
-        const height = (bytes[i + 5] << 8) | bytes[i + 6];
-        const width = (bytes[i + 7] << 8) | bytes[i + 8];
-        return { width, height };
+        if (i + 8 < bytes.length) {
+          const height = (bytes[i + 5] << 8) | bytes[i + 6];
+          const width = (bytes[i + 7] << 8) | bytes[i + 8];
+          return { width, height };
+        }
       }
       // Skip to next segment
-      const segmentLength = (bytes[i + 2] << 8) | bytes[i + 3];
-      i += 2 + segmentLength;
+      if (i + 3 < bytes.length) {
+        const segmentLength = (bytes[i + 2] << 8) | bytes[i + 3];
+        i += 2 + segmentLength;
+      } else {
+        break;
+      }
     } else {
       i++;
     }
