@@ -73,7 +73,7 @@ Node.js only.
 
 ### Basic Usage
 
-\`\`\`typescript
+```typescript
 import { ImageCompressor } from '@agent-infra/media-utils';
 
 // Create compressor with default options (WebP format, 80% quality)
@@ -88,19 +88,19 @@ const customCompressor = new ImageCompressor({
 // Compress image buffer
 const imageBuffer = new Uint8Array(/* your image data */);
 const compressedBuffer = await compressor.compressToBuffer(imageBuffer);
-\`\`\`
+```
 
 
 ### Configuration Options
 
-\`\`\`typescript
+```typescript
 interface ImageCompressionOptions {
   quality?: number;    // 1-100, default: 80
   format?: 'jpeg' | 'png' | 'webp';  // default: 'webp'
   width?: number;      // optional width constraint
   height?: number;     // optional height constraint
 }
-\`\`\`
+```
 
 ## License
 
