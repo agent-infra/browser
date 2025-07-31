@@ -1,6 +1,6 @@
 {
-  "name": "@agent-infra/puppeteer-enhance",
-  "description": "puppeteer-enhance",
+  "name": "@agent-infra/media-utils",
+  "description": "media-utils",
   "version": "0.0.1",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -22,12 +22,10 @@
     "prepublishOnly": "pnpm run build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "vitest --config vitest.e2e.config.ts",
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@agent-infra/logger": "0.0.2-beta.2",
-    "puppeteer-core": "24.15.0",
     "delay": "6.0.0"
   },
   "devDependencies": {

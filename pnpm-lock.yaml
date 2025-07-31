@@ -130,9 +130,6 @@ importers:
       '@types/turndown':
         specifier: 5.0.5
         version: 5.0.5
-      '@types/which':
-        specifier: 3.0.4
-        version: 3.0.4
       '@vitest/coverage-v8':
         specifier: 3.2.4
         version: 3.2.4(vitest@3.2.4(@types/node@24.1.0)(jiti@2.4.2)(jsdom@26.1.0)(tsx@4.20.3)(yaml@2.8.0))
@@ -266,6 +263,31 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@types/node@24.1.0)(jiti@2.4.2)(jsdom@26.1.0)(tsx@4.20.3)(yaml@2.8.0)
 
+  packages/media-utils:
+    dependencies:
+      '@agent-infra/logger':
+        specifier: 0.0.2-beta.2
+        version: 0.0.2-beta.2
+      delay:
+        specifier: 6.0.0
+        version: 6.0.0
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.11.0
+        version: 0.11.0(typescript@5.8.3)
+      '@types/node':
+        specifier: 24.1.0
+        version: 24.1.0
+      '@vitest/coverage-v8':
+        specifier: 3.2.4
+        version: 3.2.4(vitest@3.2.4(@types/node@24.1.0)(jiti@2.4.2)(jsdom@26.1.0)(tsx@4.20.3)(yaml@2.8.0))
+      typescript:
+        specifier: 5.8.3
+        version: 5.8.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/node@24.1.0)(jiti@2.4.2)(jsdom@26.1.0)(tsx@4.20.3)(yaml@2.8.0)
+
   packages/puppeteer-enhance:
     dependencies:
       '@agent-infra/logger':
@@ -284,9 +306,6 @@ importers:
       '@types/node':
         specifier: 24.1.0
         version: 24.1.0
-      '@types/which':
-        specifier: 3.0.4
-        version: 3.0.4
       '@vitest/coverage-v8':
         specifier: 3.2.4
         version: 3.2.4(vitest@3.2.4(@types/node@24.1.0)(jiti@2.4.2)(jsdom@26.1.0)(tsx@4.20.3)(yaml@2.8.0))
