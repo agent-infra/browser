@@ -16,7 +16,7 @@ A utility package for handling media files, specifically designed for processing
 npm install @agent-infra/media-utils
 ```
 
-## Base64ImageTool
+## Base64ImageParser
 
 > [!NOTE]
 > Currently only supports parsing **static** base64 image formats: PNG, JPEG, WebP, GIF, and BMP
@@ -28,10 +28,10 @@ Supports both Node.js and browsers.
 ### Basic Usage
 
 ```typescript
-import { Base64ImageTool } from '@agent-infra/media-utils/base64';
+import { Base64ImageParser } from '@agent-infra/media-utils/base64';
 
 // Initialize with a base64 image string
-const tool = new Base64ImageTool('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgA...');
+const tool = new Base64ImageParser('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgA...');
 
 // Get image type
 const imageType = tool.getImageType(); // 'png' | 'jpeg' | 'webp' | 'gif' | 'bmp' | null
@@ -52,11 +52,11 @@ const dataUri = tool.getDataUri(); // 'data:image/png;base64,...'
 ### Example
 
 ```typescript
-import { Base64ImageTool } from '@agent-infra/media-utils/base64';
+import { Base64ImageParser } from '@agent-infra/media-utils/base64';
 
 const base64Image = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
 
-const tool = new Base64ImageTool(base64Image);
+const tool = new Base64ImageParser(base64Image);
 
 console.log('Image type:', tool.getImageType()); // 'png'
 console.log('Dimensions:', tool.getDimensions()); // { width: 1, height: 1 }

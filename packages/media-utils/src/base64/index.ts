@@ -14,7 +14,7 @@ import {
 
 import type { ImageDimensions, ImageType } from '../type';
 
-export class Base64ImageTool {
+export class Base64ImageParser {
   private pureBase64: string;
   private buffer?: Uint8Array;
 
