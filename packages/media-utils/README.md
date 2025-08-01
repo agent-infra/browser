@@ -28,7 +28,7 @@ Supports both Node.js and browsers.
 ### Basic Usage
 
 ```typescript
-import { Base64ImageTool } from '@agent-infra/media-utils';
+import { Base64ImageTool } from '@agent-infra/media-utils/base64';
 
 // Initialize with a base64 image string
 const tool = new Base64ImageTool('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgA...');
@@ -52,7 +52,7 @@ const dataUri = tool.getDataUri(); // 'data:image/png;base64,...'
 ### Example
 
 ```typescript
-import { Base64ImageTool } from '@agent-infra/media-utils';
+import { Base64ImageTool } from '@agent-infra/media-utils/base64';
 
 const base64Image = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
 
@@ -74,7 +74,7 @@ Node.js only.
 ### Basic Usage
 
 ```typescript
-import { ImageCompressor } from '@agent-infra/media-utils';
+import { ImageCompressor } from '@agent-infra/media-utils/compressor';
 
 // Create compressor with default options (WebP format, 80% quality)
 const compressor = new ImageCompressor();
@@ -88,6 +88,7 @@ const customCompressor = new ImageCompressor({
 // Compress image buffer
 const imageBuffer = new Uint8Array(/* your image data */);
 const compressedBuffer = await compressor.compressToBuffer(imageBuffer);
+const compressedBase64 = await compressor.compressToBase64(imageBuffer);
 ```
 
 

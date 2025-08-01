@@ -39,6 +39,14 @@ export class ImageCompressor {
     });
   }
 
+  async compressToBase64(imageBuffer: Uint8Array) {
+    // Compress image to Buffer
+    const compressedBuffer = await this.compressToBuffer(imageBuffer);
+
+    // Convert to Base64
+    return Buffer.from(compressedBuffer).toString('base64');
+  }
+
   /**
    * Select plugins based on target format
    */
