@@ -68,7 +68,7 @@ export class Base64ImageParser {
     try {
       switch (imageType) {
         case 'png': {
-          const bytes = this.getHeaderBuffer(32); // 16-23
+          const bytes = this.getHeaderBuffer(24); // 16-23
           this.dimensions = parsePngDimensions(bytes);
           break;
         }
@@ -93,7 +93,7 @@ export class Base64ImageParser {
           break;
         }
         case 'bmp': {
-          const bytes = this.getHeaderBuffer(40); // 18-25
+          const bytes = this.getHeaderBuffer(32); // 18-25
           this.dimensions = parseBmpDimensions(bytes);
           break;
         }
