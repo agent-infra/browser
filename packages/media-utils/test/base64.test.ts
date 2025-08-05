@@ -12,7 +12,7 @@ import {
   beforeEach,
   afterEach,
 } from 'vitest';
-import { Base64ImageTool } from '../src';
+import { Base64ImageParser } from '../src';
 
 interface TestImageData {
   name: string;
@@ -24,7 +24,7 @@ interface TestImageData {
   expectedHeight: number;
 }
 
-describe('Base64ImageTool', () => {
+describe('Base64ImageParser', () => {
   let testImages: TestImageData[] = [];
 
   beforeAll(() => {
@@ -65,14 +65,14 @@ describe('Base64ImageTool', () => {
   describe('constructor and basic methods', () => {
     it('should create instance with data URI', () => {
       testImages.forEach(({ dataUri, base64 }) => {
-        const tool = new Base64ImageTool(dataUri);
+        const tool = new Base64ImageParser(dataUri);
         expect(tool.getPureBase64Image()).toBe(base64);
       });
     });
 
     it('should create instance with pure base64', () => {
       testImages.forEach(({ base64 }) => {
-        const tool = new Base64ImageTool(base64);
+        const tool = new Base64ImageParser(base64);
         expect(tool.getPureBase64Image()).toBe(base64);
       });
     });
@@ -81,7 +81,7 @@ describe('Base64ImageTool', () => {
   describe('getBuffer()', () => {
     it('should return correct Uint8Array buffer', () => {
       testImages.forEach(({ base64, name }) => {
-        const tool = new Base64ImageTool(base64);
+        const tool = new Base64ImageParser(base64);
         const buffer = tool.getBuffer();
 
         expect(buffer).toBeInstanceOf(Uint8Array);
@@ -94,7 +94,7 @@ describe('Base64ImageTool', () => {
     });
 
     it('should cache buffer on subsequent calls', () => {
-      const tool = new Base64ImageTool(testImages[0].base64);
+      const tool = new Base64ImageParser(testImages[0].base64);
       const buffer1 = tool.getBuffer();
       const buffer2 = tool.getBuffer();
 
@@ -133,7 +133,7 @@ describe('Base64ImageTool', () => {
 
       it('should work correctly in browser environment', () => {
         testImages.forEach(({ base64, name }) => {
-          const tool = new Base64ImageTool(base64);
+          const tool = new Base64ImageParser(base64);
           const buffer = tool.getBuffer();
 
           expect(buffer).toBeInstanceOf(Uint8Array);
@@ -145,7 +145,7 @@ describe('Base64ImageTool', () => {
       });
 
       it('should handle empty base64 in browser environment', () => {
-        const tool = new Base64ImageTool('');
+        const tool = new Base64ImageParser('');
         const buffer = tool.getBuffer();
 
         expect(buffer).toBeInstanceOf(Uint8Array);
@@ -153,7 +153,7 @@ describe('Base64ImageTool', () => {
       });
 
       it('should cache buffer in browser environment', () => {
-        const tool = new Base64ImageTool(testImages[0].base64);
+        const tool = new Base64ImageParser(testImages[0].base64);
         const buffer1 = tool.getBuffer();
         const buffer2 = tool.getBuffer();
 
@@ -165,7 +165,7 @@ describe('Base64ImageTool', () => {
   describe('getImageType()', () => {
     it('should correctly identify image types', () => {
       testImages.forEach(({ base64, expectedType, name }) => {
-        const tool = new Base64ImageTool(base64);
+        const tool = new Base64ImageParser(base64);
         const detectedType = tool.getImageType();
 
         expect(detectedType).toBe(expectedType);
@@ -173,12 +173,12 @@ describe('Base64ImageTool', () => {
     });
 
     it('should return null for invalid image data', () => {
-      const tool = new Base64ImageTool('invalidbase64data');
+      const tool = new Base64ImageParser('invalidbase64data');
       expect(tool.getImageType()).toBeNull();
     });
 
     it('should cache image type on subsequent calls', () => {
-      const tool = new Base64ImageTool(testImages[0].base64);
+      const tool = new Base64ImageParser(testImages[0].base64);
       const type1 = tool.getImageType();
       const type2 = tool.getImageType();
 
@@ -190,7 +190,7 @@ describe('Base64ImageTool', () => {
     it('should parse dimensions for all supported formats', () => {
       testImages.forEach(
         ({ base64, expectedType, name, expectedWidth, expectedHeight }) => {
-          const tool = new Base64ImageTool(base64);
+          const tool = new Base64ImageParser(base64);
           const dimensions = tool.getDimensions();
 
           expect(dimensions).not.toBeNull();
@@ -205,12 +205,12 @@ describe('Base64ImageTool', () => {
     });
 
     it('should return null for invalid image data', () => {
-      const tool = new Base64ImageTool('invalidbase64data');
+      const tool = new Base64ImageParser('invalidbase64data');
       expect(tool.getDimensions()).toBeNull();
     });
 
     it('should cache dimensions on subsequent calls', () => {
-      const tool = new Base64ImageTool(testImages[0].base64);
+      const tool = new Base64ImageParser(testImages[0].base64);
       const dimensions1 = tool.getDimensions();
       const dimensions2 = tool.getDimensions();
 
@@ -221,7 +221,7 @@ describe('Base64ImageTool', () => {
   describe('getDataUri()', () => {
     it('should generate correct data URI', () => {
       testImages.forEach(({ base64, expectedType, dataUri }) => {
-        const tool = new Base64ImageTool(base64);
+        const tool = new Base64ImageParser(base64);
 
         const generatedDataUri = tool.getDataUri();
         expect(generatedDataUri).toBe(dataUri);
@@ -229,27 +229,27 @@ describe('Base64ImageTool', () => {
     });
 
     it('should return undefined for unknown image type', () => {
-      const tool = new Base64ImageTool('invalidbase64data');
+      const tool = new Base64ImageParser('invalidbase64data');
       expect(tool.getDataUri()).toBeNull();
     });
   });
 
   describe('edge cases', () => {
     it('should handle empty base64 string', () => {
-      const tool = new Base64ImageTool('');
+      const tool = new Base64ImageParser('');
       expect(tool.getPureBase64Image()).toBe('');
       expect(tool.getImageType()).toBeNull();
       expect(tool.getDimensions()).toBeNull();
     });
 
     it('should handle malformed data URI', () => {
-      const tool = new Base64ImageTool('data:image/png;base64,');
+      const tool = new Base64ImageParser('data:image/png;base64,');
       expect(tool.getPureBase64Image()).toBe('');
       expect(tool.getImageType()).toBeNull();
     });
 
     it('should handle corrupted image data gracefully', () => {
-      const tool = new Base64ImageTool('YWJjZGVmZw=='); // "abcdefg" in base64
+      const tool = new Base64ImageParser('YWJjZGVmZw=='); // "abcdefg" in base64
       expect(tool.getImageType()).toBeNull();
       expect(tool.getDimensions()).toBeNull();
     });
@@ -259,7 +259,7 @@ describe('Base64ImageTool', () => {
     it('should work with complete workflow', () => {
       testImages.forEach(
         ({ base64, expectedType, name, expectedWidth, expectedHeight }) => {
-          const tool = new Base64ImageTool(base64);
+          const tool = new Base64ImageParser(base64);
 
           // Get all information
           const pureBase64 = tool.getPureBase64Image();
