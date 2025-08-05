@@ -29,7 +29,7 @@ export class ImageCompressor {
    * Compress image and return Buffer without writing to file
    * @param imageBuffer Image Buffer
    */
-  async compressToBuffer(imageBuffer: Uint8Array) {
+  async compressToBuffer(imageBuffer: Buffer) {
     // Choose appropriate compression plugin
     const plugins = this.getPluginsForFormat();
 
@@ -39,7 +39,7 @@ export class ImageCompressor {
     });
   }
 
-  async compressToBase64(imageBuffer: Uint8Array) {
+  async compressToBase64(imageBuffer: Buffer) {
     // Compress image to Buffer
     const compressedBuffer = await this.compressToBuffer(imageBuffer);
 
