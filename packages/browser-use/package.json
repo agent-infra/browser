@@ -30,14 +30,16 @@
     "test:e2e:local": "vitest --config vitest.e2e.config.ts local-browser.e2e.test.ts"
   },
   "dependencies": {
-    "zod": "4.0.5",
+    "zod": "3.25.76",
     "openai": "5.10.2",
     "jsonrepair": "3.13.0",
     "@langchain/core": "0.3.66",
     "puppeteer-core": "24.15.0",
     "@agent-infra/browser": "workspace:*",
     "@agent-infra/logger": "0.0.2-beta.2",
-    "@agent-infra/shared": "0.0.2"
+    "@agent-infra/shared": "0.0.2",
+    "zod-to-json-schema": "3.24.6",
+    "uuid": "11.1.0"
   },
   "devDependencies": {
     "@types/node": "24.1.0",
