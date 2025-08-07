@@ -1,20 +1,24 @@
 {
   "name": "@agent-infra/browser-finder",
   "description": "find browser in your system",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     }
   },
   "files": [
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:agent-infra/browser.git"
+  },
   "publishConfig": {
     "access": "public"
   },

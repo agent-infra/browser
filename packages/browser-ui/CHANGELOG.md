@@ -1,4 +1,4 @@
-# @agent-infra/browser-finder
+# @agent-infra/browser-ui
 
 ## 0.1.3
 
