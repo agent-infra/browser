@@ -1,5 +1,13 @@
 # @agent-infra/browser
 
+## 0.1.3
+
+### Patch Changes
+
+- migrate to the @agent-infra monorepo
+- Updated dependencies
+  - @agent-infra/browser-finder@0.1.3
+
 ## 0.1.1
 
 ### Patch Changes
