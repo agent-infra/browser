@@ -24,7 +24,8 @@
     "url": "git@github.com:agent-infra/browser.git"
   },
   "files": [
-    "dist"
+    "dist",
+    "examples"
   ],
   "scripts": {
     "prepublishOnly": "pnpm run build",
