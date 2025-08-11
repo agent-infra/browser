@@ -1,7 +1,7 @@
 {
   "name": "@agent-infra/browser-context",
   "description": "get browser context for AI Agent",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/browser-ui",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "exports": {
     "./react": {
       "types": "./dist/react/index.d.ts",
@@ -24,7 +24,8 @@
     "url": "git@github.com:agent-infra/browser.git"
   },
   "files": [
-    "dist"
+    "dist",
+    "examples"
   ],
   "scripts": {
     "prepublishOnly": "pnpm run build",
