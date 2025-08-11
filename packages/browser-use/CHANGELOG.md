@@ -1,5 +1,13 @@
 # @agent-infra/browser-use
 
+## 0.1.4
+
+### Patch Changes
+
+- refactor(browser-ui): refactor browser-ui logic
+- Updated dependencies
+  - @agent-infra/browser@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes
