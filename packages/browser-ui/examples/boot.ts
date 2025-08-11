@@ -17,7 +17,6 @@ async function main() {
       '--remote-debugging-address=0.0.0.0',
       '--disable-web-security', // disable cdp CORS
       '--remote-allow-origins=*',
-      'https://www.baidu.com',
     ],
   });
 

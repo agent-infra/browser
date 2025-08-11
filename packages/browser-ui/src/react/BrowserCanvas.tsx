@@ -4,26 +4,28 @@ import React, {
   useState,
   forwardRef,
   useImperativeHandle,
-} from "react";
-import type { Viewport, Page, Browser } from "puppeteer-core";
-import { connect } from "puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js";
+  useCallback,
+} from 'react';
+import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js';
+
+import type { Viewport, Page, Browser } from 'puppeteer-core';
 
 export type { Browser, Page };
 
 export interface BrowserCanvasProps {
-  /** CDP 地址，优先级高于 wsEndpoint */
+  /** CDP HTTP endpoint (higher priority than wsEndpoint) */
   cdpEndpoint?: string;
-  /** CDP WebSocket 地址，必填 */
+  /** CDP WebSocket URL for browser connection */
   wsEndpoint?: string;
-  /** 连接或运行出错回调 */
-  onError?: (error: Error) => void;
-  /** 自定义样式 */
+  /** Error callback for connection/runtime errors */
+  onError?: (error: unknown) => void;
+  /**  Custom CSS styles for the canvas */
   style?: React.CSSProperties;
-  /** 连接成功后回调，返回 browser/page 实例 */
+  /** Callback when browser connection is established */
   onReady?: (ctx: { browser: Browser; page: Page }) => void;
-  /** 会话结束回调 */
+  /** Callback when browser session ends */
   onSessionEnd?: () => void;
-  /** 画布初始 viewport，如果不提供则使用容器尺寸 */
+  /** Initial viewport configuration */
   defaultViewport?: Viewport;
 }
 
@@ -52,23 +54,28 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
       onReady,
       onSessionEnd,
     },
-    ref
+    ref,
   ) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const pageRef = useRef<Page | null>(null);
     const clientRef = useRef<any>(null);
     const browserRef = useRef<Browser | null>(null);
     const [isConnected, setIsConnected] = useState(false);
+    const [isFocused, setIsFocused] = useState(false);
 
-    useImperativeHandle(ref, () => ({
-      browser: browserRef.current,
-      page: pageRef.current,
-      client: clientRef.current,
-      endSession: () => {
-        cleanupConnection();
-        onSessionEnd?.();
-      },
-    }));
+    useImperativeHandle(
+      ref,
+      () => ({
+        browser: browserRef.current,
+        page: pageRef.current,
+        client: clientRef.current,
+        endSession: () => {
+          cleanupConnection();
+          onSessionEnd?.();
+        },
+      }),
+      [isConnected],
+    );
 
     const getModifiersForEvent = (event: any) => {
       return (
@@ -96,8 +103,8 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
 
       if (event instanceof WheelEvent) {
         clientRef.current
-          .send("Input.dispatchMouseEvent", {
-            type: "mouseWheel",
+          .send('Input.dispatchMouseEvent', {
+            type: 'mouseWheel',
             x,
             y,
             deltaX: event.deltaX,
@@ -106,18 +113,18 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
           })
           .catch((error: Error) => onError?.(error));
       } else if (event instanceof MouseEvent) {
-        const buttons = { 0: "none", 1: "left", 2: "middle", 3: "right" };
+        const buttons = { 0: 'none', 1: 'left', 2: 'middle', 3: 'right' };
         const eventType = event.type;
         const mouseEventMap = {
-          mousedown: "mousePressed",
-          mouseup: "mouseReleased",
-          mousemove: "mouseMoved",
+          mousedown: 'mousePressed',
+          mouseup: 'mouseReleased',
+          mousemove: 'mouseMoved',
         };
         const type = mouseEventMap[eventType as keyof typeof mouseEventMap];
         if (!type) return;
 
         clientRef.current
-          .send("Input.dispatchMouseEvent", {
+          .send('Input.dispatchMouseEvent', {
             type,
             x,
             y,
@@ -129,38 +136,44 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
       }
     };
 
-    const handleKeyEvent = (event: KeyboardEvent) => {
-      if (!clientRef.current) return;
-
-      const eventTypeMap = {
-        keydown: "keyDown",
-        keyup: "keyUp",
-        keypress: "char",
-      };
-      const type = eventTypeMap[event.type as keyof typeof eventTypeMap];
-      const text =
-        type === "char" ? String.fromCharCode(event.charCode) : undefined;
-
-      clientRef.current
-        .send("Input.dispatchKeyEvent", {
-          type,
-          text,
-          unmodifiedText: text ? text.toLowerCase() : undefined,
-          keyIdentifier: (event as any).keyIdentifier,
-          code: event.code,
-          key: event.key,
-          windowsVirtualKeyCode: event.keyCode,
-          nativeVirtualKeyCode: event.keyCode,
-          autoRepeat: false,
-          isKeypad: false,
-          isSystemKey: false,
-        })
-        .catch((error: Error) => onError?.(error));
-    };
+    const handleKeyEvent = useCallback(
+      (event: KeyboardEvent) => {
+        if (!clientRef.current || !isFocused) {
+          return;
+        }
+        if (event.keyCode === 8) {
+          event.preventDefault();
+        }
+        const eventTypeMap = {
+          keydown: 'keyDown',
+          keyup: 'keyUp',
+          keypress: 'char',
+        };
+        const type = eventTypeMap[event.type as keyof typeof eventTypeMap];
+        const text =
+          type === 'char' ? String.fromCharCode(event.charCode) : undefined;
+        clientRef.current
+          .send('Input.dispatchKeyEvent', {
+            type,
+            text,
+            unmodifiedText: text ? text.toLowerCase() : undefined,
+            keyIdentifier: (event as any).keyIdentifier,
+            code: event.code,
+            key: event.key,
+            windowsVirtualKeyCode: event.keyCode,
+            nativeVirtualKeyCode: event.keyCode,
+            autoRepeat: false,
+            isKeypad: false,
+            isSystemKey: false,
+          })
+          .catch(console.error);
+      },
+      [isFocused],
+    );
 
     const updateCanvasSize = (
       viewportWidth: number,
-      viewportHeight: number
+      viewportHeight: number,
     ) => {
       if (!canvasRef.current) return;
 
@@ -177,14 +190,14 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
 
       const scale = Math.min(
         containerWidth / viewportWidth,
-        containerHeight / viewportHeight
+        containerHeight / viewportHeight,
       );
       const styleWidth = viewportWidth * scale;
       const styleHeight = viewportHeight * scale;
 
       canvas.style.width = `${styleWidth}px`;
       canvas.style.height = `${styleHeight}px`;
-      canvas.style.position = "absolute";
+      canvas.style.position = 'absolute';
 
       const left = (containerWidth - styleWidth) / 2;
       const top = (containerHeight - styleHeight) / 2;
@@ -192,197 +205,157 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
       canvas.style.top = `${top}px`;
     };
 
-    const setupPageScreencast = async (page: Page) => {
-      if (!page || !canvasRef.current) return;
-
-      pageRef.current = page;
-
-      await page.setViewport({
-        width: canvasRef.current.parentElement?.clientWidth || 1280,
-        height: canvasRef.current.parentElement?.clientHeight || 1100,
-        deviceScaleFactor: 1,
-        hasTouch: false,
-        isLandscape: true,
-        isMobile: false,
-      });
-
-      const viewport = await page.viewport();
-      if (!viewport) {
-        const error = new Error("Failed to get viewport from page");
-        onError?.(error);
-        return;
-      }
-
-      requestAnimationFrame(async () => {
-        if (!canvasRef.current) return;
-
-        const container = canvasRef.current.parentElement;
-        if (!container) return;
-
-        const containerRect = container.getBoundingClientRect();
-        console.log("[BrowserCanvas] Container Rect:", containerRect);
-
-        if (containerRect.width <= 0 || containerRect.height <= 0) {
-          console.error(
-            "[BrowserCanvas] Invalid container dimensions detected. Retrying..."
-          );
-          // 重试机制
-          setTimeout(() => setupPageScreencast(page), 100);
-          return;
-        }
-
-        // 清理之前的连接
-        clientRef.current?.off("Page.screencastFrame");
-        await clientRef.current?.send("Page.stopScreencast").catch(() => {});
-
-        let client;
-        try {
-          client = await page.createCDPSession();
-        } catch (cdpError) {
-          console.error(
-            "[BrowserCanvas] Failed to create CDP session:",
-            cdpError
-          );
-          onError?.(
-            cdpError instanceof Error
-              ? cdpError
-              : new Error("Failed to create CDP session")
-          );
-          return;
-        }
-
-        clientRef.current = client;
-        updateCanvasSize(viewport.width, viewport.height);
-
-        try {
-          await client.send("Page.startScreencast", {
-            format: "jpeg",
-            quality: 80,
-          });
-        } catch (screencastError) {
-          console.error(
-            "[BrowserCanvas] Failed to start screencast:",
-            screencastError
-          );
-          onError?.(
-            screencastError instanceof Error
-              ? screencastError
-              : new Error("Failed to start screencast")
-          );
-          return;
-        }
-
-        client.on(
-          "Page.screencastFrame",
-          ({ data, sessionId }: { data: string; sessionId: number }) => {
-            if (canvasRef.current) {
-              const img = new Image();
-              img.onload = () => {
-                const ctx = canvasRef.current?.getContext("2d");
-                if (ctx && canvasRef.current) {
-                  ctx.clearRect(
-                    0,
-                    0,
-                    canvasRef.current.width,
-                    canvasRef.current.height
-                  );
-                  ctx.drawImage(
-                    img,
-                    0,
-                    0,
-                    canvasRef.current.width,
-                    canvasRef.current.height
-                  );
-                }
-              };
-              img.onerror = () => {
-                console.error(
-                  "[BrowserCanvas] Image load error for screencast frame."
-                );
-                const error = new Error("Failed to load screencast frame");
-                onError?.(error);
-              };
-              img.src = `data:image/jpeg;base64,${data}`;
-              client
-                .send("Page.screencastFrameAck", { sessionId })
-                .catch((error: Error) => onError?.(error));
-            } else {
-              console.warn(
-                "[BrowserCanvas] Canvas ref not available when screencast frame received."
-              );
-              client
-                .send("Page.screencastFrameAck", { sessionId })
-                .catch((error: Error) => onError?.(error));
-            }
-          }
-        );
-
-        client.on("error", (err: any) => {
-          console.error("[BrowserCanvas] CDP Client Error:", err);
-          onError?.(new Error(`CDP Client Error: ${err.message || err}`));
-        });
-
-        client.on("disconnect", () => {
-          console.log("[BrowserCanvas] CDP Client Disconnected");
-          cleanupConnection();
-          onSessionEnd?.();
-        });
-
-        // 触发连接成功回调
-        onReady?.({ browser: browserRef.current!, page });
-        setIsConnected(true);
-      });
-    };
-
-    const initConnection = async (endpoint: string) => {
+    const initPuppeteer = async (endpoint: string) => {
+      let browser: any;
+      let client: any;
       try {
-        // @ts-ignore
-        const browser: Browser = await connect({
+        browser = await connect({
           browserWSEndpoint: endpoint,
-          defaultViewport: defaultViewport,
+          defaultViewport,
         });
-
         browserRef.current = browser;
 
-        browser.on("targetchanged", async (target: any) => {
-          if (target.type() === "page") {
-            try {
-              const newPage = await target.page();
-              if (newPage && newPage !== pageRef.current) {
-                await setupPageScreencast(newPage);
-              }
-            } catch (error) {
-              onError?.(
-                error instanceof Error
-                  ? error
-                  : new Error("Failed to handle target change")
-              );
-            }
+        const setupPageScreencast = async (page: Page, from: string) => {
+          if (!page || !canvasRef.current) {
+            return;
           }
-        });
+          pageRef.current = page;
 
-        browser.on("disconnected", () => {
-          cleanupConnection();
-          onSessionEnd?.();
-        });
+          const url = page.url();
+
+          await page.setViewport({
+            width: 1280,
+            height: 800,
+            deviceScaleFactor: 0,
+            hasTouch: false,
+            isLandscape: true,
+            isMobile: false,
+          });
+          const viewport = page.viewport();
+          if (!viewport) {
+            return;
+          }
+
+          updateCanvasSize(viewport.width, viewport.height);
+
+          clientRef.current?.off('Page.screencastFrame');
+          await clientRef.current?.send('Page.stopScreencast').catch(() => {});
+          try {
+            client = await page.createCDPSession();
+          } catch (cdpError) {
+            return;
+          }
+          clientRef.current = client;
+
+          try {
+            await client.send('Page.startScreencast', {
+              format: 'jpeg',
+              quality: 80,
+              everyNthFrame: 1,
+            });
+          } catch (screencastError) {
+            console.error('screencastError', screencastError);
+            return;
+          }
+          client.on(
+            'Page.screencastFrame',
+            ({ data, sessionId }: { data: string; sessionId: number }) => {
+              if (canvasRef.current) {
+                const img = new Image();
+                img.onload = () => {
+                  const ctx = canvasRef.current?.getContext('2d');
+                  if (ctx && canvasRef.current) {
+                    ctx.clearRect(
+                      0,
+                      0,
+                      canvasRef.current.width,
+                      canvasRef.current.height,
+                    );
+                    ctx.drawImage(
+                      img,
+                      0,
+                      0,
+                      canvasRef.current.width,
+                      canvasRef.current.height,
+                    );
+                  }
+                };
+                img.onerror = () => {};
+                img.src = `data:image/jpeg;base64,${data}`;
+                client
+                  .send('Page.screencastFrameAck', { sessionId })
+                  .catch(console.error);
+              } else {
+                client
+                  .send('Page.screencastFrameAck', { sessionId })
+                  .catch(console.error);
+              }
+            },
+          );
+          client.on('error', (err: any) => {
+            console.error('client.on', err);
+          });
+          client.on('disconnect', () => {});
+        };
+
+        const handleTarget = async (target: any) => {
+          if (target.type() !== 'page') {
+            return;
+          }
+
+          try {
+            const newPage = (await target.page()) as Page;
+
+            if (newPage && newPage !== pageRef.current) {
+              if (clientRef.current) {
+                await clientRef.current
+                  .send('Page.stopScreencast')
+                  .catch(console.error);
+                clientRef.current.off('Page.screencastFrame');
+              }
+              await setupPageScreencast(newPage, 'handleTarget');
+            }
+          } catch (error) {
+            console.error('Failed to setup page screencast:', error);
+          }
+        };
+
+        browser.on('targetchanged', handleTarget);
+        browser.on('targetcreated', handleTarget);
 
         const pages = await browser.pages();
         const page =
           pages.length > 0 ? pages[pages.length - 1] : await browser.newPage();
-        await setupPageScreencast(page);
+
+        setIsConnected(true);
+        if (onReady) {
+          onReady({ browser: browser, page: page });
+        }
+
+        await setupPageScreencast(page, 'init');
       } catch (error) {
-        onError?.(
-          error instanceof Error
-            ? error
-            : new Error("Failed to connect to browser")
-        );
+        console.error('initPuppeteer Error:', error);
+        if (onError) {
+          onError(error);
+        }
+      }
+    };
+
+    const initCDPConnection = async (endpoint: string) => {
+      try {
+        await initPuppeteer(endpoint);
+      } catch (error) {
+        console.error('initCDPConnection Error:', error);
+        if (onError) {
+          onError(error);
+        }
       }
     };
 
     const cleanupConnection = () => {
       setIsConnected(false);
-      clientRef.current?.off("Page.screencastFrame");
-      clientRef.current?.send("Page.stopScreencast").catch(() => {});
+      clientRef.current?.off('Page.screencastFrame');
+      clientRef.current?.send('Page.stopScreencast').catch(() => {});
       pageRef.current?.close().catch(() => {});
       browserRef.current?.disconnect();
 
@@ -391,7 +364,7 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
       browserRef.current = null;
     };
 
-    // 事件监听器设置
+    // event listener
     useEffect(() => {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -399,26 +372,30 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
       const handleMouseEventWrapper = (e: MouseEvent) => handleInteraction(e);
       const handleWheelEventWrapper = (e: WheelEvent) => handleInteraction(e);
 
-      canvas.addEventListener("mousedown", handleMouseEventWrapper);
-      canvas.addEventListener("mouseup", handleMouseEventWrapper);
-      canvas.addEventListener("mousemove", handleMouseEventWrapper);
-      canvas.addEventListener("wheel", handleWheelEventWrapper);
-      document.body.addEventListener("keydown", handleKeyEvent);
-      document.body.addEventListener("keyup", handleKeyEvent);
-      document.body.addEventListener("keypress", handleKeyEvent);
+      canvas.addEventListener('mousedown', handleMouseEventWrapper);
+      canvas.addEventListener('mouseup', handleMouseEventWrapper);
+      canvas.addEventListener('mousemove', handleMouseEventWrapper);
+
+      canvas.addEventListener('wheel', handleWheelEventWrapper);
+
+      canvas.addEventListener('keydown', handleKeyEvent);
+      canvas.addEventListener('keyup', handleKeyEvent);
+      canvas.addEventListener('keypress', handleKeyEvent);
 
       return () => {
-        canvas.removeEventListener("mousedown", handleMouseEventWrapper);
-        canvas.removeEventListener("mouseup", handleMouseEventWrapper);
-        canvas.removeEventListener("mousemove", handleMouseEventWrapper);
-        canvas.removeEventListener("wheel", handleWheelEventWrapper);
-        document.body.removeEventListener("keydown", handleKeyEvent);
-        document.body.removeEventListener("keyup", handleKeyEvent);
-        document.body.removeEventListener("keypress", handleKeyEvent);
-      };
-    }, []);
+        canvas.removeEventListener('mousedown', handleMouseEventWrapper);
+        canvas.removeEventListener('mouseup', handleMouseEventWrapper);
+        canvas.removeEventListener('mousemove', handleMouseEventWrapper);
 
-    // 处理窗口大小变化
+        canvas.removeEventListener('wheel', handleWheelEventWrapper);
+
+        canvas.removeEventListener('keydown', handleKeyEvent);
+        canvas.removeEventListener('keyup', handleKeyEvent);
+        canvas.removeEventListener('keypress', handleKeyEvent);
+      };
+    }, [handleKeyEvent]);
+
+    // updateCanvasSize Listener
     useEffect(() => {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -432,11 +409,10 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
         }
       };
 
-      window.addEventListener("resize", handleResize);
-      return () => window.removeEventListener("resize", handleResize);
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // 初始化连接
     useEffect(() => {
       const init = async () => {
         let wsUrl = wsEndpoint;
@@ -444,17 +420,17 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
         if (cdpEndpoint) {
           const response = await fetch(cdpEndpoint);
           if (!response.ok) {
-            throw new Error("get json/version error");
+            throw new Error('get json/version error');
           }
           const info = await response.json();
           wsUrl =
-            window.location.protocol === "https:"
-              ? info.webSocketDebuggerUrl.replace("ws://", "wss://")
+            window.location.protocol === 'https:'
+              ? info.webSocketDebuggerUrl.replace('ws://', 'wss://')
               : info.webSocketDebuggerUrl;
 
           const wsUrlObj = new URL(wsUrl!);
           const cdpSearchParams = new URL(cdpEndpoint).searchParams;
-          // 合并 searchParams
+
           cdpSearchParams.forEach((value, key) => {
             wsUrlObj.searchParams.append(key, value);
           });
@@ -462,9 +438,9 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
         }
 
         if (!wsUrl) {
-          throw new Error("wsEndpoint is required");
+          throw new Error('wsEndpoint is required');
         }
-        initConnection(wsUrl);
+        initCDPConnection(wsUrl);
       };
 
       init();
@@ -478,27 +454,21 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
       <canvas
         ref={canvasRef}
         style={{
-          display: "block",
+          display: 'block',
+          outline: 'none',
           ...style,
         }}
         onClick={(e) => {
           e.preventDefault();
+          if (canvasRef.current) {
+            canvasRef.current.focus();
+          }
           handleInteraction(e.nativeEvent as MouseEvent);
         }}
-        onMouseMove={(e) => handleInteraction(e.nativeEvent as MouseEvent)}
-        onMouseDown={(e) => {
-          e.preventDefault();
-          handleInteraction(e.nativeEvent as MouseEvent);
-        }}
-        onMouseUp={(e) => {
-          e.preventDefault();
-          handleInteraction(e.nativeEvent as MouseEvent);
-        }}
-        onWheel={(e) => {
-          e.preventDefault();
-          handleInteraction(e.nativeEvent as WheelEvent);
-        }}
+        tabIndex={99}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
       />
     );
-  }
+  },
 );
