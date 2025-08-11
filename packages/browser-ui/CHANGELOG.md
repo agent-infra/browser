@@ -1,5 +1,11 @@
 # @agent-infra/browser-ui
 
+## 0.1.5
+
+### Patch Changes
+
+- feat(browser-ui): package.json files add examples dist
+
 ## 0.1.4
 
 ### Patch Changes
