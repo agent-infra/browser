@@ -21,8 +21,6 @@ const App = () => {
     
     const canvas = ref.current;
 
-    console.log('handleNavigate', canvas);
-
     if (canvas && canvas.page) {
       setIsNavigating(true);
       try {

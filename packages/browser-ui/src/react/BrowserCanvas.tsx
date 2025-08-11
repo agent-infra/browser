@@ -5,9 +5,10 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useCallback,
-} from "react";
-import type { Viewport, Page, Browser } from "puppeteer-core";
-import { connect } from "puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js";
+} from 'react';
+import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js';
+
+import type { Viewport, Page, Browser } from 'puppeteer-core';
 
 export type { Browser, Page };
 
@@ -53,7 +54,7 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
       onReady,
       onSessionEnd,
     },
-    ref
+    ref,
   ) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const pageRef = useRef<Page | null>(null);
@@ -62,15 +63,19 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
     const [isConnected, setIsConnected] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
 
-    useImperativeHandle(ref, () => ({
-      browser: browserRef.current,
-      page: pageRef.current,
-      client: clientRef.current,
-      endSession: () => {
-        cleanupConnection();
-        onSessionEnd?.();
-      },
-    }));
+    useImperativeHandle(
+      ref,
+      () => ({
+        browser: browserRef.current,
+        page: pageRef.current,
+        client: clientRef.current,
+        endSession: () => {
+          cleanupConnection();
+          onSessionEnd?.();
+        },
+      }),
+      [isConnected],
+    );
 
     const getModifiersForEvent = (event: any) => {
       return (
@@ -322,6 +327,7 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
         const page =
           pages.length > 0 ? pages[pages.length - 1] : await browser.newPage();
 
+        setIsConnected(true);
         if (onReady) {
           onReady({ browser: browser, page: page });
         }
@@ -464,5 +470,5 @@ export const BrowserCanvas = forwardRef<BrowserCanvasRef, BrowserCanvasProps>(
         onBlur={() => setIsFocused(false)}
       />
     );
-  }
+  },
 );
