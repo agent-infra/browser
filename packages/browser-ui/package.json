@@ -32,7 +32,8 @@
     "build": "rslib build",
     "dev": "rsbuild dev --open",
     "test": "vitest run",
-    "demo:boot": "tsx examples/boot.ts"
+    "demo:boot": "tsx examples/boot.ts",
+    "demo:core": "rsbuild dev --config rsbuild.core.ts"
   },
   "dependencies": {
     "puppeteer-core": "24.15.0"
