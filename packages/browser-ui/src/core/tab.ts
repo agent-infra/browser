@@ -2,15 +2,25 @@ import type { PuppeteerLifeCycleEvent, Protocol, Page, Dialog } from "puppeteer-
 import { EventEmitter } from "events";
 
 export class Tab extends EventEmitter {
+  #id: string;
+  #status: 'active' | 'inactive';
   #page: Page;
   #dialog: Dialog | null = null;
 
   constructor(page: Page) {
     super();
+    this.#id = Math.random().toString(36).substring(2, 15);
     this.#page = page;
+    this.#status = 'active';
+
+    // 对于一个 new Page 的空白页面，url 为空字符串，title 为 "about:blank"
 
     // page events: https://pptr.dev/api/puppeteer.pageevent
     this.#page.on('dialog', (dialog: Dialog) => this.onDialog(dialog));
+  }
+
+  getTabId() {
+    return this.#id;
   }
 
   getUrl() {
@@ -46,6 +56,9 @@ export class Tab extends EventEmitter {
 
   async active() {
     await this.#page.bringToFront();
+    this.#status = 'active';
+
+    // TODO: 需要加入 evaluate 代码确保页面真的可见
   }
 
   async goBack(waitUntil: PuppeteerLifeCycleEvent[] = []): Promise<boolean> {
