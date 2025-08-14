@@ -6,6 +6,7 @@ This monorepo provides a complete set of packages for browser detection, control
 
 Currently, the business users of this Infra include [UI-TARS-desktop](https://github.com/bytedance/UI-TARS-desktop/#ui-tars-desktop) and [Agent TARS](https://github.com/bytedance/UI-TARS-desktop/#agent-tars), with more agents or apps to be integrated in the future.
 
+<br />
 
 ## What is this for?
 
@@ -49,10 +50,16 @@ This toolkit is specifically designed for:
 **Cross-Platform Browser Detection**. Automatically locate installed browsers (Chrome, Edge, Firefox) on Windows, macOS, and Linux systems.
 
 
+### [@agent-infra/browser-context](./packages/browser-context) 
+
+**Smart Web Content Extraction**. Extract clean, readable content from web pages and convert to Markdown format with advanced algorithms and browser automation support.
+
+
 ### [@agent-infra/media-utils](./packages/media-utils)
 
 **Media Processing Utilities**. Media tools for handling browser-related tasks, such as high-performance base64 image parsing and media resource processing.
 
+<br />
 
 ## Development
 
@@ -71,7 +78,7 @@ pnpm run test
 # Lint code
 pnpm run lint
 ```
-
+<br />
 
 ## Requirements
 
@@ -79,11 +86,13 @@ pnpm run lint
 - **pnpm** for package management
 - **Chrome/Chromium** browser for browser automation features
 
+<br />
 
 ## License
 
 This project is licensed under the Apache License 2.0.
 
+<br />
 
 ## Credits
 
