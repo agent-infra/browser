@@ -31,7 +31,10 @@ Supports both Node.js and browsers.
 import { Base64ImageParser } from '@agent-infra/media-utils';
 
 // Initialize with a base64 image string
+// You only need to ensure that the input base64 string is image data; the data URI prefix is not required.
 const tool = new Base64ImageParser('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgA...');
+// or
+const tool = new Base64ImageParser('iVBORw0KGgoAAAANSUhEUgA...');
 
 // Get image type
 const imageType = tool.getImageType(); // 'png' | 'jpeg' | 'webp' | 'gif' | 'bmp' | null
