@@ -5,15 +5,19 @@ export class Tab extends EventEmitter {
   #id: string;
   #status: 'active' | 'inactive';
   #page: Page;
+
+  #favicon = '';
+  #url = 'about:blank';
   #dialog: Dialog | null = null;
+
+  #isLoading = false;
+  #reloadAbortController: AbortController | null = null;
 
   constructor(page: Page) {
     super();
     this.#id = Math.random().toString(36).substring(2, 15);
     this.#page = page;
     this.#status = 'active';
-
-    // 对于一个 new Page 的空白页面，url 为空字符串，title 为 "about:blank"
 
     // page events: https://pptr.dev/api/puppeteer.pageevent
     this.#page.on('dialog', (dialog: Dialog) => this.onDialog(dialog));
@@ -24,7 +28,8 @@ export class Tab extends EventEmitter {
   }
 
   getUrl() {
-    return this.#page.url();
+    this.#url = this.#page.url();
+    return this.#url;
   }
 
   async getTitle() {
@@ -33,9 +38,12 @@ export class Tab extends EventEmitter {
   }
 
   async getFavicon(): Promise<string | null> {
+    if (this.#favicon) {
+      return this.#favicon;
+    }
+
     try {
       const favicon = await this.#page.evaluate(() => {
-        // 尝试获取 link[rel*="icon"] 元素
         const iconLink = document.querySelector(
           'link[rel*="icon"]',
         ) as HTMLLinkElement;
@@ -43,15 +51,16 @@ export class Tab extends EventEmitter {
           return iconLink.href;
         }
 
-        // fallback 到默认的 /favicon.ico
+        // fallback
         return `${window.location.origin}/favicon.ico`;
       });
 
-      return favicon;
+      this.#favicon = favicon;
     } catch (error) {
       console.warn('Failed to get favicon:', error);
-      return null;
     }
+
+    return this.#favicon;
   }
 
   async active() {
@@ -79,8 +88,25 @@ export class Tab extends EventEmitter {
     return true;
   }
 
-  async reload(waitUntil: PuppeteerLifeCycleEvent[] = []): Promise<void> {
-    await this.#page.reload({ waitUntil: waitUntil });
+  async reload(): Promise<void> {
+    if (this.#reloadAbortController) {
+      this.#reloadAbortController.abort();
+    }
+
+    this.#reloadAbortController = new AbortController();
+    this.#setLoading(true);
+
+    try {
+      await this.#page.reload({
+        waitUntil: ['load'],
+        signal: this.#reloadAbortController.signal,
+      });
+      this.#setLoading(false);
+    } catch (error) {
+      this.#setLoading(false);
+    } finally {
+      this.#reloadAbortController = null;
+    }
   }
 
   async close() {
@@ -102,6 +128,18 @@ export class Tab extends EventEmitter {
         await dialog.dismiss();
         this.#dialog = null;
       },
+    });
+  }
+
+  #setLoading(loading: boolean) {
+    if (this.#isLoading === loading) {
+      return;
+    }
+
+    this.#isLoading = loading;
+    this.emit('loadingStateChanged', {
+      isLoading: loading,
+      tabId: this.#id,
     });
   }
 }
