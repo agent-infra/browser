@@ -1,5 +1,6 @@
 import type { PuppeteerLifeCycleEvent, Protocol, Page, Dialog } from "puppeteer-core";
 import { EventEmitter } from "events";
+import { ScreencastRenderer } from './screencast-renderer';
 
 export class Tab extends EventEmitter {
   #id: string;
@@ -12,6 +13,7 @@ export class Tab extends EventEmitter {
 
   #isLoading = false;
   #reloadAbortController: AbortController | null = null;
+  #renderer: ScreencastRenderer | null = null;
 
   constructor(page: Page) {
     super();
@@ -141,5 +143,27 @@ export class Tab extends EventEmitter {
       isLoading: loading,
       tabId: this.#id,
     });
+  }
+
+  getRenderer(): ScreencastRenderer {
+    if (!this.#renderer) {
+      this.#renderer = new ScreencastRenderer(this.#page, this.#id);
+    }
+    return this.#renderer;
+  }
+
+  #destroyRenderer(): void {
+    if (this.#renderer) {
+      this.#renderer.removeAllListeners();
+      this.#renderer = null;
+    }
+  }
+
+  async destroy(): Promise<void> {
+    // ... 保留现有销毁逻辑 ...
+    
+    this.#destroyRenderer();
+    
+    // ... 保留其他销毁逻辑 ...
   }
 }
