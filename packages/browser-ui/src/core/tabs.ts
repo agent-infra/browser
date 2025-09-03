@@ -1,6 +1,6 @@
-import type { Page } from 'puppeteer-core';
 import { proxy, subscribe } from 'valtio';
 import { Tab } from './tab';
+import type { Browser } from 'puppeteer-core';
 
 export interface TabMeta {
   id: string;
@@ -17,30 +17,27 @@ export interface TabsState {
 }
 
 export class Tabs {
-  #tabs = new Map<string, Tab>();
+  #pptrBrowser: Browser;
   #canvas: HTMLCanvasElement;
 
+  #tabs: Map<string, Tab>;
   public state: TabsState;
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(browser: Browser, canvas: HTMLCanvasElement) {
+    this.#pptrBrowser = browser;
     this.#canvas = canvas;
-    
+
+    this.#tabs = new Map<string, Tab>();
     this.state = proxy({
       tabs: new Map<string, TabMeta>(),
       activeTabId: null,
     });
   }
 
-  /**
-   * 订阅状态变化
-   */
   subscribe(callback: () => void): () => void {
     return subscribe(this.state, callback);
   }
 
-  /**
-   * 获取当前状态快照
-   */
   getSnapshot(): TabsState {
     return {
       tabs: new Map(this.state.tabs),
@@ -48,30 +45,26 @@ export class Tabs {
     };
   }
 
-  async createTab(
-    page: Page,
-    url?: string,
-  ): Promise<string> {
-    const tab = new Tab(page, this.#canvas);
+  async createTab(url?: string): Promise<string> {
+    const pptrPage = await this.#pptrBrowser.newPage();
+
+    const tab = new Tab(pptrPage, this.#canvas);
     const tabId = tab.getTabId();
 
-    // 只在内部 Map 中存储 Tab 实例
     this.#tabs.set(tabId, tab);
 
     tab.on('loadingStateChanged', () => {
       this.#syncTabMeta(tabId);
     });
 
-    // 如果没有活跃标签页，自动激活新创建的标签页
     if (!this.state.activeTabId || this.state.tabs.size === 0) {
-      await this.switchTab(tabId);
+      await this.activeTab(tabId);
     }
 
     if (url) {
       await tab.goto(url);
     }
 
-    // 同步到响应式状态 - Map 会保持插入顺序
     await this.#syncTabMeta(tabId);
 
     return tabId;
@@ -88,29 +81,45 @@ export class Tabs {
 
     if (this.state.activeTabId === tabId) {
       this.state.activeTabId = null;
-      // 获取第一个可用的标签页
-      const firstTabId = this.state.tabs.keys().next().value;
-      if (firstTabId) {
-        await this.switchTab(firstTabId);
+
+      // close active tab, switch to last tab or create a new one
+      const lastTabId = Array.from(this.state.tabs.keys()).pop();
+      if (lastTabId) {
+        await this.activeTab(lastTabId);
+      } else {
+        await this.createTab();
       }
     }
 
     return true;
   }
 
-  async switchTab(tabId: string): Promise<boolean> {
+  async activeTab(tabId: string): Promise<boolean> {
     const tab = this.#tabs.get(tabId);
-    if (!tab) return false;
 
-    // 更新之前活跃 tab 的状态
+    if (!tab) {
+      return false;
+    }
+
+    // 1.sync previous active tab meta
     if (this.state.activeTabId && this.state.activeTabId !== tabId) {
       await this.#syncTabMeta(this.state.activeTabId);
     }
 
+    // 2.active current tab
     this.state.activeTabId = tabId;
     await tab.active();
 
-    // 更新当前活跃 tab 的状态
+    // 3.inactive other tabs
+    const inactivePromises = [];
+    for (const [id, tabInstance] of this.#tabs) {
+      if (id !== tabId) {
+        inactivePromises.push(tabInstance.inactive());
+      }
+    }
+    await Promise.all(inactivePromises);
+
+    // 4.sync current active tab meta
     await this.#syncTabMeta(tabId);
 
     return true;
@@ -121,31 +130,32 @@ export class Tabs {
     return this.#tabs.get(this.state.activeTabId) || null;
   }
 
-  getActiveTabId(): string | null {
-    return this.state.activeTabId;
-  }
-
-  async getAllTabsMeta(): Promise<TabMeta[]> {
-    return Array.from(this.state.tabs.values());
-  }
-
   async goBack(): Promise<boolean> {
     const activeTab = this.getActiveTab();
-    if (!activeTab) return false;
+
+    if (!activeTab) {
+      return false;
+    }
 
     return await activeTab.goBack(['load']);
   }
 
   async goForward(): Promise<boolean> {
     const activeTab = this.getActiveTab();
-    if (!activeTab) return false;
+
+    if (!activeTab) {
+      return false;
+    }
 
     return await activeTab.goForward(['load']);
   }
 
   async reload(): Promise<boolean> {
     const activeTab = this.getActiveTab();
-    if (!activeTab) return false;
+
+    if (!activeTab) {
+      return false;
+    }
 
     try {
       await activeTab.reload();
@@ -158,7 +168,10 @@ export class Tabs {
 
   async navigate(url: string): Promise<boolean> {
     const activeTab = this.getActiveTab();
-    if (!activeTab) return false;
+
+    if (!activeTab) {
+      return false;
+    }
 
     try {
       await activeTab.goto(url);

@@ -1,4 +1,10 @@
-import type { PuppeteerLifeCycleEvent, Protocol, Page, Dialog } from "puppeteer-core";
+import type {
+  PuppeteerLifeCycleEvent,
+  Protocol,
+  Page,
+  Dialog,
+  Frame,
+} from 'puppeteer-core';
 import { EventEmitter } from 'eventemitter3';
 import { ScreencastRenderer } from './screencast-renderer';
 
@@ -26,6 +32,7 @@ export class Tab extends EventEmitter {
 
     // page events: https://pptr.dev/api/puppeteer.pageevent
     this.#page.on('dialog', (dialog: Dialog) => this.onDialog(dialog));
+    this.#page.on('framenavigated', (frame) => this.onFrameNavigated(frame));
   }
 
   getTabId() {
@@ -182,6 +189,26 @@ export class Tab extends EventEmitter {
       isLoading: loading,
       tabId: this.#id,
     });
+  }
+
+  private async onFrameNavigated(frame: Frame) {
+    if (!frame.parentFrame()) {
+      const oldUrl = this.#url;
+      const newUrl = frame.url();
+
+      this.#url = newUrl;
+      this.getUrl();
+      await this.getFavicon();
+      await this.getTitle();
+
+      if (oldUrl !== newUrl) {
+        this.emit('urlChanged', {
+          tabId: this.#id,
+          oldUrl,
+          newUrl,
+        });
+      }
+    }
   }
 
   getRenderer(): ScreencastRenderer {
