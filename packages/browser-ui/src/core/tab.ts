@@ -1,9 +1,8 @@
 import type {
-  PuppeteerLifeCycleEvent,
-  Protocol,
   Page,
-  Dialog,
   Frame,
+  Dialog,
+  PuppeteerLifeCycleEvent,
 } from 'puppeteer-core';
 import { EventEmitter } from 'eventemitter3';
 import { ScreencastRenderer } from './screencast-renderer';
@@ -19,17 +18,13 @@ interface TabEventMap {
     oldUrl: string;
     newUrl: string;
   };
-  [TabEvents.TabPopupCreated]: {
-    tabId: string;
-    newPage: Page;
-  };
 }
 
 export class Tab extends EventEmitter<TabEventMap> {
   #id: string;
   #status: 'active' | 'inactive';
 
-  #page: Page;
+  #pptrPage: Page;
   #renderer: ScreencastRenderer;
 
   #favicon = '';
@@ -41,16 +36,17 @@ export class Tab extends EventEmitter<TabEventMap> {
 
   constructor(page: Page, canvas: HTMLCanvasElement) {
     super();
+    this.#pptrPage = page;
     this.#id = Math.random().toString(36).substring(2, 15);
-    this.#page = page;
     this.#status = 'active';
 
     this.#renderer = new ScreencastRenderer(this.#id, page, canvas);
 
     // page events: https://pptr.dev/api/puppeteer.pageevent
-    this.#page.on('dialog', (dialog: Dialog) => this.#onDialog(dialog));
-    this.#page.on('framenavigated', (frame) => this.#onFrameNavigated(frame));
-    this.#page.on('popup', (page) => this.#onPopup(page));
+    this.#pptrPage.on('dialog', (dialog: Dialog) => this.#onDialog(dialog));
+    this.#pptrPage.on('framenavigated', (frame) =>
+      this.#onFrameNavigated(frame),
+    );
   }
 
   getTabId() {
@@ -58,12 +54,12 @@ export class Tab extends EventEmitter<TabEventMap> {
   }
 
   getUrl() {
-    this.#url = this.#page.url();
+    this.#url = this.#pptrPage.url();
     return this.#url;
   }
 
   async getTitle() {
-    const title = await this.#page.title();
+    const title = await this.#pptrPage.title();
     return title;
   }
 
@@ -73,7 +69,7 @@ export class Tab extends EventEmitter<TabEventMap> {
     }
 
     try {
-      const favicon = await this.#page.evaluate(() => {
+      const favicon = await this.#pptrPage.evaluate(() => {
         const iconLink = document.querySelector(
           'link[rel*="icon"]',
         ) as HTMLLinkElement;
@@ -94,7 +90,7 @@ export class Tab extends EventEmitter<TabEventMap> {
   }
 
   async active() {
-    await this.#page.bringToFront();
+    await this.#pptrPage.bringToFront();
     this.#status = 'active';
 
     // TODO: 需要加入 evaluate 代码确保页面真的可见
@@ -112,7 +108,7 @@ export class Tab extends EventEmitter<TabEventMap> {
       return false;
     }
 
-    await this.#page.goBack({ waitUntil: waitUntil });
+    await this.#pptrPage.goBack({ waitUntil: waitUntil });
     return true;
   }
 
@@ -121,7 +117,7 @@ export class Tab extends EventEmitter<TabEventMap> {
       return false;
     }
 
-    await this.#page.goForward({ waitUntil: waitUntil });
+    await this.#pptrPage.goForward({ waitUntil: waitUntil });
     return true;
   }
 
@@ -134,7 +130,7 @@ export class Tab extends EventEmitter<TabEventMap> {
     this.#setLoading(true);
 
     try {
-      await this.#page.reload({
+      await this.#pptrPage.reload({
         waitUntil: ['load'],
         signal: this.#reloadAbortController.signal,
       });
@@ -147,7 +143,7 @@ export class Tab extends EventEmitter<TabEventMap> {
   }
 
   async close() {
-    await this.#page.close();
+    await this.#pptrPage.close();
   }
 
   async goto(
@@ -161,11 +157,11 @@ export class Tab extends EventEmitter<TabEventMap> {
     this.#setLoading(true);
 
     try {
-      await this.#page.setViewport({
+      await this.#pptrPage.setViewport({
         width: 1280,
         height: 720,
       });
-      await this.#page.goto(url, {
+      await this.#pptrPage.goto(url, {
         waitUntil: options?.waitUntil || ['load'],
       });
 
@@ -229,17 +225,6 @@ export class Tab extends EventEmitter<TabEventMap> {
         });
       }
     }
-  }
-
-  async #onPopup(page: Page | null) {
-    if (!page) {
-      return;
-    }
-
-    this.emit(TabEvents.TabPopupCreated, {
-      tabId: this.#id,
-      newPage: page,
-    });
   }
 
   getRenderer(): ScreencastRenderer {
