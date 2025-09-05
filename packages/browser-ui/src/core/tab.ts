@@ -37,7 +37,11 @@ export class Tab extends EventEmitter<TabEventMap> {
   constructor(page: Page, canvas: HTMLCanvasElement) {
     super();
     this.#pptrPage = page;
-    this.#id = Math.random().toString(36).substring(2, 15);
+    // CdpTarget has _targetId
+    // @ts-ignore
+    this.#id = page.target()._targetId;
+    this.#url = page.url();
+
     this.#status = 'active';
 
     this.#renderer = new ScreencastRenderer(this.#id, page, canvas);
@@ -49,12 +53,17 @@ export class Tab extends EventEmitter<TabEventMap> {
     );
   }
 
-  getTabId() {
+  get tabId() {
     return this.#id;
   }
 
-  getUrl() {
+  get page() {
+    return this.#pptrPage;
+  }
+
+  get url() {
     this.#url = this.#pptrPage.url();
+
     return this.#url;
   }
 
@@ -66,6 +75,10 @@ export class Tab extends EventEmitter<TabEventMap> {
   async getFavicon(): Promise<string | null> {
     if (this.#favicon) {
       return this.#favicon;
+    }
+
+    if (this.#url === 'about:blank' || this.#url.startsWith('chrome://')) {
+      return '';
     }
 
     try {
@@ -93,13 +106,20 @@ export class Tab extends EventEmitter<TabEventMap> {
     await this.#pptrPage.bringToFront();
     this.#status = 'active';
 
-    // TODO: 需要加入 evaluate 代码确保页面真的可见
+    if (this.#url === 'about:blank' || this.#url.startsWith('chrome://')) {
+      return;
+    }
 
     this.#renderer.start();
   }
 
   async inactive() {
     this.#status = 'inactive';
+
+    if (this.#url === 'about:blank' || this.#url.startsWith('chrome://')) {
+      return '';
+    }
+
     this.#renderer.stop();
   }
 
@@ -213,7 +233,6 @@ export class Tab extends EventEmitter<TabEventMap> {
       const newUrl = frame.url();
 
       this.#url = newUrl;
-      this.getUrl();
       await this.getFavicon();
       await this.getTitle();
 

@@ -17,19 +17,31 @@ export interface TabsState {
   activeTabId: string | null;
 }
 
+interface OperationTracker {
+  creatingTargetId: Set<string>;
+  processingTargets: WeakSet<Target>;
+  closingTargets: WeakSet<Target>;
+}
+
 export class Tabs {
   #pptrBrowser: Browser;
-  #canvas: HTMLCanvasElement;
   #tabs: Map<string, Tab>;
-  #creatingPages: WeakSet<Page>; // 使用 WeakSet 跟踪正在创建的 Page 对象
+  #canvas: HTMLCanvasElement;
+  #operations: OperationTracker;
+
   public state: TabsState;
 
   constructor(browser: Browser, canvas: HTMLCanvasElement) {
     this.#pptrBrowser = browser;
     this.#canvas = canvas;
     this.#tabs = new Map<string, Tab>();
-    this.#creatingPages = new WeakSet<Page>();
-    
+
+    this.#operations = {
+      creatingTargetId: new Set<string>(),
+      processingTargets: new WeakSet<Target>(),
+      closingTargets: new WeakSet<Target>(),
+    };
+
     this.state = proxy({
       tabs: new Map<string, TabMeta>(),
       activeTabId: null,
@@ -37,7 +49,15 @@ export class Tabs {
 
     this.#initializeExistingTabs();
 
-    this.#pptrBrowser.on('targetcreated', this.#handleTargetCreated.bind(this));
+    this.#pptrBrowser.on('targetcreated', (target) =>
+      this.#handleTargetCreated(target),
+    );
+    // this.#pptrBrowser.on('targetchanged', (target) =>
+    //   this.#handleTargetEvent('changed', target),
+    // );
+    // this.#pptrBrowser.on('targetdestroyed', (target) =>
+    //   this.#handleTargetEvent('destroyed', target),
+    // );
   }
 
   subscribe(callback: () => void): () => void {
@@ -51,53 +71,98 @@ export class Tabs {
     };
   }
 
-  async createTab(url?: string): Promise<string> {
-    const pptrPage = await this.#pptrBrowser.newPage();
+  // #region createTab
 
-    this.#creatingPages.add(pptrPage);
-
+  async #createTab(pptrPage: Page, from: string) {
     const tab = new Tab(pptrPage, this.#canvas);
-    const tabId = tab.getTabId();
+    const tabId = tab.tabId;
+
+    console.log('#createTab', tabId, from);
+
+    if (this.#operations.creatingTargetId.has(tabId)) {
+      return tabId;
+    }
+    this.#operations.creatingTargetId.add(tabId);
 
     this.#tabs.set(tabId, tab);
     this.#setupTabEvents(tab, tabId);
-
-    if (!this.state.activeTabId || this.state.tabs.size === 0) {
-      await this.activeTab(tabId);
-    }
-
-    if (url) {
-      await tab.goto(url);
-    }
-
     await this.#syncTabMeta(tabId);
 
-    this.#creatingPages.delete(pptrPage);
+    this.#operations.creatingTargetId.delete(tabId);
+
+    console.log('#createTab this.state', this.state);
 
     return tabId;
   }
 
-  async closeTab(tabId: string): Promise<boolean> {
-    const tab = this.#tabs.get(tabId);
-    if (!tab) return false;
+  async #initializeExistingTabs() {
+    const existingPages = await this.#pptrBrowser.pages();
 
-    await tab.close();
+    console.log('initializeExistingTabs', existingPages);
 
-    this.#tabs.delete(tabId);
-    this.state.tabs.delete(tabId);
-
-    if (this.state.activeTabId === tabId) {
-      this.state.activeTabId = null;
-
-      const lastTabId = Array.from(this.state.tabs.keys()).pop();
-      if (lastTabId) {
-        await this.activeTab(lastTabId);
-      } else {
-        await this.createTab();
-      }
+    if (existingPages.length === 0) {
+      return;
     }
 
-    return true;
+    const tabIds: string[] = [];
+    for (const pptrPage of existingPages) {
+      const tabId = await this.#createTab(pptrPage, 'init');
+      tabIds.push(tabId);
+    }
+
+    // TODO: 需要加入 evaluate 代码检测真正 active 的逻辑
+    await this.activeTab(tabIds[0]);
+
+    return tabIds;
+  }
+
+  async #handleTargetCreated(target: Target) {
+    if (target.type() !== 'page') {
+      return;
+    }
+
+    const pptrPage = await target.page();
+    if (!pptrPage) {
+      return;
+    }
+    const tabId = await this.#createTab(pptrPage, 'event');
+
+    await this.activeTab(tabId);
+
+    return tabId;
+  }
+
+  async createTab(): Promise<string> {
+    const pptrPage = await this.#pptrBrowser.newPage();
+    const tabId = await this.#createTab(pptrPage, 'create');
+
+    await this.activeTab(tabId);
+
+    return tabId;
+  }
+
+  // #endregion
+
+  async closeTab(tabId: string): Promise<boolean> {
+    const tab = this.#tabs.get(tabId);
+    if (!tab) {
+      return false;
+    }
+
+    const target = tab.target;
+    if (this.#operations.closingTargets.has(target)) {
+      return false;
+    }
+
+    this.#operations.closingTargets.add(target);
+
+    try {
+      await tab.close();
+      await this.#removeTab(tabId);
+      return true;
+    } finally {
+      this.#operations.closingTargets.delete(target);
+    }
   }
 
   async activeTab(tabId: string): Promise<boolean> {
@@ -186,7 +251,7 @@ export class Tabs {
 
   getCurrentUrl(): string {
     const activeTab = this.getActiveTab();
-    return activeTab ? activeTab.getUrl() : 'about:blank';
+    return activeTab ? activeTab.url : 'about:blank';
   }
 
   hasTab(tabId: string): boolean {
@@ -198,6 +263,88 @@ export class Tabs {
       this.closeTab(tabId),
     );
     await Promise.all(closeTasks);
+  }
+
+  async #handleTargetEvent(
+    eventType: 'created' | 'changed' | 'destroyed',
+    target: Target,
+  ): Promise<void> {
+    if (target.type() !== 'page') {
+      return;
+    }
+
+    if (this.#operations.processingTargets.has(target)) {
+      return;
+    }
+
+    this.#operations.processingTargets.add(target);
+
+    try {
+      switch (eventType) {
+        case 'created':
+          await this.#handleTargetCreated(target);
+          break;
+        case 'changed':
+          await this.#handleTargetChanged(target);
+          break;
+        case 'destroyed':
+          await this.#handleTargetDestroyed(target);
+          break;
+      }
+    } finally {
+      this.#operations.processingTargets.delete(target);
+    }
+  }
+
+  async #handleTargetChanged(target: Target): Promise<void> {
+    const page = await target.page();
+    if (!page) return;
+
+    const tabId = this.#findTabIdByPage(page);
+    if (tabId) {
+      await this.#syncTabMeta(tabId);
+    }
+  }
+
+  async #handleTargetDestroyed(target: Target): Promise<void> {
+    const tabId = this.#findTabIdByTarget(target);
+    if (tabId && !this.#operations.closingTargets.has(target)) {
+      await this.#removeTab(tabId);
+    }
+  }
+
+  #findTabIdByPage(page: Page): string | null {
+    for (const [tabId, tab] of this.#tabs) {
+      if (tab.page === page) {
+        return tabId;
+      }
+    }
+    return null;
+  }
+
+  #findTabIdByTarget(target: Target): string | null {
+    for (const [tabId, tab] of this.#tabs) {
+      if (tab.target === target) {
+        return tabId;
+      }
+    }
+    return null;
+  }
+
+  async #removeTab(tabId: string): Promise<void> {
+    this.#tabs.delete(tabId);
+    this.state.tabs.delete(tabId);
+
+    if (this.state.activeTabId === tabId) {
+      this.state.activeTabId = null;
+
+      const lastTabId = Array.from(this.state.tabs.keys()).pop();
+      if (lastTabId) {
+        await this.activeTab(lastTabId);
+      } else {
+        await this.createTab();
+      }
+    }
   }
 
   async #syncTabMeta(tabId: string): Promise<void> {
@@ -212,7 +359,7 @@ export class Tabs {
     const tabMeta: TabMeta = {
       id: tabId,
       title,
-      url: tab.getUrl(),
+      url: tab.url,
       favicon,
       isLoading: false,
       isActive: tabId === this.state.activeTabId,
@@ -221,65 +368,9 @@ export class Tabs {
     this.state.tabs.set(tabId, tabMeta);
   }
 
-  async #handlePopupCreated(newPage: Page): Promise<void> {
-    const tab = new Tab(newPage, this.#canvas);
-    const tabId = tab.getTabId();
-
-    this.#tabs.set(tabId, tab);
-    this.#setupTabEvents(tab, tabId);
-
-    await this.activeTab(tabId);
-    await this.#syncTabMeta(tabId);
-  }
-
-  async #initializeExistingTabs(): Promise<void> {
-    const existingPages = await this.#pptrBrowser.pages();
-
-    if (existingPages.length === 0) {
-      return;
-    }
-
-    const initPromises = existingPages.map(async (page) => {
-      const tab = new Tab(page, this.#canvas);
-      const tabId = tab.getTabId();
-
-      this.#setupTabEvents(tab, tabId);
-      this.#tabs.set(tabId, tab);
-
-      return tabId;
-    });
-
-    const tabIds = await Promise.all(initPromises);
-
-    if (tabIds.length > 0) {
-      await this.activeTab(tabIds[0]);
-    }
-
-    await Promise.all(tabIds.map((tabId) => this.#syncTabMeta(tabId)));
-  }
-
   #setupTabEvents(tab: Tab, tabId: string): void {
     tab.on(TabEvents.TabLoadingStateChanged, () => {
       this.#syncTabMeta(tabId);
     });
-  }
-
-  async #handleTargetCreated(target: Target): Promise<void> {
-    if (target.type() !== 'page') {
-      return;
-    }
-    if (!target.opener()) {
-      return;
-    }
-
-    const newPage = await target.page();
-    if (!newPage) {
-      return;
-    }
-    if (this.#creatingPages.has(newPage)) {
-      return;
-    }
-
-    await this.#handlePopupCreated(newPage);
   }
 }
