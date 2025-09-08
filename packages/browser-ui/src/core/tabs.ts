@@ -56,6 +56,43 @@ export class Tabs {
     };
   }
 
+  // #region init ExistingTabs
+
+  async #initializeExistingTabs() {
+    const existingPages = await this.#pptrBrowser.pages();
+
+    // console.log('initializeExistingTabs', existingPages);
+
+    if (existingPages.length === 0) {
+      return;
+    }
+
+    // init all existing tabs
+    const initTabTasks = existingPages.map(async (pptrPage) => {
+      // @ts-ignore
+      const tabId = pptrPage.target()._targetId;
+      const tab = new Tab(tabId, pptrPage, this.#canvas);
+
+      this.#tabs.set(tabId, tab);
+      this.#setupTabEvents(tab, tabId);
+      await this.#syncTabMeta(tabId);
+
+      const isActive = await tab.checkActiveStatusWithRuntime();
+      return { tabId, pptrPage, isActive };
+    });
+    const initedTabs = await Promise.all(initTabTasks);
+
+    // active tab
+    let activeTabId = initedTabs.find((result) => result.isActive)?.tabId;
+    if (!activeTabId) {
+      activeTabId = initedTabs[0].tabId;
+    }
+
+    await this.#activeTab(activeTabId);
+  }
+
+  // #endregion
+
   // #region createTab
 
   #cteateMutex = new Mutex();
@@ -74,39 +111,6 @@ export class Tabs {
     await this.#syncTabMeta(targetId);
 
     return targetId;
-  }
-
-  async #initializeExistingTabs() {
-    const existingPages = await this.#pptrBrowser.pages();
-
-    // console.log('initializeExistingTabs', existingPages);
-
-    if (existingPages.length === 0) {
-      return;
-    }
-
-    let activeTabId: string = '';
-    let firstTabId: string = '';
-    for (const pptrPage of existingPages) {
-      // @ts-ignore
-      const tabId = pptrPage.target()._targetId;
-      await this.#createTab(tabId, pptrPage);
-      const tab = this.#tabs.get(tabId)!;
-
-      if (!firstTabId) {
-        firstTabId = tabId;
-      }
-
-      if (await tab.checkActiveStatusWithRuntime()) {
-        activeTabId = tabId;
-      }
-    }
-
-    if (!activeTabId) {
-      activeTabId = firstTabId;
-    }
-
-    await this.#activeTab(activeTabId);
   }
 
   async #handleTargetCreated(target: Target) {
