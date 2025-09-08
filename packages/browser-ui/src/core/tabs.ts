@@ -1,33 +1,16 @@
 import { proxy, subscribe } from 'valtio';
 import { Tab } from './tab';
-import type { Browser, Page, Target } from 'puppeteer-core';
+import type { Browser, CDPSession, Page, Target } from 'puppeteer-core';
 import { TabEvents } from '../event/tabs';
+import { Mutex } from '../utils/mutex';
 
-export interface TabMeta {
-  id: string;
-  title: string;
-  url: string;
-  favicon: string | null;
-  isLoading: boolean;
-  isActive: boolean;
-}
-
-export interface TabsState {
-  tabs: Map<string, TabMeta>;
-  activeTabId: string | null;
-}
-
-interface OperationTracker {
-  creatingTargetId: Set<string>;
-  processingTargets: WeakSet<Target>;
-  closingTargets: WeakSet<Target>;
-}
-
+import { TabMeta, TabsState, TabsOperationTracker } from '../types/tabs';
 export class Tabs {
   #pptrBrowser: Browser;
   #tabs: Map<string, Tab>;
   #canvas: HTMLCanvasElement;
-  #operations: OperationTracker;
+  #operations: TabsOperationTracker;
+  #cdpSession: CDPSession | null = null;
 
   public state: TabsState;
 
@@ -37,8 +20,8 @@ export class Tabs {
     this.#tabs = new Map<string, Tab>();
 
     this.#operations = {
-      creatingTargetId: new Set<string>(),
-      processingTargets: new WeakSet<Target>(),
+      creatingTargetIds: new Set<string>(),
+      switchingTargetIds: new Set<string>(),
       closingTargets: new WeakSet<Target>(),
     };
 
@@ -52,9 +35,9 @@ export class Tabs {
     this.#pptrBrowser.on('targetcreated', (target) =>
       this.#handleTargetCreated(target),
     );
-    // this.#pptrBrowser.on('targetchanged', (target) =>
-    //   this.#handleTargetEvent('changed', target),
-    // );
+    this.#pptrBrowser.on('targetchanged', (target) =>
+      console.log('targetchanged', target),
+    );
     // this.#pptrBrowser.on('targetdestroyed', (target) =>
     //   this.#handleTargetEvent('destroyed', target),
     // );
@@ -73,32 +56,28 @@ export class Tabs {
 
   // #region createTab
 
-  async #createTab(pptrPage: Page, from: string) {
-    const tab = new Tab(pptrPage, this.#canvas);
-    const tabId = tab.tabId;
+  #cteateMutex = new Mutex();
+  async #createTab(targetId: string, pptrPage: Page) {
+    using _ = await this.#cteateMutex.acquire();
 
-    console.log('#createTab', tabId, from);
-
-    if (this.#operations.creatingTargetId.has(tabId)) {
-      return tabId;
+    if (this.#operations.creatingTargetIds.has(targetId)) {
+      return targetId;
     }
-    this.#operations.creatingTargetId.add(tabId);
+    this.#operations.creatingTargetIds.add(targetId);
 
-    this.#tabs.set(tabId, tab);
-    this.#setupTabEvents(tab, tabId);
-    await this.#syncTabMeta(tabId);
+    const tab = new Tab(pptrPage, this.#canvas);
 
-    this.#operations.creatingTargetId.delete(tabId);
+    this.#tabs.set(targetId, tab);
+    this.#setupTabEvents(tab, targetId);
+    await this.#syncTabMeta(targetId);
 
-    console.log('#createTab this.state', this.state);
-
-    return tabId;
+    return targetId;
   }
 
   async #initializeExistingTabs() {
     const existingPages = await this.#pptrBrowser.pages();
 
-    console.log('initializeExistingTabs', existingPages);
+    // console.log('initializeExistingTabs', existingPages);
 
     if (existingPages.length === 0) {
       return;
@@ -107,7 +86,9 @@ export class Tabs {
     let activeTabId: string = '';
     let firstTabId: string = '';
     for (const pptrPage of existingPages) {
-      const tabId = await this.#createTab(pptrPage, 'init');
+      // @ts-ignore
+      const tabId = pptrPage.target()._targetId;
+      await this.#createTab(tabId, pptrPage);
       const tab = this.#tabs.get(tabId)!;
 
       if (!firstTabId) {
@@ -123,35 +104,126 @@ export class Tabs {
       activeTabId = firstTabId;
     }
 
-    await this.activeTab(activeTabId);
+    await this.#activeTab(activeTabId);
   }
 
   async #handleTargetCreated(target: Target) {
     if (target.type() !== 'page') {
       return;
     }
-
     const pptrPage = await target.page();
     if (!pptrPage) {
       return;
     }
-    const tabId = await this.#createTab(pptrPage, 'event');
+    // @ts-ignore
+    const targetId = target._targetId;
 
-    await this.activeTab(tabId);
+    await this.#createTab(targetId, pptrPage);
+    await this.#activeTab(targetId);
 
-    return tabId;
+    return targetId;
   }
 
   async createTab(): Promise<string> {
     const pptrPage = await this.#pptrBrowser.newPage();
-    const tabId = await this.#createTab(pptrPage, 'create');
+    // @ts-ignore
+    const targetId = pptrPage.target()._targetId;
 
-    await this.activeTab(tabId);
+    await this.#createTab(targetId, pptrPage);
+    await this.#activeTab(targetId);
 
-    return tabId;
+    return targetId;
   }
 
   // #endregion
+
+  // #region activeTab
+
+  #activeMutex = new Mutex();
+  async #activeTab(tabId: string) {
+    using _ = await this.#activeMutex.acquire();
+    // console.log(
+    //   'switchingTargetIds before',
+    //   tabId,
+    //   this.#operations.switchingTargetIds,
+    // );
+
+    // check lock
+    if (this.#operations.switchingTargetIds.has(tabId)) {
+      return false;
+    }
+    this.#operations.switchingTargetIds.add(tabId);
+
+    // check tab existence
+    const tab = this.#tabs.get(tabId);
+    if (!tab) {
+      this.#operations.switchingTargetIds.delete(tabId);
+      return false;
+    }
+    if (this.state.activeTabId === tabId) {
+      this.#operations.switchingTargetIds.delete(tabId);
+      return true;
+    }
+
+    // active select tab
+    this.state.activeTabId = tabId;
+    await tab.active();
+    await this.#syncTabMeta(this.state.activeTabId);
+
+    // inactivate other tabs
+    const inactivePromises = [];
+    for (const [id, tabInstance] of this.#tabs) {
+      if (id !== tabId) {
+        inactivePromises.push(tabInstance.inactive());
+      }
+    }
+    await Promise.all(inactivePromises);
+
+    // release lock
+    this.#operations.switchingTargetIds.delete(tabId);
+
+    // console.log(
+    //   'switchingTargetIds after',
+    //   tabId,
+    //   this.#operations.switchingTargetIds,
+    // );
+    // console.log('#activeTab this.state', tabId, this.state);
+
+    return true;
+  }
+
+  async #handleTargetChanged(target: Target) {
+    console.log('handleTargetChanged', target);
+
+    if (target.type() !== 'page') {
+      return false;
+    }
+    const page = await target.page();
+    if (!page) {
+      return false;
+    }
+
+    // @ts-ignore
+    const targetId: string = target._targetId;
+    console.log('handleTargetChanged', targetId);
+
+    return await this.#activeTab(targetId);
+  }
+
+  async activeTab(tabId: string): Promise<boolean> {
+    console.log('public activeTab', tabId);
+
+    return await this.#activeTab(tabId);
+  }
+
+  getActiveTab(): Tab | null {
+    if (!this.state.activeTabId) return null;
+    return this.#tabs.get(this.state.activeTabId) || null;
+  }
+
+  // #endregion
+
+  // #region closeTab
 
   async closeTab(tabId: string): Promise<boolean> {
     const tab = this.#tabs.get(tabId);
@@ -175,37 +247,16 @@ export class Tabs {
     }
   }
 
-  async activeTab(tabId: string): Promise<boolean> {
-    const tab = this.#tabs.get(tabId);
-
-    if (!tab) {
-      return false;
+  async #handleTargetDestroyed(target: Target): Promise<void> {
+    const tabId = this.#findTabIdByTarget(target);
+    if (tabId && !this.#operations.closingTargets.has(target)) {
+      await this.#removeTab(tabId);
     }
-
-    if (this.state.activeTabId && this.state.activeTabId !== tabId) {
-      await this.#syncTabMeta(this.state.activeTabId);
-    }
-
-    this.state.activeTabId = tabId;
-    await tab.active();
-
-    const inactivePromises = [];
-    for (const [id, tabInstance] of this.#tabs) {
-      if (id !== tabId) {
-        inactivePromises.push(tabInstance.inactive());
-      }
-    }
-    await Promise.all(inactivePromises);
-
-    await this.#syncTabMeta(tabId);
-
-    return true;
   }
 
-  getActiveTab(): Tab | null {
-    if (!this.state.activeTabId) return null;
-    return this.#tabs.get(this.state.activeTabId) || null;
-  }
+  // #endregion
+
+  // #region public methods
 
   async goBack(): Promise<boolean> {
     const activeTab = this.getActiveTab();
@@ -275,6 +326,10 @@ export class Tabs {
     await Promise.all(closeTasks);
   }
 
+  // #endregion
+
+  // #region private methods
+
   async #handleTargetEvent(
     eventType: 'created' | 'changed' | 'destroyed',
     target: Target,
@@ -283,11 +338,11 @@ export class Tabs {
       return;
     }
 
-    if (this.#operations.processingTargets.has(target)) {
+    if (this.#operations.switchingTargetIds.has(target)) {
       return;
     }
 
-    this.#operations.processingTargets.add(target);
+    this.#operations.switchingTargetIds.add(target);
 
     try {
       switch (eventType) {
@@ -302,24 +357,7 @@ export class Tabs {
           break;
       }
     } finally {
-      this.#operations.processingTargets.delete(target);
-    }
-  }
-
-  async #handleTargetChanged(target: Target): Promise<void> {
-    const page = await target.page();
-    if (!page) return;
-
-    const tabId = this.#findTabIdByPage(page);
-    if (tabId) {
-      await this.#syncTabMeta(tabId);
-    }
-  }
-
-  async #handleTargetDestroyed(target: Target): Promise<void> {
-    const tabId = this.#findTabIdByTarget(target);
-    if (tabId && !this.#operations.closingTargets.has(target)) {
-      await this.#removeTab(tabId);
+      this.#operations.switchingTargetIds.delete(target);
     }
   }
 
@@ -383,4 +421,6 @@ export class Tabs {
       this.#syncTabMeta(tabId);
     });
   }
+
+  // #endregion
 }

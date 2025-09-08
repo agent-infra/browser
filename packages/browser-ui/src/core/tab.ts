@@ -39,7 +39,7 @@ export class Tab extends EventEmitter<TabEventMap> {
     this.#pptrPage = page;
     // CdpTarget has _targetId
     // @ts-ignore
-    this.#id = page.target()._targetId;
+    this.#id = page.target()._targetId; // tabId is tagetId
     this.#url = page.url();
 
     this.#status = 'active';
@@ -48,9 +48,6 @@ export class Tab extends EventEmitter<TabEventMap> {
 
     // page events: https://pptr.dev/api/puppeteer.pageevent
     this.#pptrPage.on('dialog', (dialog: Dialog) => this.#onDialog(dialog));
-    this.#pptrPage.on('framenavigated', (frame) =>
-      this.#onFrameNavigated(frame),
-    );
   }
 
   get tabId() {
