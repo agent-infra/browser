@@ -358,7 +358,7 @@ export class Tabs {
 
     const tabMeta: TabMeta = {
       id: tabId,
-      title,
+      title: title || 'about:blank',
       url: tab.url,
       favicon,
       isLoading: false,
