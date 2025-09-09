@@ -9,15 +9,15 @@ async function main() {
       '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     headless: false,
     defaultViewport: {
-      width: 1280,
-      height: 720,
+      width: 900,
+      height: 900,
     },
     args: [
       '--remote-debugging-port=9222',
       '--remote-debugging-address=0.0.0.0',
       '--disable-web-security', // disable cdp CORS
       '--remote-allow-origins=*',
-      '--window-size=1280,810',
+      '--window-size=900,980',
     ],
   });
 

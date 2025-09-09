@@ -67,8 +67,8 @@ export class ScreencastRenderer extends EventEmitter {
     this.#options = {
       format: 'jpeg',
       quality: 80,
-      width: 1280,
-      height: 720,
+      width: 900,
+      height: 900,
       everyNthFrame: 1,
       ...options,
     };

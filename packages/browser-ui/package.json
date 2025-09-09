@@ -38,7 +38,9 @@
   "dependencies": {
     "puppeteer-core": "24.15.0",
     "rxjs": "7.8.2",
-    "eventemitter3": "5.0.1"
+    "eventemitter3": "5.0.1",
+    "valtio": "2.1.7",
+    "morphdom": "2.7.7"
   },
   "devDependencies": {
     "@rsbuild/core": "1.4.8",
