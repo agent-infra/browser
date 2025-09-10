@@ -90,7 +90,8 @@ export class Tab extends EventEmitter<TabEventsMap> {
         if (
           window.location &&
           window.location.origin &&
-          window.location.origin !== 'null'
+          window.location.origin !== 'null' &&
+          window.location.origin !== 'file://'
         ) {
           return `${window.location.origin}/favicon.ico`;
         }
