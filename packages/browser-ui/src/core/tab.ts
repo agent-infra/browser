@@ -11,7 +11,6 @@ import { TabEvents, TabEventsMap } from '../types/tabs';
 declare global {
   interface Window {
     __agent_infra_visibility_initialized?: boolean;
-    __agent_infra_visibility_handler?: () => void;
     __agent_infra_visibility_change?: (isVisible: boolean) => void;
   }
 }
@@ -23,8 +22,10 @@ export class Tab extends EventEmitter<TabEventsMap> {
   #pptrPage: Page;
   #renderer: ScreencastRenderer;
 
-  #favicon = '';
   #url = 'about:blank';
+  #favicon = '';
+  #title = '';
+
   #dialog: Dialog | null = null;
 
   #isLoading = false;
@@ -47,6 +48,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
     // page events: https://pptr.dev/api/puppeteer.pageevent
     this.#pptrPage.on('dialog', this.#dialogHandler);
+    this.#pptrPage.on('domcontentloaded', this.#dclHandler);
     this.#pptrPage.on('load', this.#loadHandler);
     this.#pptrPage.on('framenavigated', this.#frameNavigatedHandler);
   }
@@ -62,45 +64,20 @@ export class Tab extends EventEmitter<TabEventsMap> {
   }
 
   get url() {
-    this.#url = this.#pptrPage.url();
-
     return this.#url;
   }
 
   async getTitle() {
-    const title = await this.#pptrPage.title();
-    return title;
-  }
-
-  async getFavicon(): Promise<string | null> {
-    if (this.url === 'about:blank' || this.url.startsWith('chrome://')) {
-      return '';
+    if (!this.#title) {
+      this.#title = await this.#pptrPage.title();
     }
 
-    try {
-      const favicon = await this.#pptrPage.evaluate(() => {
-        const iconLink = document.querySelector(
-          'link[rel*="icon"]',
-        ) as HTMLLinkElement;
-        if (iconLink && iconLink.href) {
-          return iconLink.href;
-        }
+    return this.#title;
+  }
 
-        // fallback
-        if (
-          window.location &&
-          window.location.origin &&
-          window.location.origin !== 'null'
-        ) {
-          return `${window.location.origin}/favicon.ico`;
-        }
-
-        return '';
-      });
-
-      this.#favicon = favicon;
-    } catch (error) {
-      console.warn('Failed to get favicon:', error);
+  async getFavicon() {
+    if (!this.#favicon) {
+      this.#favicon = await this.#getFavicon();
     }
 
     return this.#favicon;
@@ -112,6 +89,13 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   #dialogHandler = (dialog: Dialog) => this.#onDialog(dialog);
 
+  #dclHandler = () => {
+    this.emit(TabEvents.TabLoadingStateChanged, {
+      isLoading: true,
+      tabId: this.#id,
+    });
+  }
+
   #loadHandler = () => {
     this.emit(TabEvents.TabLoadingStateChanged, {
       isLoading: false,
@@ -122,6 +106,8 @@ export class Tab extends EventEmitter<TabEventsMap> {
   #frameNavigatedHandler = (frame: Frame) => this.#onFrameNavigated(frame);
 
   // #endregion
+
+  // #region public methods
 
   async active() {
     await this.#pptrPage.bringToFront();
@@ -147,6 +133,38 @@ export class Tab extends EventEmitter<TabEventsMap> {
       return true;
     } catch (error) {
       return false;
+    }
+  }
+
+  async goto(
+    url: string,
+    options?: { waitUntil?: PuppeteerLifeCycleEvent[] },
+  ): Promise<void> {
+    if (this.#dialog) {
+      throw new Error('Cannot navigate while dialog is open');
+    }
+
+    this.#url = url;
+    this.#title = url;
+
+    this.#setLoading(true);
+
+    try {
+      // await this.#pptrPage.setViewport({
+      //   width: 900,
+      //   height: 900,
+      // });
+      await this.#pptrPage.goto(url, {
+        waitUntil: options?.waitUntil || ['load'],
+      });
+
+      this.#title = await this.#pptrPage.title();
+      this.#favicon = await this.#getFavicon();
+
+      this.#setLoading(false);
+    } catch (error) {
+      this.#setLoading(false);
+      throw error;
     }
   }
 
@@ -189,47 +207,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
     }
   }
 
-  async goto(
-    url: string,
-    options?: { waitUntil?: PuppeteerLifeCycleEvent[] },
-  ): Promise<void> {
-    if (this.#dialog) {
-      throw new Error('Cannot navigate while dialog is open');
-    }
-
-    this.#setLoading(true);
-
-    try {
-      // await this.#pptrPage.setViewport({
-      //   width: 900,
-      //   height: 900,
-      // });
-      await this.#pptrPage.goto(url, {
-        waitUntil: options?.waitUntil || ['load'],
-      });
-
-      this.#url = url;
-      this.#favicon = ''; // 重置 favicon，让下次获取时重新加载
-
-      this.#setLoading(false);
-    } catch (error) {
-      this.#setLoading(false);
-      throw error;
-    }
-  }
-
-  #setLoading(loading: boolean) {
-    if (this.#isLoading === loading) {
-      return;
-    }
-
-    this.#isLoading = loading;
-    this.emit(TabEvents.TabLoadingStateChanged, {
-      isLoading: loading,
-      tabId: this.#id,
-    });
-  }
-
   async close() {
     this.#pptrPage.off('dialog', this.#dialogHandler);
     this.#pptrPage.off('load', this.#loadHandler);
@@ -257,6 +234,62 @@ export class Tab extends EventEmitter<TabEventsMap> {
     }
   }
 
+  getRenderer(): ScreencastRenderer {
+    return this.#renderer;
+  }
+
+  // #endregion
+
+  // #region pravite methods
+
+  async #getFavicon() {
+    if (this.url === 'about:blank' || this.url.startsWith('chrome://')) {
+      return '';
+    }
+
+    try {
+      const favicon = await this.#pptrPage.evaluate(() => {
+        const iconLink = document.querySelector(
+          'link[rel*="icon"]',
+        ) as HTMLLinkElement;
+        if (iconLink && iconLink.href) {
+          return iconLink.href;
+        }
+
+        // fallback
+        if (
+          window.location &&
+          window.location.origin &&
+          window.location.origin !== 'null' &&
+          window.location.origin !== 'file://'
+        ) {
+          return `${window.location.origin}/favicon.ico`;
+        }
+
+        return '';
+      });
+
+      return favicon;
+    } catch (error) {
+      console.warn('Failed to get favicon:', error);
+      return '';
+    }
+  }
+
+  #setLoading(loading: boolean) {
+    if (this.#isLoading === loading) {
+      return;
+    }
+
+    // console.log('setLoading', loading, this.#url);
+
+    this.#isLoading = loading;
+    this.emit(TabEvents.TabLoadingStateChanged, {
+      isLoading: loading,
+      tabId: this.#id,
+    });
+  }
+
   async #onDialog(dialog: Dialog) {
     this.#dialog = dialog;
 
@@ -276,16 +309,17 @@ export class Tab extends EventEmitter<TabEventsMap> {
   }
 
   async #onFrameNavigated(frame: Frame) {
-    // 只处理主框架的导航
     if (!frame.parentFrame()) {
       const oldUrl = this.#url;
       const newUrl = frame.url();
 
       this.#url = newUrl;
-      await this.getFavicon();
-      await this.getTitle();
+      this.#title = await this.#pptrPage.title();
+      this.#favicon = await this.#getFavicon();
 
       if (oldUrl !== newUrl) {
+        // console.log('onFrameNavigated', newUrl, this.#isLoading);
+
         this.emit(TabEvents.TabUrlChanged, {
           tabId: this.#id,
           oldUrl,
@@ -294,8 +328,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
       }
     }
   }
-
-  // #region visibility
 
   async #setupVisibilityTracking() {
     await this.#pptrPage.exposeFunction(
@@ -316,6 +348,8 @@ export class Tab extends EventEmitter<TabEventsMap> {
         return;
       }
 
+      console.log('injectedScript');
+
       const handleVisibilityChange = () => {
         const isVisible = document.visibilityState === 'visible';
         if (typeof window.__agent_infra_visibility_change === 'function') {
@@ -324,7 +358,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
       };
 
       window.__agent_infra_visibility_initialized = true;
-      window.__agent_infra_visibility_handler = handleVisibilityChange;
 
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', handleVisibilityChange);
@@ -342,8 +375,4 @@ export class Tab extends EventEmitter<TabEventsMap> {
   }
 
   // #endregion
-
-  getRenderer(): ScreencastRenderer {
-    return this.#renderer;
-  }
 }

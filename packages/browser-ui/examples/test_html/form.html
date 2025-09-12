@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>表单组件 Demo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #555;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+
+    .radio-group,
+    .checkbox-group {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .radio-item,
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .radio-item input,
+    .checkbox-item input {
+      width: auto;
+      margin: 0;
+    }
+
+    .range-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .range-value {
+      font-weight: 500;
+      color: #007bff;
+      min-width: 40px;
+    }
+
+    .submit-btn {
+      background-color: #007bff;
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+
+    .submit-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin: 30px 0 15px 0;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #007bff;
+    }
+
+    /* 自定义下拉选择样式 */
+    .custom-select {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .custom-select .select-trigger {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      background-color: white;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    .custom-select .select-trigger:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+
+    .custom-select .select-arrow {
+      border: solid #666;
+      border-width: 0 2px 2px 0;
+      display: inline-block;
+      padding: 3px;
+      transform: rotate(45deg);
+      transition: transform 0.2s;
+    }
+
+    .custom-select.active .select-arrow {
+      transform: rotate(-135deg);
+    }
+
+    .custom-select .select-options {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+
+    .custom-select.active .select-options {
+      display: block;
+    }
+
+    .custom-select .select-optgroup {
+      font-weight: 600;
+      padding: 8px 12px;
+      background-color: #f8f9fa;
+      color: #666;
+      font-size: 13px;
+    }
+
+    .custom-select .select-option {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background-color 0.2s;
+    }
+
+    .custom-select .select-option:hover {
+      background-color: #f8f9fa;
+    }
+
+    .custom-select .select-option.selected {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .custom-select .select-option:last-child {
+      border-bottom: none;
+    }
+
+    /* 隐藏原生 select */
+    select.replaced {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>表单组件 Demo</h1>
+
+    <form id="demoForm">
+      <h2 class="section-title">文本输入</h2>
+
+      <div class="form-group">
+        <label for="password">密码 (Password)</label>
+        <input type="password" id="password" name="password" placeholder="请输入密码">
+      </div>
+
+      <div class="form-group">
+        <label for="email">邮箱 (Email)</label>
+        <input type="email" id="email" name="email" placeholder="example@domain.com">
+      </div>
+
+      <div class="form-group">
+        <label for="tel">电话 (Tel)</label>
+        <input type="tel" id="tel" name="tel" placeholder="138-0000-0000">
+      </div>
+
+      <div class="form-group">
+        <label for="url">网址 (URL)</label>
+        <input type="url" id="url" name="url" placeholder="https://example.com">
+      </div>
+
+      <div class="form-group">
+        <label for="search">搜索 (Search)</label>
+        <input type="search" id="search" name="search" placeholder="搜索内容...">
+      </div>
+
+      <h2 class="section-title">数值输入</h2>
+
+      <div class="form-group">
+        <label for="number">数字 (Number)</label>
+        <input type="number" id="number" name="number" min="0" max="100" step="1" placeholder="0-100">
+      </div>
+
+      <div class="form-group">
+        <label for="range">范围 (Range)</label>
+        <div class="range-group">
+          <input type="range" id="range" name="range" min="0" max="100" value="50"
+            oninput="updateRangeValue(this.value)">
+          <span class="range-value" id="rangeValue">50</span>
+        </div>
+      </div>
+
+      <h2 class="section-title">日期时间</h2>
+
+      <div class="form-group">
+        <label for="date">日期 (Date)</label>
+        <input type="date" id="date" name="date">
+      </div>
+
+      <div class="form-group">
+        <label for="time">时间 (Time)</label>
+        <input type="time" id="time" name="time">
+      </div>
+
+      <div class="form-group">
+        <label for="datetime-local">本地日期时间 (Datetime-local)</label>
+        <input type="datetime-local" id="datetime-local" name="datetime-local">
+      </div>
+
+      <div class="form-group">
+        <label for="month">月份 (Month)</label>
+        <input type="month" id="month" name="month">
+      </div>
+
+      <div class="form-group">
+        <label for="week">周 (Week)</label>
+        <input type="week" id="week" name="week">
+      </div>
+
+      <h2 class="section-title">颜色选择</h2>
+
+      <div class="form-group">
+        <label for="color">颜色 (Color)</label>
+        <input type="color" id="color" name="color" value="#007bff">
+      </div>
+
+      <h2 class="section-title">选择控件</h2>
+
+      <div class="form-group">
+        <label>单选框 (Radio)</label>
+        <div class="radio-group">
+          <div class="radio-item">
+            <input type="radio" id="radio1" name="radio-group" value="option1">
+            <label for="radio1">选项一</label>
+          </div>
+          <div class="radio-item">
+            <input type="radio" id="radio2" name="radio-group" value="option2">
+            <label for="radio2">选项二</label>
+          </div>
+          <div class="radio-item">
+            <input type="radio" id="radio3" name="radio-group" value="option3">
+            <label for="radio3">选项三</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>复选框 (Checkbox)</label>
+        <div class="checkbox-group">
+          <div class="checkbox-item">
+            <input type="checkbox" id="checkbox1" name="checkboxes" value="check1">
+            <label for="checkbox1">复选项一</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="checkbox2" name="checkboxes" value="check2">
+            <label for="checkbox2">复选项二</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="checkbox3" name="checkboxes" value="check3">
+            <label for="checkbox3">复选项三</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="file">文件上传 (File)</label>
+        <input type="file" id="file" name="file" multiple accept=".jpg,.png,.pdf,.doc">
+      </div>
+
+      <div class="form-group">
+        <label for="select">下拉选择 (Select)</label>
+        <select id="select" name="select">
+          <option value="">请选择...</option>
+          <optgroup label="水果">
+            <option value="apple">苹果</option>
+            <option value="banana">香蕉</option>
+            <option value="orange">橙子</option>
+          </optgroup>
+          <optgroup label="蔬菜">
+            <option value="carrot">胡萝卜</option>
+            <option value="broccoli">西兰花</option>
+            <option value="spinach">菠菜</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <button type="submit" class="submit-btn">提交表单</button>
+    </form>
+  </div>
+
+  <script>
+    function updateRangeValue(value) {
+      document.getElementById('rangeValue').textContent = value;
+    }
+
+    document.getElementById('demoForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const data = {};
+
+      for (let [key, value] of formData.entries()) {
+        if (data[key]) {
+          if (Array.isArray(data[key])) {
+            data[key].push(value);
+          } else {
+            data[key] = [data[key], value];
+          }
+        } else {
+          data[key] = value;
+        }
+      }
+
+      console.log('表单数据:', data);
+      alert('表单提交成功！请查看控制台输出。');
+    });
+
+    // 设置默认值
+    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('time').value = '09:00';
+    document.getElementById('datetime-local').value = new Date().toISOString().slice(0, 16);
+    document.getElementById('month').value = new Date().toISOString().slice(0, 7);
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const week = Math.ceil((now - new Date(year, 0, 1)) / (7 * 24 * 60 * 60 * 1000));
+    document.getElementById('week').value = `${year}-W${week.toString().padStart(2, '0')}`;
+
+    // 自定义 select 组件
+    class CustomSelect {
+      constructor(selectElement) {
+        this.originalSelect = selectElement;
+        this.value = selectElement.value;
+        this.createCustomSelect();
+        this.bindEvents();
+      }
+
+      createCustomSelect() {
+        // 创建自定义下拉容器
+        this.customSelect = document.createElement('div');
+        this.customSelect.className = 'custom-select';
+
+        // 创建触发器
+        this.trigger = document.createElement('div');
+        this.trigger.className = 'select-trigger';
+        this.trigger.tabIndex = 0;
+        
+        this.triggerText = document.createElement('span');
+        this.triggerText.textContent = this.getSelectedText();
+        
+        this.arrow = document.createElement('span');
+        this.arrow.className = 'select-arrow';
+        
+        this.trigger.appendChild(this.triggerText);
+        this.trigger.appendChild(this.arrow);
+
+        // 创建选项容器
+        this.optionsContainer = document.createElement('div');
+        this.optionsContainer.className = 'select-options';
+
+        this.createOptions();
+
+        this.customSelect.appendChild(this.trigger);
+        this.customSelect.appendChild(this.optionsContainer);
+
+        // 插入到原始 select 之后
+        this.originalSelect.parentNode.insertBefore(this.customSelect, this.originalSelect.nextSibling);
+        
+        // 隐藏原始 select
+        this.originalSelect.classList.add('replaced');
+      }
+
+      createOptions() {
+        const children = Array.from(this.originalSelect.children);
+        
+        children.forEach(child => {
+          if (child.tagName === 'OPTGROUP') {
+            // 创建分组标题
+            const optgroup = document.createElement('div');
+            optgroup.className = 'select-optgroup';
+            optgroup.textContent = child.label;
+            this.optionsContainer.appendChild(optgroup);
+
+            // 创建分组选项
+            Array.from(child.children).forEach(option => {
+              this.createOption(option);
+            });
+          } else if (child.tagName === 'OPTION') {
+            this.createOption(child);
+          }
+        });
+      }
+
+      createOption(optionElement) {
+        const option = document.createElement('div');
+        option.className = 'select-option';
+        option.textContent = optionElement.textContent;
+        option.dataset.value = optionElement.value;
+        
+        if (optionElement.value === this.value) {
+          option.classList.add('selected');
+        }
+
+        option.addEventListener('click', (e) => {
+          this.selectOption(e.target);
+        });
+
+        this.optionsContainer.appendChild(option);
+      }
+
+      selectOption(optionElement) {
+        // 移除之前的选中状态
+        const previousSelected = this.optionsContainer.querySelector('.select-option.selected');
+        if (previousSelected) {
+          previousSelected.classList.remove('selected');
+        }
+
+        // 设置新的选中状态
+        optionElement.classList.add('selected');
+        
+        // 更新值和显示
+        this.value = optionElement.dataset.value;
+        this.triggerText.textContent = optionElement.textContent;
+        
+        // 同步原始 select 的值
+        this.originalSelect.value = this.value;
+        
+        // 触发 change 事件
+        this.originalSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        
+        // 关闭下拉
+        this.close();
+      }
+
+      getSelectedText() {
+        const selectedOption = this.originalSelect.querySelector(`option[value="${this.value}"]`);
+        return selectedOption ? selectedOption.textContent : '请选择...';
+      }
+
+      toggle() {
+        if (this.customSelect.classList.contains('active')) {
+          this.close();
+        } else {
+          this.open();
+        }
+      }
+
+      open() {
+        // 关闭其他打开的下拉
+        document.querySelectorAll('.custom-select.active').forEach(select => {
+          if (select !== this.customSelect) {
+            select.classList.remove('active');
+          }
+        });
+        
+        this.customSelect.classList.add('active');
+      }
+
+      close() {
+        this.customSelect.classList.remove('active');
+      }
+
+      bindEvents() {
+        // 点击触发器切换下拉
+        this.trigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.toggle();
+        });
+
+        // 键盘导航
+        this.trigger.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.toggle();
+          } else if (e.key === 'Escape') {
+            this.close();
+          }
+        });
+
+        // 点击外部关闭下拉
+        document.addEventListener('click', (e) => {
+          if (!this.customSelect.contains(e.target)) {
+            this.close();
+          }
+        });
+      }
+    }
+
+    // 初始化自定义 select
+    document.addEventListener('DOMContentLoaded', function() {
+      const selectElements = document.querySelectorAll('select');
+      selectElements.forEach(select => {
+        new CustomSelect(select);
+      });
+    });
+  </script>
+</body>
+
+</html>

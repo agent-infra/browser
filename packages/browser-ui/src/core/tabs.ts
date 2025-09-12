@@ -62,25 +62,27 @@ export class Tabs {
   async #initializeExistingTabs() {
     const existingPages = await this.#pptrBrowser.pages();
 
-    // console.log('initializeExistingTabs', existingPages);
+    console.log('initializeExistingTabs', existingPages);
 
     if (existingPages.length === 0) {
       return;
     }
 
     // init all existing tabs
-    const initTabTasks = existingPages.map(async (pptrPage) => {
-      // @ts-ignore
-      const tabId = pptrPage.target()._targetId;
-      const tab = new Tab(tabId, pptrPage, this.#canvas);
+    const initTabTasks = existingPages
+      .filter((pptrPage) => !pptrPage.url().startsWith('devtools://')) // not allowed chrome devtools frontend
+      .map(async (pptrPage) => {
+        // @ts-ignore
+        const tabId = pptrPage.target()._targetId;
+        const tab = new Tab(tabId, pptrPage, this.#canvas);
 
-      this.#tabs.set(tabId, tab);
-      this.#setupTabEvents(tab, tabId);
-      await this.#syncTabMeta(tabId);
+        this.#tabs.set(tabId, tab);
+        this.#setupTabEvents(tab, tabId);
+        await this.#syncTabMeta(tabId);
 
-      const isActive = await tab.checkActiveStatusWithRuntime();
-      return { tabId, pptrPage, isActive };
-    });
+        const isActive = await tab.checkActiveStatusWithRuntime();
+        return { tabId, pptrPage, isActive };
+      });
     const initedTabs = await Promise.all(initTabTasks);
 
     // active tab
@@ -124,6 +126,8 @@ export class Tabs {
     }
     // @ts-ignore
     const targetId = target._targetId;
+
+    console.log('handleTargetCreated', targetId);
 
     await this.#createTab(targetId, pptrPage);
     await this.#activeTab(targetId);
@@ -347,7 +351,7 @@ export class Tabs {
 
   // #region private methods
 
-  async #syncTabMeta(tabId: string): Promise<void> {
+  async #syncTabMeta(tabId: string, isLoading = false): Promise<void> {
     const tab = this.#tabs.get(tabId);
     if (!tab) return;
 
@@ -358,10 +362,10 @@ export class Tabs {
 
     const tabMeta: TabMeta = {
       id: tabId,
-      title: title || 'about:blank',
-      url: tab.url,
-      favicon,
-      isLoading: false,
+      url: tab.url || 'about:blank',
+      title: title,
+      favicon: favicon,
+      isLoading: isLoading,
       isActive: tabId === this.state.activeTabId,
     };
 
@@ -371,16 +375,19 @@ export class Tabs {
   }
 
   #setupTabEvents(tab: Tab, tabId: string): void {
-    tab.on(TabEvents.TabLoadingStateChanged, () => {
-      this.#syncTabMeta(tabId);
-    });
+    tab.on(
+      TabEvents.TabLoadingStateChanged,
+      (event: TabEventsMap[TabEvents.TabLoadingStateChanged]) => {
+        this.#syncTabMeta(tabId, event.isLoading);
+      },
+    );
     tab.on(TabEvents.TabUrlChanged, () => {
       this.#syncTabMeta(tabId);
     });
     tab.on(
       TabEvents.TabVisibilityChanged,
       (event: TabEventsMap[TabEvents.TabVisibilityChanged]) => {
-        console.log('TabVisibilityChanged', event);
+        // console.log('TabVisibilityChanged', event);
 
         if (event.isVisible) {
           this.#activeTab(event.tabId);

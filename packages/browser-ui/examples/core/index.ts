@@ -13,7 +13,7 @@ const urlBar = document.getElementById('urlBar') as HTMLInputElement;
 const loadingIndicator = document.getElementById('loadingIndicator') as HTMLDivElement;
 
 const ws =
-  'ws://127.0.0.1:9222/devtools/browser/018e1933-595a-4916-831e-1221f80a25ca';
+  'ws://127.0.0.1:9222/devtools/browser/88c1e031-e86e-49a7-a4f8-390c947cc052';
 
 const canvasBrowser = await CanvasBrowser.create(canvasEle, {
   wsEndpoint: ws,
@@ -23,12 +23,19 @@ const tabs = canvasBrowser.tabs;
 
 // 初始化：创建第一个 tab
 function createTabElement(tabMeta: TabMeta, isActive: boolean): HTMLDivElement {
+  // console.log('tabMeta', tabMeta);
+
   const tabElement = document.createElement('div');
   tabElement.className = `tab ${isActive ? 'active' : ''}`;
   tabElement.dataset.tabId = tabMeta.id;
 
+  // 根据加载状态决定显示的图标
+  const iconHtml = tabMeta.isLoading
+    ? `<div class="tab-loading-icon" data-tab-id="ico-${tabMeta.id}">⟳</div>`
+    : `<img class="tab-favicon" data-tab-id="ico-${tabMeta.id}" src="${tabMeta.favicon}" />`;
+
   tabElement.innerHTML = `
-    <img class="tab-favicon" data-tab-id="ico-${tabMeta.id}" src="${tabMeta.favicon}" />
+    ${iconHtml}
     <span class="tab-title" data-tab-id="title-${tabMeta.id}">${tabMeta.title}</span>
     <button class="tab-close" data-tab-id="close-${tabMeta.id}">X</button>
   `;
