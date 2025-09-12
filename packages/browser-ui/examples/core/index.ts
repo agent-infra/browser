@@ -13,7 +13,7 @@ const urlBar = document.getElementById('urlBar') as HTMLInputElement;
 const loadingIndicator = document.getElementById('loadingIndicator') as HTMLDivElement;
 
 const ws =
-  'ws://127.0.0.1:9222/devtools/browser/018e1933-595a-4916-831e-1221f80a25ca';
+  'ws://127.0.0.1:9222/devtools/browser/88c1e031-e86e-49a7-a4f8-390c947cc052';
 
 const canvasBrowser = await CanvasBrowser.create(canvasEle, {
   wsEndpoint: ws,

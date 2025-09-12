@@ -112,6 +112,98 @@
       padding-bottom: 5px;
       border-bottom: 2px solid #007bff;
     }
+
+    /* 自定义下拉选择样式 */
+    .custom-select {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .custom-select .select-trigger {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      background-color: white;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    .custom-select .select-trigger:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+
+    .custom-select .select-arrow {
+      border: solid #666;
+      border-width: 0 2px 2px 0;
+      display: inline-block;
+      padding: 3px;
+      transform: rotate(45deg);
+      transition: transform 0.2s;
+    }
+
+    .custom-select.active .select-arrow {
+      transform: rotate(-135deg);
+    }
+
+    .custom-select .select-options {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+
+    .custom-select.active .select-options {
+      display: block;
+    }
+
+    .custom-select .select-optgroup {
+      font-weight: 600;
+      padding: 8px 12px;
+      background-color: #f8f9fa;
+      color: #666;
+      font-size: 13px;
+    }
+
+    .custom-select .select-option {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background-color 0.2s;
+    }
+
+    .custom-select .select-option:hover {
+      background-color: #f8f9fa;
+    }
+
+    .custom-select .select-option.selected {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .custom-select .select-option:last-child {
+      border-bottom: none;
+    }
+
+    /* 隐藏原生 select */
+    select.replaced {
+      display: none;
+    }
   </style>
 </head>
 
@@ -298,6 +390,174 @@
     const year = now.getFullYear();
     const week = Math.ceil((now - new Date(year, 0, 1)) / (7 * 24 * 60 * 60 * 1000));
     document.getElementById('week').value = `${year}-W${week.toString().padStart(2, '0')}`;
+
+    // 自定义 select 组件
+    class CustomSelect {
+      constructor(selectElement) {
+        this.originalSelect = selectElement;
+        this.value = selectElement.value;
+        this.createCustomSelect();
+        this.bindEvents();
+      }
+
+      createCustomSelect() {
+        // 创建自定义下拉容器
+        this.customSelect = document.createElement('div');
+        this.customSelect.className = 'custom-select';
+
+        // 创建触发器
+        this.trigger = document.createElement('div');
+        this.trigger.className = 'select-trigger';
+        this.trigger.tabIndex = 0;
+        
+        this.triggerText = document.createElement('span');
+        this.triggerText.textContent = this.getSelectedText();
+        
+        this.arrow = document.createElement('span');
+        this.arrow.className = 'select-arrow';
+        
+        this.trigger.appendChild(this.triggerText);
+        this.trigger.appendChild(this.arrow);
+
+        // 创建选项容器
+        this.optionsContainer = document.createElement('div');
+        this.optionsContainer.className = 'select-options';
+
+        this.createOptions();
+
+        this.customSelect.appendChild(this.trigger);
+        this.customSelect.appendChild(this.optionsContainer);
+
+        // 插入到原始 select 之后
+        this.originalSelect.parentNode.insertBefore(this.customSelect, this.originalSelect.nextSibling);
+        
+        // 隐藏原始 select
+        this.originalSelect.classList.add('replaced');
+      }
+
+      createOptions() {
+        const children = Array.from(this.originalSelect.children);
+        
+        children.forEach(child => {
+          if (child.tagName === 'OPTGROUP') {
+            // 创建分组标题
+            const optgroup = document.createElement('div');
+            optgroup.className = 'select-optgroup';
+            optgroup.textContent = child.label;
+            this.optionsContainer.appendChild(optgroup);
+
+            // 创建分组选项
+            Array.from(child.children).forEach(option => {
+              this.createOption(option);
+            });
+          } else if (child.tagName === 'OPTION') {
+            this.createOption(child);
+          }
+        });
+      }
+
+      createOption(optionElement) {
+        const option = document.createElement('div');
+        option.className = 'select-option';
+        option.textContent = optionElement.textContent;
+        option.dataset.value = optionElement.value;
+        
+        if (optionElement.value === this.value) {
+          option.classList.add('selected');
+        }
+
+        option.addEventListener('click', (e) => {
+          this.selectOption(e.target);
+        });
+
+        this.optionsContainer.appendChild(option);
+      }
+
+      selectOption(optionElement) {
+        // 移除之前的选中状态
+        const previousSelected = this.optionsContainer.querySelector('.select-option.selected');
+        if (previousSelected) {
+          previousSelected.classList.remove('selected');
+        }
+
+        // 设置新的选中状态
+        optionElement.classList.add('selected');
+        
+        // 更新值和显示
+        this.value = optionElement.dataset.value;
+        this.triggerText.textContent = optionElement.textContent;
+        
+        // 同步原始 select 的值
+        this.originalSelect.value = this.value;
+        
+        // 触发 change 事件
+        this.originalSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        
+        // 关闭下拉
+        this.close();
+      }
+
+      getSelectedText() {
+        const selectedOption = this.originalSelect.querySelector(`option[value="${this.value}"]`);
+        return selectedOption ? selectedOption.textContent : '请选择...';
+      }
+
+      toggle() {
+        if (this.customSelect.classList.contains('active')) {
+          this.close();
+        } else {
+          this.open();
+        }
+      }
+
+      open() {
+        // 关闭其他打开的下拉
+        document.querySelectorAll('.custom-select.active').forEach(select => {
+          if (select !== this.customSelect) {
+            select.classList.remove('active');
+          }
+        });
+        
+        this.customSelect.classList.add('active');
+      }
+
+      close() {
+        this.customSelect.classList.remove('active');
+      }
+
+      bindEvents() {
+        // 点击触发器切换下拉
+        this.trigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.toggle();
+        });
+
+        // 键盘导航
+        this.trigger.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.toggle();
+          } else if (e.key === 'Escape') {
+            this.close();
+          }
+        });
+
+        // 点击外部关闭下拉
+        document.addEventListener('click', (e) => {
+          if (!this.customSelect.contains(e.target)) {
+            this.close();
+          }
+        });
+      }
+    }
+
+    // 初始化自定义 select
+    document.addEventListener('DOMContentLoaded', function() {
+      const selectElements = document.querySelectorAll('select');
+      selectElements.forEach(select => {
+        new CustomSelect(select);
+      });
+    });
   </script>
 </body>
 
