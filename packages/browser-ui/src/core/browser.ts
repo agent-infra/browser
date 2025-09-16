@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js';
 import type { Browser } from 'puppeteer-core';
 import { Tabs } from './tabs';

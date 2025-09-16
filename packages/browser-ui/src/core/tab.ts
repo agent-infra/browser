@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import type {
   Page,
   Frame,
@@ -32,11 +36,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
   #isLoading = false;
   #reloadAbortController: AbortController | null = null;
 
-  constructor(
-    page: Page,
-    canvas: HTMLCanvasElement,
-    options: TabOptions,
-  ) {
+  constructor(page: Page, canvas: HTMLCanvasElement, options: TabOptions) {
     super();
     this.#pptrPage = page;
     this.#options = options;

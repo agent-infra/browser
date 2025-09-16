@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import { useRef, useState } from 'react';
 import {
   BrowserCanvas,
@@ -18,7 +22,7 @@ const App = () => {
 
   const handleNavigate = async () => {
     if (!url.trim()) return;
-    
+
     const canvas = ref.current;
 
     if (canvas && canvas.page) {

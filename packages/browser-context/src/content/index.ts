@@ -1,2 +1,6 @@
-export * from './extract-content.js'
-export * from './to-markdown.js'
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+export * from './extract-content.js';
+export * from './to-markdown.js';

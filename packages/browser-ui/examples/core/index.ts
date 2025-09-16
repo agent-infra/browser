@@ -1,26 +1,34 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import morphdom from 'morphdom';
 
 import { CanvasBrowser } from '../../src/core/browser';
 import type { TabMeta } from '../../src/types/tabs';
 
 const canvasEle = document.getElementById('browserCanvas') as HTMLCanvasElement;
-const tabsContainer = document.getElementById('tabsContainer') as HTMLDivElement;
+const tabsContainer = document.getElementById(
+  'tabsContainer',
+) as HTMLDivElement;
 const newTabBtn = document.getElementById('newTabBtn') as HTMLButtonElement;
 const backBtn = document.getElementById('backBtn') as HTMLButtonElement;
 const forwardBtn = document.getElementById('forwardBtn') as HTMLButtonElement;
 const refreshBtn = document.getElementById('refreshBtn') as HTMLButtonElement;
 const urlBar = document.getElementById('urlBar') as HTMLInputElement;
-const loadingIndicator = document.getElementById('loadingIndicator') as HTMLDivElement;
+const loadingIndicator = document.getElementById(
+  'loadingIndicator',
+) as HTMLDivElement;
 
 const ws =
-  'ws://127.0.0.1:9222/devtools/browser/8657d335-44d7-4c62-a32b-f3acfdcfe1c2';
+  'ws://127.0.0.1:9222/devtools/browser/xxx-xxx-xxxx';
 
 const canvasBrowser = await CanvasBrowser.create(canvasEle, {
   wsEndpoint: ws,
   viewport: {
     width: 900,
     height: 900,
-  }
+  },
 });
 
 const tabs = canvasBrowser.tabs;
@@ -84,7 +92,6 @@ function renderTabs() {
     },
   });
 
-
   updateControls();
 }
 
@@ -112,7 +119,7 @@ tabsContainer.addEventListener('click', async (e) => {
 function updateControls() {
   const currentUrl = tabs.getCurrentUrl();
   urlBar.value = currentUrl;
-  
+
   // 这里可以根据实际情况更新前进后退按钮的状态
   // backBtn.disabled = !canGoBack;
   // forwardBtn.disabled = !canGoForward;

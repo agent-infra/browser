@@ -1,3 +1,13 @@
+/*
+ * This file contains code derived from the puppeteer.
+ * The original code is available at: https://github.com/puppeteer/puppeteer/blob/fcbfb730b8abb9412ce797ccfd0e1579d4e1d490/packages/puppeteer-core/src/node/ScreenRecorder.ts#L198
+ * 
+ * Original file license:
+ * 
+ * Copyright 2023 Google Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ * https://github.com/puppeteer/puppeteer/blob/main/LICENSE
+ */
 import {
   Observable,
   fromEvent,
@@ -73,7 +83,7 @@ export class ScreencastRenderer extends EventEmitter {
         quality: 80,
         everyNthFrame: 1,
         ...options.cast,
-      }
+      },
     };
   }
 

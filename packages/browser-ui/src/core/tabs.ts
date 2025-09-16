@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import { proxy, subscribe } from 'valtio';
 import { proxyMap } from 'valtio/utils';
 import { Tab } from './tab';
