@@ -115,7 +115,7 @@ const App = () => {
       >
         <BrowserCanvas
           ref={ref}
-          wsEndpoint="ws://127.0.0.1:9222/devtools/browser/WS_ENDPOINT"
+          wsEndpoint="ws://127.0.0.1:9222/devtools/browser/xxx-xxx-xxxx"
           onReady={handlePageReady}
           onError={(err) => {
             console.error('BrowserCanvas Error:', err);
