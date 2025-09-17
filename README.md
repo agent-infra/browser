@@ -35,11 +35,6 @@ This toolkit is specifically designed for:
 **Browser Interface Components**. UI components for displaying and interacting with remote browser instances through Chrome DevTools Protocol (CDP).
 
 
-### [@agent-infra/browser-use](./packages/browser-use)
-
-**AI Agent Browser Automation**. Advanced browser automation library specifically designed for AI agents, providing structured DOM access and intelligent interaction capabilities.
-
-
 ### [@agent-infra/puppeteer-enhance](./packages/puppeteer-enhance)
 
 **Enhanced Puppeteer Features**. A collection of tools that enhance Puppeteer functionality, such as hotkey support and common injection scripts.
@@ -99,6 +94,5 @@ This project is licensed under the Apache License 2.0.
 Special thanks to the open source projects that inspired this toolkit:
 
 - [Puppeteer](https://github.com/puppeteer/puppeteer) - Browser automation foundation
-- [browser-use](https://github.com/browser-use/browser-use) - AI browser automation inspiration
 - [ChatWise](https://chatwise.app/) - Browser detection functionality reference
 - [nanobrowser](https://github.com/nanobrowser/nanobrowser) - Technical references for browser integration
