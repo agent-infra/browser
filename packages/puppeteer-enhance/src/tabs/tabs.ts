@@ -5,7 +5,7 @@
 import { proxy, subscribe } from 'valtio';
 import { proxyMap } from 'valtio/utils';
 import { Tab } from './tab';
-import { Mutex } from '../utils/mutex';
+import { Mutex } from '../utils';
 
 import type { Browser, Page, Target } from 'puppeteer-core';
 

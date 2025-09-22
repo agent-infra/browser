@@ -12,6 +12,7 @@ import { EventEmitter } from 'eventemitter3';
 import { TabEvents, TabEventsMap, TabOptions } from '../types';
 
 import { visibilityScript } from "../injected-script";
+import { iife } from '../utils';
 
 export class Tab extends EventEmitter<TabEventsMap> {
   #id: string;
@@ -29,6 +30,9 @@ export class Tab extends EventEmitter<TabEventsMap> {
   #isLoading = false;
   #reloadAbortController: AbortController | null = null;
 
+  #scriptsOnCreate: string[] = [visibilityScript];
+  #scriptsOnLoad: string[] = [];
+
   constructor(page: Page, options: TabOptions) {
     super();
     this.#pptrPage = page;
@@ -41,8 +45,8 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
     this.#status = 'active';
 
-    // 设置页面可见性监听
     this.#setupVisibilityTracking();
+    this.#executeScriptsOnCreate();
 
     // page events: https://pptr.dev/api/puppeteer.pageevent
     this.#pptrPage.on('dialog', this.#dialogHandler);
@@ -99,6 +103,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
       isLoading: false,
       tabId: this.#id,
     });
+    this.#executeScriptsOnLoad();
   };
 
   #frameNavigatedHandler = (frame: Frame) => this.#onFrameNavigated(frame);
@@ -228,6 +233,22 @@ export class Tab extends EventEmitter<TabEventsMap> {
     }
   }
 
+  injectScriptOnCreate(script: string | string[]) {
+    if (Array.isArray(script)) {
+      this.#scriptsOnCreate.push(...script);
+    } else {
+      this.#scriptsOnCreate.push(script);
+    }
+  }
+
+  injectScriptOnLoad(script: string | string[]) {
+    if (Array.isArray(script)) {
+      this.#scriptsOnLoad.push(...script);
+    } else {
+      this.#scriptsOnLoad.push(script);
+    }
+  }
+
   // #endregion
 
   // #region pravite methods
@@ -308,8 +329,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
       this.#favicon = await this.#getFavicon();
 
       if (oldUrl !== newUrl) {
-        // console.log('onFrameNavigated', newUrl, this.#isLoading);
-
         this.emit(TabEvents.TabUrlChanged, {
           tabId: this.#id,
           oldUrl,
@@ -329,12 +348,25 @@ export class Tab extends EventEmitter<TabEventsMap> {
         });
       },
     );
-
-    try {
-      await this.#pptrPage.evaluateOnNewDocument(visibilityScript);
-      await this.#pptrPage.evaluate(visibilityScript);
-    } catch (error) {}
   }
 
+  async #executeScriptsOnCreate() {
+    try {
+      const script = iife(this.#scriptsOnCreate.join('\n'));
+      await this.#pptrPage.evaluateOnNewDocument(script);
+      await this.#pptrPage.evaluate(script);
+    } catch (error) {
+      console.warn('Failed to execute script on create:', error);
+    }
+  }
+
+  async #executeScriptsOnLoad(): Promise<void> {
+    try {
+      const script = iife(this.#scriptsOnLoad.join('\n'));
+      await this.#pptrPage.evaluate(script);
+    } catch (error) {
+      console.warn('Failed to execute script on load:', error);
+    }
+  }
   // #endregion
 }

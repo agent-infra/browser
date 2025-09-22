@@ -4,8 +4,9 @@
  */
 
 // install "es6-string-html" vscode Extensions to highlight string code
+
 export const visibilityScript = /* javascript */ `
-(() => {
+function agentInfraVisibilityScript() {
   if (window.top !== window) {
     return;
   }
@@ -16,7 +17,7 @@ export const visibilityScript = /* javascript */ `
   console.log('injectedScript');
 
   const handleVisibilityChange = () => {
-  const isVisible = document.visibilityState === 'visible';
+    const isVisible = document.visibilityState === 'visible';
     if (typeof window.__agent_infra_visibility_change === 'function') {
       window.__agent_infra_visibility_change(isVisible);
     }
@@ -31,5 +32,6 @@ export const visibilityScript = /* javascript */ `
   }
 
   document.addEventListener('visibilitychange', handleVisibilityChange);
-})();
+}
+agentInfraVisibilityScript();
 `;
