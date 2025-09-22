@@ -9,8 +9,7 @@ import type {
   PuppeteerLifeCycleEvent,
 } from 'puppeteer-core';
 import { EventEmitter } from 'eventemitter3';
-import { ScreencastRenderer } from './screencast-renderer';
-import { TabEvents, TabEventsMap, TabOptions } from '../types/tabs';
+import { TabEvents, TabEventsMap, TabOptions } from '../types';
 
 declare global {
   interface Window {
@@ -25,7 +24,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
   #status: 'active' | 'inactive';
 
   #pptrPage: Page;
-  #renderer: ScreencastRenderer;
 
   #url = 'about:blank';
   #favicon = '';
@@ -36,7 +34,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
   #isLoading = false;
   #reloadAbortController: AbortController | null = null;
 
-  constructor(page: Page, canvas: HTMLCanvasElement, options: TabOptions) {
+  constructor(page: Page, options: TabOptions) {
     super();
     this.#pptrPage = page;
     this.#options = options;
@@ -47,11 +45,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
     this.#url = page.url();
 
     this.#status = 'active';
-
-    this.#renderer = new ScreencastRenderer(page, canvas, {
-      tabId: options.tabId,
-      viewport: options.viewport,
-    });
 
     // 设置页面可见性监听
     this.#setupVisibilityTracking();
@@ -122,14 +115,10 @@ export class Tab extends EventEmitter<TabEventsMap> {
   async active() {
     await this.#pptrPage.bringToFront();
     this.#status = 'active';
-
-    this.#renderer.start();
   }
 
   async inactive() {
     this.#status = 'inactive';
-
-    this.#renderer.stop();
   }
 
   async checkActiveStatusWithRuntime() {
@@ -242,10 +231,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
       throw error;
     }
-  }
-
-  getRenderer(): ScreencastRenderer {
-    return this.#renderer;
   }
 
   // #endregion

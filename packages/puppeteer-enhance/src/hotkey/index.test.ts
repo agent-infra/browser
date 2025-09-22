@@ -5,7 +5,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Hotkey } from './index';
 import type { Page } from 'puppeteer-core';
-import type { OSType, BrowserType } from '../type';
+import type { OSType, BrowserType } from '../types/env';
 
 // Mock delay module
 vi.mock('delay', () => ({

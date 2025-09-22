@@ -35,10 +35,13 @@
   "dependencies": {
     "@agent-infra/logger": "0.0.2-beta.2",
     "puppeteer-core": "24.15.0",
-    "delay": "6.0.0"
+    "delay": "6.0.0",
+    "valtio": "2.1.7",
+    "eventemitter3": "5.0.1"
   },
   "devDependencies": {
     "@types/node": "24.1.0",
+    "@types/eventemitter3": "2.0.4",
     "typescript": "5.8.3",
     "vitest": "3.2.4",
     "@vitest/coverage-v8": "3.2.4",

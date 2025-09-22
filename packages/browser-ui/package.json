@@ -36,6 +36,7 @@
     "demo:core": "rsbuild dev --config rsbuild.core.ts"
   },
   "dependencies": {
+    "@agent-infra/puppeteer-enhance": "workspace:*",
     "puppeteer-core": "24.15.0",
     "rxjs": "7.8.2",
     "eventemitter3": "5.0.1",

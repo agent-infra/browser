@@ -12,7 +12,7 @@ import {
 } from './key-map';
 
 import type { Page, KeyInput } from 'puppeteer-core';
-import type { OSType, BrowserType } from '../type';
+import type { OSType, BrowserType } from '../types/env';
 
 export interface HotkeyOptions {
   delay: number;

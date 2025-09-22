@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import type { Browser } from 'puppeteer-core';
-import type { OSType, BrowserType } from './type';
+import type { OSType, BrowserType } from './types/env';
 
 export interface EnvInfo {
   osName: OSType;

@@ -17,6 +17,7 @@ export const enum TabEvents {
   TabUrlChanged = 'tabUrlChanged',
   TabVisibilityChanged = 'TabVisibilityChanged',
 }
+
 export interface TabEventsMap {
   [TabEvents.TabLoadingStateChanged]: {
     tabId: string;

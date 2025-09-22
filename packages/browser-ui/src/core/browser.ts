@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js';
-import type { Browser } from 'puppeteer-core';
-import { Tabs } from './tabs';
+import { UITabs } from './tabs';
 
-import { BrowserOptions } from '../types/browser';
+import type { Browser } from 'puppeteer-core';
+import type { BrowserOptions } from '@agent-infra/puppeteer-enhance';
 
 /**
  * https://pptr.dev/guides/running-puppeteer-in-the-browser
@@ -16,7 +16,7 @@ export class CanvasBrowser {
   #element: HTMLCanvasElement;
   #wsEndpoint: string;
   #pptrBrowser: Browser;
-  #tabs: Tabs;
+  #tabs: UITabs;
 
   static async create(
     element: HTMLCanvasElement,
@@ -49,10 +49,12 @@ export class CanvasBrowser {
     this.#element = element;
     this.#pptrBrowser = pptrBrowser;
     this.#wsEndpoint = options.wsEndpoint;
-    this.#tabs = new Tabs(pptrBrowser, element, { viewport: options.viewport });
+    this.#tabs = new UITabs(pptrBrowser, element, {
+      viewport: options.viewport,
+    });
   }
 
-  get tabs(): Tabs {
+  get tabs(): UITabs {
     return this.#tabs;
   }
 

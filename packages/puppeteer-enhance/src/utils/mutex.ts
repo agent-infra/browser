@@ -1,7 +1,7 @@
 /**
  * The following code is modified based on
  * https://github.com/puppeteer/puppeteer/blob/main/packages/puppeteer-core/src/util/Mutex.ts
- * 
+ *
  * Copyright 2024 Google Inc.
  * SPDX-License-Identifier: Apache-2.0
  * https://github.com/puppeteer/puppeteer/blob/main/LICENSE
