@@ -11,12 +11,7 @@ import type {
 import { EventEmitter } from 'eventemitter3';
 import { TabEvents, TabEventsMap, TabOptions } from '../types';
 
-declare global {
-  interface Window {
-    __agent_infra_visibility_initialized?: boolean;
-    __agent_infra_visibility_change?: (isVisible: boolean) => void;
-  }
-}
+import { visibilityScript } from "../injected-script";
 
 export class Tab extends EventEmitter<TabEventsMap> {
   #id: string;
@@ -335,37 +330,9 @@ export class Tab extends EventEmitter<TabEventsMap> {
       },
     );
 
-    const injectedScript = () => {
-      if (window.top !== window) {
-        return;
-      }
-      if (window.__agent_infra_visibility_initialized) {
-        return;
-      }
-
-      console.log('injectedScript');
-
-      const handleVisibilityChange = () => {
-        const isVisible = document.visibilityState === 'visible';
-        if (typeof window.__agent_infra_visibility_change === 'function') {
-          window.__agent_infra_visibility_change(isVisible);
-        }
-      };
-
-      window.__agent_infra_visibility_initialized = true;
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', handleVisibilityChange);
-      } else {
-        handleVisibilityChange();
-      }
-
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-    };
-
     try {
-      await this.#pptrPage.evaluateOnNewDocument(injectedScript);
-      await this.#pptrPage.evaluate(injectedScript);
+      await this.#pptrPage.evaluateOnNewDocument(visibilityScript);
+      await this.#pptrPage.evaluate(visibilityScript);
     } catch (error) {}
   }
 
