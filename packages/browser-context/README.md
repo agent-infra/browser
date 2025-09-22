@@ -167,8 +167,10 @@ This library is designed to work with:
 
 ## License
 
-Apache-2.0
+Apache License 2.0.
 
-## Contributing
+## Credits
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Special thanks to the open source projects that inspired this toolkit:
+
+- [readability](https://github.com/mozilla/readability/) - A standalone version of the readability lib

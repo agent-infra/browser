@@ -66,9 +66,13 @@ async function main() {
 }
 ```
 
+## License
+
+Apache License 2.0.
+
 ## Credits
 
 Thanks to:
 
 - [EGOIST](https://github.com/egoist) for creating a great AI chatbot product [ChatWise](https://chatwise.app/) from which we draw a lot of inspiration for browser detection functionality.
-- The [puppeteer](https://github.com/puppeteer/puppeteer) project which helps us operate the browser better.
+- [puppeteer](https://github.com/puppeteer/puppeteer) - The underlying browser automation library

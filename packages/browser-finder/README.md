@@ -164,13 +164,11 @@ This library is optimized for fast browser detection:
 
 ## License
 
-Apache-2.0
+Apache License 2.0.
 
-## Contributing
+## Credits
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Related Projects
+Special thanks to the open source projects that inspired this toolkit:
 
 - [edge-paths](https://github.com/shirshak55/edge-paths) - Edge browser path finder
 - [chrome-finder](https://github.com/gwuhaolin/chrome-finder) - Alternative Chrome finder

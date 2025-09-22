@@ -192,4 +192,10 @@ chrome.exe --remote-debugging-port=9222 --remote-debugging-address=0.0.0.0 --dis
 
 ## License
 
-ISC
+Apache License 2.0.
+
+## Credits
+
+Special thanks to the open source projects that inspired this toolkit:
+
+- [puppeteer](https://github.com/puppeteer/puppeteer) - The underlying browser automation library

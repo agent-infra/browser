@@ -68,4 +68,11 @@ console.log('Pure base64:', tool.getPureBase64Image()); // 'iVBORw0KGgo...'
 
 ## License
 
-ISC
+Apache License 2.0.
+
+## Credits
+
+Special thanks to the open source projects that inspired this toolkit:
+
+- [puppeteer](https://github.com/puppeteer/puppeteer) - The underlying browser automation library
+

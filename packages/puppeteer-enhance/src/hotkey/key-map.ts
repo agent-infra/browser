@@ -1,6 +1,10 @@
-/*
- * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+/**
+ * The following code is modified based on
+ * https://github.com/puppeteer/puppeteer/blob/main/packages/puppeteer-core/src/common/USKeyboardLayout.ts
+ *
+ * Copyright 2017 Google Inc.
  * SPDX-License-Identifier: Apache-2.0
+ * https://github.com/puppeteer/puppeteer/blob/main/LICENSE
  */
 import type { KeyInput } from 'puppeteer-core';
 

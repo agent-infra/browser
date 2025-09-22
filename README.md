@@ -93,6 +93,8 @@ This project is licensed under the Apache License 2.0.
 
 Special thanks to the open source projects that inspired this toolkit:
 
-- [Puppeteer](https://github.com/puppeteer/puppeteer) - Browser automation foundation
+- [puppeteer](https://github.com/puppeteer/puppeteer) - The underlying browser automation library
+- [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/) - Chrome DevTools Protocol
 - [ChatWise](https://chatwise.app/) - Browser detection functionality reference
-- [nanobrowser](https://github.com/nanobrowser/nanobrowser) - Technical references for browser integration
+- [readability](https://github.com/mozilla/readability/) - A standalone version of the readability lib
+- [edge-paths](https://github.com/shirshak55/edge-paths) - Edge browser path finder

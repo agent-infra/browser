@@ -113,12 +113,13 @@ try {
 }
 ```
 
-## Browser Compatibility
+## License
 
-See [puppeteer FAQ](https://pptr.dev/faq#q-what-is-the-status-of-cross-browser-support).
+Apache License 2.0.
 
+## Credits
 
-## Related
+Special thanks to the open source projects that inspired this toolkit:
 
-- [Puppeteer](https://pptr.dev/) - The underlying browser automation library
-- [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/) - Used for macOS optimizations
+- [puppeteer](https://github.com/puppeteer/puppeteer) - The underlying browser automation library
+- [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/) - Chrome DevTools Protocol
