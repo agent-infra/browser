@@ -74,7 +74,7 @@ export class Tabs<T extends Tab = Tab> {
   async #initializeExistingTabs() {
     const existingPages = await this.#pptrBrowser.pages();
 
-    console.log('initializeExistingTabs', existingPages);
+    // console.log('initializeExistingTabs', existingPages);
 
     if (existingPages.length === 0) {
       return;

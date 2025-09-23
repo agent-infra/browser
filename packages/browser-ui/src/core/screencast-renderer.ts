@@ -1,9 +1,9 @@
 /*
  * This file contains code derived from the puppeteer.
  * The original code is available at: https://github.com/puppeteer/puppeteer/blob/fcbfb730b8abb9412ce797ccfd0e1579d4e1d490/packages/puppeteer-core/src/node/ScreenRecorder.ts#L198
- * 
+ *
  * Original file license:
- * 
+ *
  * Copyright 2023 Google Inc.
  * SPDX-License-Identifier: Apache-2.0
  * https://github.com/puppeteer/puppeteer/blob/main/LICENSE
@@ -17,38 +17,12 @@ import {
   takeUntil,
   catchError,
   EMPTY,
-  map,
 } from 'rxjs';
 import { EventEmitter } from 'eventemitter3';
-
-import {
-  Page,
-  CDPSession,
-  CDPEvents,
-  EventType,
-  Protocol,
-} from 'puppeteer-core';
-
 import { drawBase64ToCanvas } from '../utils/image';
 
-interface ScreenCastOptions {
-  tabId: string;
-  viewport: {
-    width: number;
-    height: number;
-  };
-  cast?: {
-    format: 'jpeg' | 'png';
-    /**
-     * Compression quality from range [0..100].
-     */
-    quality: number;
-    /**
-     * Send every n-th frame.
-     */
-    everyNthFrame: number;
-  };
-}
+import type { Page, CDPSession, Protocol } from 'puppeteer-core';
+import { ScreenCastOptions } from '../types';
 
 export class ScreencastRenderer extends EventEmitter {
   #page: Page;
