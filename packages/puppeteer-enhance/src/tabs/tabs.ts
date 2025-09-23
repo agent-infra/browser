@@ -74,7 +74,7 @@ export class Tabs<T extends Tab = Tab> {
   async #initializeExistingTabs() {
     const existingPages = await this.#pptrBrowser.pages();
 
-    console.log('initializeExistingTabs', existingPages);
+    // console.log('initializeExistingTabs', existingPages);
 
     if (existingPages.length === 0) {
       return;
@@ -171,11 +171,8 @@ export class Tabs<T extends Tab = Tab> {
   #activeMutex = new Mutex();
   async #activeTab(tabId: string) {
     using _ = await this.#activeMutex.acquire();
-    // console.log(
-    //   'switchingTargetIds before',
-    //   tabId,
-    //   this.#operations.switchingTargetIds,
-    // );
+
+    // console.trace('#activeTab', tabId);
 
     // check lock
     if (this.#operations.switchingTargetIds.has(tabId)) {
@@ -210,13 +207,6 @@ export class Tabs<T extends Tab = Tab> {
 
     // release lock
     this.#operations.switchingTargetIds.delete(tabId);
-
-    // console.log(
-    //   'switchingTargetIds after',
-    //   tabId,
-    //   this.#operations.switchingTargetIds,
-    // );
-    // console.log('#activeTab this.state', tabId, this.state);
 
     return true;
   }
@@ -255,14 +245,11 @@ export class Tabs<T extends Tab = Tab> {
     this.#tabs.delete(tabId);
     this.state.tabs.delete(tabId);
 
-    // active page
+    // fallback logic to prevent the browser from being closed directly
     if (this.state.activeTabId === tabId) {
       this.state.activeTabId = null;
 
-      const lastTabId = Array.from(this.state.tabs.keys()).pop();
-      if (lastTabId) {
-        await this.activeTab(lastTabId);
-      } else {
+      if (this.#tabs.size === 0) {
         await this.createTab();
       }
     }

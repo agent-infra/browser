@@ -1,9 +1,9 @@
 /*
  * This file contains code derived from the puppeteer.
  * The original code is available at: https://github.com/puppeteer/puppeteer/blob/fcbfb730b8abb9412ce797ccfd0e1579d4e1d490/packages/puppeteer-core/src/node/ScreenRecorder.ts#L198
- * 
+ *
  * Original file license:
- * 
+ *
  * Copyright 2023 Google Inc.
  * SPDX-License-Identifier: Apache-2.0
  * https://github.com/puppeteer/puppeteer/blob/main/LICENSE
@@ -17,38 +17,12 @@ import {
   takeUntil,
   catchError,
   EMPTY,
-  map,
 } from 'rxjs';
 import { EventEmitter } from 'eventemitter3';
-
-import {
-  Page,
-  CDPSession,
-  CDPEvents,
-  EventType,
-  Protocol,
-} from 'puppeteer-core';
-
 import { drawBase64ToCanvas } from '../utils/image';
 
-interface ScreenCastOptions {
-  tabId: string;
-  viewport: {
-    width: number;
-    height: number;
-  };
-  cast?: {
-    format: 'jpeg' | 'png';
-    /**
-     * Compression quality from range [0..100].
-     */
-    quality: number;
-    /**
-     * Send every n-th frame.
-     */
-    everyNthFrame: number;
-  };
-}
+import type { Page, CDPSession, Protocol } from 'puppeteer-core';
+import { ScreenCastOptions } from '../types';
 
 export class ScreencastRenderer extends EventEmitter {
   #page: Page;
@@ -146,6 +120,13 @@ export class ScreencastRenderer extends EventEmitter {
 
       await this.#initCDPSession();
 
+      // If setViewport is not called before each 'Page.startScreencast',
+      // the screenshot size given by screencastFrameAck may have slight deviations (for example, expected 900x900, actual 900x918)
+      // The exact reason is currently unknown.
+      await this.#page.setViewport({
+        width: this.#options.viewport.width,
+        height: this.#options.viewport.height,
+      });
       await this.#cdpSession!.send('Page.startScreencast', {
         maxWidth: this.#options.viewport.width,
         maxHeight: this.#options.viewport.height,
@@ -157,9 +138,7 @@ export class ScreencastRenderer extends EventEmitter {
       this.#observable = this.#createScreencastObservable();
 
       this.#observable.subscribe({
-        next: () => {
-          // 帧处理成功
-        },
+        next: () => {},
         error: (error) => {
           console.error('Screencast stream error:', error);
           this.stop();
@@ -186,12 +165,16 @@ export class ScreencastRenderer extends EventEmitter {
       return;
     }
 
-    await this.#cdpSession.send('Page.stopScreencast');
+    if (!this.#page.isClosed()) {
+      await this.#cdpSession.send('Page.stopScreencast');
+    }
 
     this.#controller?.abort();
     this.#observable = undefined;
 
-    await this.#cdpSession.detach();
+    if (!this.#page.isClosed()) {
+      await this.#cdpSession.detach();
+    }
     this.#cdpSession = undefined;
 
     this.#isRunning = false;
