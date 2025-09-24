@@ -8,15 +8,15 @@ import { Tab } from './tab';
 import { Mutex } from '../utils';
 
 import type { Browser, Page, Target } from 'puppeteer-core';
-
 import {
   TabEvents,
-  TabEventsMap,
-  TabMeta,
-  TabOptions,
-  TabsState,
-  TabsOperationTracker,
-  TabsOptions,
+  type TabEventsMap,
+  type TabMeta,
+  type TabOptions,
+  type TabsState,
+  type TabsOperationTracker,
+  type TabsOptions,
+  type NavigationOptions,
 } from '../types/tabs';
 
 export class Tabs<T extends Tab = Tab> {
@@ -276,7 +276,7 @@ export class Tabs<T extends Tab = Tab> {
   // #region public methods
 
   #backMutex = new Mutex();
-  async goBack(): Promise<boolean> {
+  async goBack(options: NavigationOptions = {}): Promise<boolean> {
     using _ = await this.#backMutex.acquire();
 
     const activeTab = this.getActiveTab();
@@ -285,11 +285,11 @@ export class Tabs<T extends Tab = Tab> {
       return false;
     }
 
-    return await activeTab.goBack(['load']);
+    return await activeTab.goBack(options);
   }
 
   #forwardMutex = new Mutex();
-  async goForward(): Promise<boolean> {
+  async goForward(options: NavigationOptions = {}): Promise<boolean> {
     using _ = await this.#forwardMutex.acquire();
 
     const activeTab = this.getActiveTab();
@@ -298,11 +298,11 @@ export class Tabs<T extends Tab = Tab> {
       return false;
     }
 
-    return await activeTab.goForward(['load']);
+    return await activeTab.goForward(options);
   }
 
   #reloadMutex = new Mutex();
-  async reload(): Promise<boolean> {
+  async reload(options: NavigationOptions = {}): Promise<boolean> {
     using _ = await this.#reloadMutex.acquire();
 
     const activeTab = this.getActiveTab();
@@ -312,7 +312,7 @@ export class Tabs<T extends Tab = Tab> {
     }
 
     try {
-      await activeTab.reload();
+      await activeTab.reload(options);
       return true;
     } catch (error) {
       console.error('Reload failed:', error);
@@ -320,7 +320,7 @@ export class Tabs<T extends Tab = Tab> {
     }
   }
 
-  async navigate(url: string): Promise<boolean> {
+  async navigate(url: string, options: NavigationOptions = {}): Promise<boolean> {
     const activeTab = this.getActiveTab();
 
     if (!activeTab) {
@@ -328,7 +328,7 @@ export class Tabs<T extends Tab = Tab> {
     }
 
     try {
-      await activeTab.goto(url);
+      await activeTab.goto(url, options);
       return true;
     } catch (error) {
       console.error('Navigation failed:', error);

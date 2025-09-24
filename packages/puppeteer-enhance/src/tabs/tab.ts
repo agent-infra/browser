@@ -2,17 +2,18 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import type {
-  Page,
-  Frame,
-  Dialog,
-  PuppeteerLifeCycleEvent,
-} from 'puppeteer-core';
 import { EventEmitter } from 'eventemitter3';
-import { TabEvents, TabEventsMap, TabOptions } from '../types';
-
-import { visibilityScript } from "../injected-script";
+import { visibilityScript } from '../injected-script';
 import { iife } from '../utils';
+
+import type { Page, Frame, Dialog } from 'puppeteer-core';
+import {
+  TabEvents,
+  type NavigationOptions,
+  type TabEventsMap,
+  type TabOptions,
+} from '../types';
+
 
 export class Tab extends EventEmitter<TabEventsMap> {
   #id: string;
@@ -135,10 +136,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
     }
   }
 
-  async goto(
-    url: string,
-    options?: { waitUntil?: PuppeteerLifeCycleEvent[] },
-  ): Promise<void> {
+  async goto(url: string, options: NavigationOptions): Promise<void> {
     if (this.#dialog) {
       throw new Error('Cannot navigate while dialog is open');
     }
@@ -154,7 +152,8 @@ export class Tab extends EventEmitter<TabEventsMap> {
         height: this.#options.viewport.height,
       });
       await this.#pptrPage.goto(url, {
-        waitUntil: options?.waitUntil || ['load'],
+        waitUntil: options.waitUntil,
+        timeout: options.timeout,
       });
 
       this.#title = await this.#pptrPage.title();
@@ -167,25 +166,31 @@ export class Tab extends EventEmitter<TabEventsMap> {
     }
   }
 
-  async goBack(waitUntil: PuppeteerLifeCycleEvent[] = []): Promise<boolean> {
+  async goBack(options: NavigationOptions): Promise<boolean> {
     if (this.#dialog) {
       return false;
     }
 
-    await this.#pptrPage.goBack({ waitUntil: waitUntil });
+    await this.#pptrPage.goBack({
+      waitUntil: options.waitUntil,
+      timeout: options.timeout,
+    });
     return true;
   }
 
-  async goForward(waitUntil: PuppeteerLifeCycleEvent[] = []): Promise<boolean> {
+  async goForward(options: NavigationOptions): Promise<boolean> {
     if (this.#dialog) {
       return false;
     }
 
-    await this.#pptrPage.goForward({ waitUntil: waitUntil });
+    await this.#pptrPage.goForward({
+      waitUntil: options.waitUntil,
+      timeout: options.timeout,
+    });
     return true;
   }
 
-  async reload(): Promise<void> {
+  async reload(options: NavigationOptions): Promise<void> {
     if (this.#reloadAbortController) {
       this.#reloadAbortController.abort();
     }
@@ -195,7 +200,8 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
     try {
       await this.#pptrPage.reload({
-        waitUntil: ['load'],
+        waitUntil: options.waitUntil,
+        timeout: options.timeout,
         signal: this.#reloadAbortController.signal,
       });
       this.#setLoading(false);

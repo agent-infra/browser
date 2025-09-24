@@ -2,6 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+import type { PuppeteerLifeCycleEvent } from 'puppeteer-core';
 import { Viewport } from './browser';
 
 export interface TabsOptions {
@@ -52,4 +53,9 @@ export interface TabsOperationTracker {
   creatingTargetIds: Set<string>;
   switchingTargetIds: Set<string>;
   closingTargetIds: Set<string>;
+}
+
+export interface NavigationOptions {
+  waitUntil?: PuppeteerLifeCycleEvent[];
+  timeout?: number;
 }
