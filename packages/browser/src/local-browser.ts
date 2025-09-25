@@ -48,14 +48,14 @@ export class LocalBrowser extends BaseBrowser {
         '--mute-audio',
         '--disable-gpu',
         '--disable-blink-features=AutomationControlled',
-        '--disable-infobars',
+        '--disable-infobars', // 已废弃，换 --enable-automation
         '--disable-background-timer-throttling',
         '--disable-popup-blocking',
         '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding',
-        '--disable-window-activation',
-        '--disable-focus-on-load',
-        '--no-default-browser-check', // disable default browser check
+        '--disable-renderer-backgrounding', // 设置时防止渲染进程进入后台
+        '--disable-window-activation', // 已废弃
+        '--disable-focus-on-load', // 已废弃
+        '--no-default-browser-check', // disable default browser check，禁用默认浏览器检查。适用于希望避免显示默认浏览器信息栏的UI/浏览器测试。
         '--disable-web-security', // disable CORS
         '--disable-features=IsolateOrigins,site-per-process',
         '--disable-site-isolation-trials',

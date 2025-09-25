@@ -33,12 +33,7 @@ import puppeteer from 'puppeteer-core';
 const browser = await puppeteer.launch({
   executablePath: '/path/to/chrome',
   headless: false,
-  args: [
-    '--remote-debugging-port=9222',
-    '--remote-debugging-address=0.0.0.0',
-    '--disable-web-security',
-    '--remote-allow-origins=*'
-  ]
+  args: []
 });
 
 console.log('WebSocket endpoint:', browser.wsEndpoint());
