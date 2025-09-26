@@ -1,19 +1,19 @@
-# puppeteer-enhance
+# @agent-infra/browser
 
 A powerful enhancement library for Puppeteer that provides advanced hotkey simulation capabilities with cross-platform support and browser-specific optimizations.
 
 ## Installation
 
 ```bash
-npm install @agent-infra/puppeteer-enhance
+npm install @agent-infra/browser
 # or
-pnpm install @agent-infra/puppeteer-enhance
+pnpm install @agent-infra/browser
 ```
 
 ## Quick Start
 
 ```typescript
-import { Hotkey } from '@agent-infra/puppeteer-enhance';
+import { Hotkey } from '@agent-infra/browser';
 import puppeteer from 'puppeteer-core';
 
 const browser = await puppeteer.launch();

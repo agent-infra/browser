@@ -6,7 +6,7 @@ import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser
 import { UITabs } from './tabs';
 
 import type { Browser } from 'puppeteer-core';
-import type { BrowserOptions } from '@agent-infra/puppeteer-enhance';
+import type { BrowserOptions } from '@agent-infra/browser/web';
 
 /**
  * https://pptr.dev/guides/running-puppeteer-in-the-browser

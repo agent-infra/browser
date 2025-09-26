@@ -1,5 +1,5 @@
 {
-  "name": "@agent-infra/browser",
+  "name": "@agent-infra/browser-old",
   "description": "A tiny Browser Control library, built for Agent Tars.",
   "version": "0.1.6",
   "main": "dist/index.js",

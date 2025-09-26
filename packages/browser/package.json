@@ -1,20 +1,20 @@
 {
-  "name": "@agent-infra/puppeteer-enhance",
-  "description": "puppeteer-enhance",
+  "name": "@agent-infra/browser",
+  "description": "agent-infra browser",
   "version": "0.1.6",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "types": "./dist/index.node.d.ts",
+      "import": "./dist/index.node.mjs",
+      "require": "./dist/index.node.js"
     },
-    "./tabs": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/tabs/index.mjs",
-      "require": "./dist/tabs/index.js"
+    "./web": {
+      "types": "./dist/index.web.d.ts",
+      "import": "./dist/index.web.mjs",
+      "require": "./dist/index.web.js"
     }
   },
   "files": [

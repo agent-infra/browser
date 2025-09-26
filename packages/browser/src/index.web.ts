@@ -5,7 +5,5 @@
 
 export * from './types';
 export * from './env';
-export * from './tabs/tab';
-export * from './tabs/tabs';
+export * from './tabs';
 export * from './hotkey';
-export * from './browser';

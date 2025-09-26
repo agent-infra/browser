@@ -27,17 +27,12 @@ This toolkit is specifically designed for:
 
 ### [@agent-infra/browser](./packages/browser)
 
-**Core Browser Control Library**. A lightweight wrapper around Puppeteer that provides simplified browser management with support for both local and remote browser instances.
+**Core Browser Control Library**.
 
 
 ### [@agent-infra/browser-ui](./packages/browser-ui)
 
 **Browser Interface Components**. UI components for displaying and interacting with remote browser instances through Chrome DevTools Protocol (CDP).
-
-
-### [@agent-infra/puppeteer-enhance](./packages/puppeteer-enhance)
-
-**Enhanced Puppeteer Features**. A collection of tools that enhance Puppeteer functionality, such as hotkey support and common injection scripts.
 
 
 ### [@agent-infra/browser-finder](./packages/browser-finder) 
