@@ -17,10 +17,7 @@ async function main() {
       deviceScaleFactor: 0,
     },
     args: [
-      '--remote-debugging-port=9222',
-      '--remote-debugging-address=0.0.0.0',
-      '--disable-web-security', // disable cdp CORS
-      '--remote-allow-origins=*',
+      '--remote-allow-origins=http://127.0.0.1:3000',
       '--window-size=900,980',
     ],
   });

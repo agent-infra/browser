@@ -5,7 +5,6 @@
 import morphdom from 'morphdom';
 
 import { CanvasBrowser } from '../../src/core/browser';
-import type { TabMeta } from '../../src/types/tabs';
 
 const canvasEle = document.getElementById('browserCanvas') as HTMLCanvasElement;
 const tabsContainer = document.getElementById(
@@ -34,7 +33,7 @@ const canvasBrowser = await CanvasBrowser.create(canvasEle, {
 const tabs = canvasBrowser.tabs;
 
 // 初始化：创建第一个 tab
-function createTabElement(tabMeta: TabMeta, isActive: boolean): HTMLDivElement {
+function createTabElement(tabMeta: any, isActive: boolean): HTMLDivElement {
   // console.log('tabMeta', tabMeta);
 
   const tabElement = document.createElement('div');
@@ -58,13 +57,13 @@ function createTabElement(tabMeta: TabMeta, isActive: boolean): HTMLDivElement {
 function renderTabs() {
   const snapshot = tabs.getSnapshot();
 
-  console.log('Rendering tabs:', snapshot);
+  // console.log('Rendering tabs:', snapshot);
 
   const targetContainer = document.createElement('div');
   targetContainer.className = tabsContainer.className;
   targetContainer.id = tabsContainer.id;
 
-  snapshot.tabs.forEach((tabMeta: TabMeta, tabId: string) => {
+  snapshot.tabs.forEach((tabMeta, tabId: string) => {
     const isActive = snapshot.activeTabId === tabMeta.id;
     const tabElement = createTabElement(tabMeta, isActive);
     targetContainer.appendChild(tabElement);
