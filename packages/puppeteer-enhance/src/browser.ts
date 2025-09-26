@@ -7,21 +7,17 @@ import { launch, connect } from 'puppeteer-core';
 import { BrowserFinder } from '@agent-infra/browser-finder';
 
 import type {
-  Browser as PuppeteerBrowser,
+  Browser as pptrBrowser,
   LaunchOptions,
   ConnectOptions,
   Viewport,
 } from 'puppeteer-core';
 
-export interface ReconnectOptions {
-  enabled?: boolean;
-  maxRetries?: number;
-  retryInterval?: number;
-  backoffMultiplier?: number;
-}
+const MAX_RETRIES = 5;
+const INITIAL_BACKOFF = 2000;
 
 export class Browser {
-  #pptrBrowser: PuppeteerBrowser | null = null;
+  #pptrBrowser: pptrBrowser | null = null;
 
   #wsEndpoint = '';
   // https://pptr.dev/api/puppeteer.viewport
@@ -38,8 +34,7 @@ export class Browser {
     hasTouch: false, // deafault is false in pptr
   };
 
-  #isConnected: boolean = false;
-  #isDestroyed: boolean = false;
+  #isIntentionalDisconnect: boolean = false;
   #reconnectAttempts: number = 0;
 
   /**
@@ -140,7 +135,6 @@ export class Browser {
     }
 
     this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
-    this.#isConnected = true;
     this.#setupAutoReconnect();
   }
 
@@ -152,73 +146,53 @@ export class Browser {
     }
 
     this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
-    this.#isConnected = true;
     this.#setupAutoReconnect();
   }
 
   #setupAutoReconnect(): void {
-    if (!this.#isConnected || !this.#pptrBrowser) return;
-
-    const reconnectConfig = {
-      enabled: true,
-      maxRetries: 5,
-      retryInterval: 2000,
-      backoffMultiplier: 1.5,
-    };
-
-    if (!reconnectConfig.enabled) return;
+    if (!this.#pptrBrowser) return;
 
     this.#pptrBrowser.on('disconnected', () => {
-      if (this.#isDestroyed) return;
+      if (this.#isIntentionalDisconnect) {
+        return;
+      }
 
-      console.log('Browser disconnected, attempting to reconnect...');
-      this.#isConnected = false;
-      this.#attemptReconnect(reconnectConfig);
+      this.#attemptReconnect();
     });
   }
 
-  async #attemptReconnect(config: Required<ReconnectOptions>): Promise<void> {
-    if (this.#reconnectAttempts >= config.maxRetries) {
-      console.error(`Max reconnect attempts (${config.maxRetries}) reached`);
+  async #attemptReconnect(): Promise<void> {
+    if (this.#reconnectAttempts >= 5) {
+      console.error('Max reconnect attempts reached. Giving up reconnecting');
+      return;
+    }
+    if (!this.#wsEndpoint) {
+      console.error('No wsEndpoint found. Cannot reconnect');
       return;
     }
 
+    const delay = INITIAL_BACKOFF * this.#reconnectAttempts;
     this.#reconnectAttempts++;
-    const delay =
-      config.retryInterval *
-      Math.pow(config.backoffMultiplier, this.#reconnectAttempts - 1);
-
-    console.log(
-      `Reconnect attempt ${this.#reconnectAttempts}/${config.maxRetries} in ${delay}ms`,
-    );
-
     await new Promise((resolve) => setTimeout(resolve, delay));
 
     try {
-      // 重连时使用当前的 wsEndpoint
       const connectOptions: ConnectOptions = {
         browserWSEndpoint: this.#wsEndpoint,
+        defaultViewport: this.#defaultViewport,
       };
 
       this.#pptrBrowser = await connect(connectOptions);
-      this.#isConnected = true;
-      this.#reconnectAttempts = 0; // 重置重连次数
-      console.log('Successfully reconnected to browser');
+      this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
+      this.#reconnectAttempts = 0;
     } catch (error) {
-      console.error(
-        `Reconnect attempt ${this.#reconnectAttempts} failed:`,
-        error,
-      );
-
-      if (this.#reconnectAttempts < config.maxRetries) {
-        this.#attemptReconnect(config);
+      if (this.#reconnectAttempts < MAX_RETRIES) {
+        this.#attemptReconnect();
       }
     }
   }
 
-  async destroy(): Promise<void> {
-    this.#isDestroyed = true;
-    this.#isConnected = false;
+  async disconnect(): Promise<void> {
+    this.#isIntentionalDisconnect = true;
 
     await this.#pptrBrowser?.disconnect();
   }
