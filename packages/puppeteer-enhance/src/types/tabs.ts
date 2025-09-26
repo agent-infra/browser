@@ -2,8 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import type { PuppeteerLifeCycleEvent } from 'puppeteer-core';
-import { Viewport } from './browser';
+import type { PuppeteerLifeCycleEvent, Viewport } from 'puppeteer-core';
 
 export interface TabsOptions {
   viewport: Viewport;

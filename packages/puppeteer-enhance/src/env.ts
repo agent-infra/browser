@@ -8,17 +8,19 @@ import type { OSType, BrowserType } from './types/env';
 export interface EnvInfo {
   osName: OSType;
   browserName: BrowserType;
+  browserVersion: string;
 }
 
 export async function getEnvInfo(browser: Browser): Promise<EnvInfo> {
   let osName: OSType = 'Unknown';
   let browserName: BrowserType = 'Unknown';
+  let browserVersion: string = 'Unknown';
 
   try {
     // 1.get env info from CDP
     const client = await browser.target().createCDPSession();
     const systemInfo = await client.send('SystemInfo.getInfo');
-    const browserVersion = await browser.version();
+    const cdpBrowserVersion = await browser.version();
 
     await client.detach();
 
@@ -33,7 +35,7 @@ export async function getEnvInfo(browser: Browser): Promise<EnvInfo> {
       }
     }
 
-    const versionStr = browserVersion.toLowerCase();
+    const versionStr = cdpBrowserVersion.toLowerCase();
     if (versionStr.includes('chrome')) {
       browserName = 'Chrome';
     } else if (versionStr.includes('edge') || versionStr.includes('edg')) {
@@ -42,8 +44,14 @@ export async function getEnvInfo(browser: Browser): Promise<EnvInfo> {
       browserName = 'Firefox';
     }
 
-    if (osName !== 'Unknown' && browserName !== 'Unknown') {
-      return { osName, browserName };
+    browserVersion = versionStr.split('/')[1];
+
+    if (
+      osName !== 'Unknown' &&
+      browserName !== 'Unknown' &&
+      browserVersion !== 'Unknown'
+    ) {
+      return { osName, browserName, browserVersion };
     }
   } catch (error) {
     console.warn(
@@ -71,12 +79,27 @@ export async function getEnvInfo(browser: Browser): Promise<EnvInfo> {
   if (browserName === 'Unknown') {
     if (userAgent.includes('edg/') || userAgent.includes('edge/')) {
       browserName = 'Edge';
+
+      const edgeMatch = userAgent.match(/edg?\/([0-9.]+)/);
+      if (edgeMatch && browserVersion === 'Unknown') {
+        browserVersion = edgeMatch[1];
+      }
     } else if (userAgent.includes('chrome/') && !userAgent.includes('edg')) {
       browserName = 'Chrome';
+
+      const chromeMatch = userAgent.match(/chrome\/([0-9.]+)/);
+      if (chromeMatch && browserVersion === 'Unknown') {
+        browserVersion = chromeMatch[1];
+      }
     } else if (userAgent.includes('firefox/')) {
       browserName = 'Firefox';
+
+      const firefoxMatch = userAgent.match(/firefox\/([0-9.]+)/);
+      if (firefoxMatch && browserVersion === 'Unknown') {
+        browserVersion = firefoxMatch[1];
+      }
     }
   }
 
-  return { osName, browserName };
+  return { osName, browserName, browserVersion };
 }

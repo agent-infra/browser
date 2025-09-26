@@ -5,6 +5,8 @@
 
 import { launch, connect } from 'puppeteer-core';
 import { BrowserFinder } from '@agent-infra/browser-finder';
+import { Tabs } from './tabs/tabs';
+import { getEnvInfo } from './env';
 
 import type {
   Browser as pptrBrowser,
@@ -17,7 +19,8 @@ const MAX_RETRIES = 5;
 const INITIAL_BACKOFF = 2000;
 
 export class Browser {
-  #pptrBrowser: pptrBrowser | null = null;
+  #pptrBrowser?: pptrBrowser;
+  #tabs?: Tabs;
 
   #wsEndpoint = '';
   // https://pptr.dev/api/puppeteer.viewport
@@ -49,6 +52,30 @@ export class Browser {
   constructor() {}
 
   // #region public methods
+
+  get tabs(): Tabs {
+    return this.#tabs!;
+  }
+
+  async getBrowserMetaInfo() {
+    if (!this.#pptrBrowser) {
+      throw new Error('Browser not initialized');
+    }
+
+    const [envInfo, userAgent] = await Promise.all(
+      [
+        getEnvInfo(this.#pptrBrowser),
+        this.#pptrBrowser.userAgent(),
+      ],
+    );
+
+    return {
+      ...envInfo,
+      userAgent,
+      viewport: this.#defaultViewport,
+      wsEndpoint: this.#wsEndpoint,
+    };
+  }
 
   async disconnect(): Promise<void> {
     this.#isIntentionalDisconnect = true;
@@ -135,18 +162,17 @@ export class Browser {
     return processedOptions;
   }
 
-  #isConnectMode(options: LaunchOptions): boolean {
-    return !!(options.browserWSEndpoint || options.browserURL);
-  }
-
   async #launch(options: LaunchOptions): Promise<void> {
     this.#pptrBrowser = await launch(options);
 
     if (!this.#pptrBrowser) {
-      throw new Error('pptrBrowser not launch');
+      throw new Error('Puppeteer browser not launch');
     }
 
     this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
+    this.#tabs = new Tabs(this.#pptrBrowser, {
+      viewport: this.#defaultViewport,
+    });
     this.#setupAutoReconnect();
   }
 
@@ -154,17 +180,22 @@ export class Browser {
     this.#pptrBrowser = await connect(options);
 
     if (!this.#pptrBrowser) {
-      throw new Error('pptrBrowser not connect');
+      throw new Error('Puppeteer browser not connect');
     }
 
     this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
+    this.#tabs = new Tabs(this.#pptrBrowser, {
+      viewport: this.#defaultViewport,
+    });
     this.#setupAutoReconnect();
   }
 
-  #setupAutoReconnect(): void {
-    if (!this.#pptrBrowser) return;
+  #isConnectMode(options: LaunchOptions): boolean {
+    return !!(options.browserWSEndpoint || options.browserURL);
+  }
 
-    this.#pptrBrowser.on('disconnected', () => {
+  #setupAutoReconnect(): void {
+    this.#pptrBrowser!.on('disconnected', () => {
       if (this.#isIntentionalDisconnect) {
         return;
       }
@@ -195,6 +226,9 @@ export class Browser {
 
       this.#pptrBrowser = await connect(connectOptions);
       this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
+      this.#tabs = new Tabs(this.#pptrBrowser, {
+        viewport: this.#defaultViewport,
+      });
       this.#reconnectAttempts = 0;
     } catch (error) {
       if (this.#reconnectAttempts < MAX_RETRIES) {
