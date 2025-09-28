@@ -1,6 +1,6 @@
 {
-  "name": "@agent-infra/puppeteer-enhance",
-  "description": "puppeteer-enhance",
+  "name": "@agent-infra/browser-old",
+  "description": "A tiny Browser Control library, built for Agent Tars.",
   "version": "0.1.6",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -10,11 +10,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
-    },
-    "./tabs": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/tabs/index.mjs",
-      "require": "./dist/tabs/index.js"
     }
   },
   "files": [
@@ -35,19 +30,17 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "vitest --config vitest.e2e.config.ts",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "test:e2e:local": "vitest --config vitest.e2e.config.ts local-browser.e2e.test.ts"
   },
   "dependencies": {
-    "@agent-infra/logger": "0.0.2-beta.2",
-    "@agent-infra/browser-finder": "workspace:*",
     "puppeteer-core": "24.15.0",
-    "delay": "6.0.0",
-    "valtio": "2.1.7",
-    "eventemitter3": "5.0.1"
+    "@agent-infra/logger": "0.0.2-beta.2",
+    "@agent-infra/shared": "0.0.2",
+    "@agent-infra/browser-finder": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "24.1.0",
-    "@types/eventemitter3": "2.0.4",
     "typescript": "5.8.3",
     "vitest": "3.2.4",
     "@vitest/coverage-v8": "3.2.4",

@@ -7,7 +7,7 @@ import {
   Tabs,
   type TabOptions,
   type TabsOptions,
-} from '@agent-infra/puppeteer-enhance/tabs';
+} from '@agent-infra/browser/web';
 import { ScreencastRenderer } from './screencast-renderer';
 
 import type { Browser, Page } from 'puppeteer-core';
