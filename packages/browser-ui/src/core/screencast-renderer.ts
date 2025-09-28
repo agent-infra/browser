@@ -51,6 +51,7 @@ export class ScreencastRenderer extends EventEmitter {
       viewport: {
         width: options.viewport.width,
         height: options.viewport.height,
+        deviceScaleFactor: options.viewport.deviceScaleFactor || 0,
       },
       cast: {
         format: 'jpeg',
@@ -126,6 +127,7 @@ export class ScreencastRenderer extends EventEmitter {
       await this.#page.setViewport({
         width: this.#options.viewport.width,
         height: this.#options.viewport.height,
+        deviceScaleFactor: this.#options.viewport.deviceScaleFactor,
       });
       await this.#cdpSession!.send('Page.startScreencast', {
         maxWidth: this.#options.viewport.width,
