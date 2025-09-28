@@ -4,7 +4,7 @@
  */
 import morphdom from 'morphdom';
 
-import { CanvasBrowser } from '../../src/core/browser';
+import { UIBrowser } from '../../src/core/browser';
 
 const canvasEle = document.getElementById('browserCanvas') as HTMLCanvasElement;
 const tabsContainer = document.getElementById(
@@ -22,9 +22,9 @@ const loadingIndicator = document.getElementById(
 const ws =
   'ws://127.0.0.1:9222/devtools/browser/xxx-xxx-xxxx';
 
-const canvasBrowser = await CanvasBrowser.create(canvasEle, {
-  wsEndpoint: ws,
-  viewport: {
+const canvasBrowser = await UIBrowser.create(canvasEle, {
+  browserWSEndpoint: ws,
+  defaultViewport: {
     width: 900,
     height: 900,
   },

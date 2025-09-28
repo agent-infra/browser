@@ -205,7 +205,7 @@ export class Browser {
   }
 
   async #attemptReconnect(): Promise<void> {
-    if (this.#reconnectAttempts >= 5) {
+    if (this.#reconnectAttempts >= MAX_RETRIES) {
       console.error('Max reconnect attempts reached. Giving up reconnecting');
       return;
     }
@@ -223,8 +223,8 @@ export class Browser {
         browserWSEndpoint: this.#wsEndpoint,
         defaultViewport: this.#defaultViewport,
       };
-
       this.#pptrBrowser = await connect(connectOptions);
+
       this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
       this.#tabs = new Tabs(this.#pptrBrowser, {
         viewport: this.#defaultViewport,
@@ -233,6 +233,8 @@ export class Browser {
     } catch (error) {
       if (this.#reconnectAttempts < MAX_RETRIES) {
         this.#attemptReconnect();
+      } else {
+        console.error('Failed to reconnect after max retries:', error);
       }
     }
   }
