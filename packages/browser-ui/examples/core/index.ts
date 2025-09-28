@@ -4,7 +4,7 @@
  */
 import morphdom from 'morphdom';
 
-import { UIBrowser } from '../../src/core/browser';
+import { UIBrowser } from '../../src';
 
 const canvasEle = document.getElementById('browserCanvas') as HTMLCanvasElement;
 const tabsContainer = document.getElementById(
