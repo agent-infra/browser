@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js';
+import { getEnvInfo } from '@agent-infra/browser/web';
 import { UITabs } from './tabs';
 
 import type { Browser, Viewport, ConnectOptions } from 'puppeteer-core';
@@ -52,6 +53,24 @@ export class UIBrowser {
 
   get tabs(): UITabs {
     return this.#tabs!;
+  }
+
+  async getBrowserMetaInfo() {
+    if (!this.#pptrBrowser) {
+      throw new Error('Browser not initialized');
+    }
+
+    const [envInfo, userAgent] = await Promise.all([
+      getEnvInfo(this.#pptrBrowser),
+      this.#pptrBrowser.userAgent(),
+    ]);
+
+    return {
+      ...envInfo,
+      userAgent,
+      viewport: this.#defaultViewport,
+      wsEndpoint: this.#wsEndpoint,
+    };
   }
 
   async disconnect(): Promise<void> {
