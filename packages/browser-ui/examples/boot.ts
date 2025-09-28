@@ -17,9 +17,14 @@ async function main() {
       deviceScaleFactor: 0,
     },
     args: [
+      '--mute-audio',
+      // '--disable-blink-features=AutomationControlled', // will show banner
+      '--no-default-browser-check',
+      '--window-size=900,990',
       '--remote-allow-origins=http://127.0.0.1:3000',
-      '--window-size=900,980',
+      'https://www.baidu.com',
     ],
+    ignoreDefaultArgs: ['--enable-automation'],
   });
 
   const wsEndpoint = browser.wsEndpoint();

@@ -4,3 +4,4 @@
  */
 
 export { visibilityScript } from './visibility';
+export { disableWebdriver } from './webdriver';

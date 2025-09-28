@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { EventEmitter } from 'eventemitter3';
-import { visibilityScript } from '../injected-script';
+import { disableWebdriver, visibilityScript } from '../injected-script';
 import { iife } from '../utils';
 
 import type { Page, Frame, Dialog } from 'puppeteer-core';
@@ -31,7 +31,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
   #isLoading = false;
   #reloadAbortController: AbortController | null = null;
 
-  #scriptsOnCreate: string[] = [visibilityScript];
+  #scriptsOnCreate: string[] = [disableWebdriver, visibilityScript];
   #scriptsOnLoad: string[] = [];
 
   constructor(page: Page, options: TabOptions) {

@@ -62,12 +62,10 @@ export class Browser {
       throw new Error('Browser not initialized');
     }
 
-    const [envInfo, userAgent] = await Promise.all(
-      [
-        getEnvInfo(this.#pptrBrowser),
-        this.#pptrBrowser.userAgent(),
-      ],
-    );
+    const [envInfo, userAgent] = await Promise.all([
+      getEnvInfo(this.#pptrBrowser),
+      this.#pptrBrowser.userAgent(),
+    ]);
 
     return {
       ...envInfo,
@@ -134,6 +132,36 @@ export class Browser {
 
       return finder.findBrowser(foundBrowser).path;
     };
+    const setArgs = () => {
+      const args = processedOptions.args || [];
+      const defaultArgs = ['--mute-audio', '--no-default-browser-check'];
+      const windowSizeArg = `--window-size=${this.#defaultViewport.width},${this.#defaultViewport.height + 90}`;
+
+      // args
+      for (const arg of defaultArgs) {
+        if (!args.includes(arg)) {
+          args.push(arg);
+        }
+      }
+      if (args.find((arg) => arg.startsWith('--window-size'))) {
+        args.push(windowSizeArg);
+      }
+
+      processedOptions.args = args;
+
+      // ignoreArgs
+      if (processedOptions.ignoreDefaultArgs) {
+        if (Array.isArray(processedOptions.ignoreDefaultArgs)) {
+          const ignoreArgs = processedOptions.ignoreDefaultArgs;
+          const enableAutomationArg = '--enable-automation';
+          if (!ignoreArgs.includes(enableAutomationArg)) {
+            ignoreArgs.push(enableAutomationArg);
+          }
+        }
+      } else {
+        processedOptions.ignoreDefaultArgs = ['--enable-automation'];
+      }
+    }
 
     // 1.Set default viewport
     processedOptions.defaultViewport = setDefaultViewport(
@@ -151,13 +179,17 @@ export class Browser {
       );
     }
 
-    // 3.Set executable path if needed
     if (
       !this.#isConnectMode(processedOptions) &&
       !processedOptions.executablePath
     ) {
+      // 3.Set executable path if needed
       processedOptions.executablePath = findBrowserPath();
+
+      // 4.Optimize args and ignoreDefaultArgs for launch mode
+      setArgs();
     }
+
 
     return processedOptions;
   }
