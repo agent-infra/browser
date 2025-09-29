@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 export { iife } from './iife';
-export { Deferred, Mutex } from './mutex';
+export { Mutex } from './mutex';
