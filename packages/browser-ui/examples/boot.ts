@@ -18,7 +18,6 @@ async function main() {
     },
     args: [
       '--mute-audio',
-      // '--disable-blink-features=AutomationControlled', // will show banner
       '--no-default-browser-check',
       '--window-size=900,990',
       '--remote-allow-origins=http://127.0.0.1:3000',

@@ -141,7 +141,14 @@ export class Browser {
     };
     const setArgs = () => {
       const args = processedOptions.args || [];
-      const defaultArgs = ['--mute-audio', '--no-default-browser-check'];
+      // https://github.com/GoogleChrome/chrome-launcher/blob/main/docs/chrome-flags-for-tools.md
+      const defaultArgs = [
+        '--mute-audio', // Mute any audio
+        '--no-default-browser-check', // Disable the default browser check, do not prompt to set it as such
+        '--ash-no-nudges', // Avoids blue bubble "user education" nudges
+      ];
+      // window-size includes some Chrome UI components (such as tabs, URL input box, etc.),
+      // so an additional 90 pixels should be added to the viewport height.
       const windowSizeArg = `--window-size=${this.#defaultViewport.width},${this.#defaultViewport.height + 90}`;
 
       // args
@@ -157,16 +164,16 @@ export class Browser {
       processedOptions.args = args;
 
       // ignoreArgs
+      const enableAutomationArg = '--enable-automation';
       if (processedOptions.ignoreDefaultArgs) {
         if (Array.isArray(processedOptions.ignoreDefaultArgs)) {
           const ignoreArgs = processedOptions.ignoreDefaultArgs;
-          const enableAutomationArg = '--enable-automation';
           if (!ignoreArgs.includes(enableAutomationArg)) {
             ignoreArgs.push(enableAutomationArg);
           }
         }
       } else {
-        processedOptions.ignoreDefaultArgs = ['--enable-automation'];
+        processedOptions.ignoreDefaultArgs = [enableAutomationArg];
       }
     }
 
