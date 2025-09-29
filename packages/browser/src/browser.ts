@@ -150,7 +150,7 @@ export class Browser {
           args.push(arg);
         }
       }
-      if (args.find((arg) => arg.startsWith('--window-size'))) {
+      if (!args.find((arg) => arg.startsWith('--window-size'))) {
         args.push(windowSizeArg);
       }
 
