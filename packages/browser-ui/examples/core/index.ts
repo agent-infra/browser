@@ -19,11 +19,9 @@ const loadingIndicator = document.getElementById(
   'loadingIndicator',
 ) as HTMLDivElement;
 
-const ws =
-  'ws://127.0.0.1:9222/devtools/browser/xxx-xxx-xxxx';
-
 const canvasBrowser = await UIBrowser.create(canvasEle, {
-  browserWSEndpoint: ws,
+  // @ts-ignore
+  browserWSEndpoint: import.meta.WSEndpoint,
   defaultViewport: {
     width: 900,
     height: 900,

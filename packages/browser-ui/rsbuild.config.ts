@@ -3,18 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { defineConfig } from '@rsbuild/core';
-import { pluginReact } from '@rsbuild/plugin-react';
 
 export default defineConfig({
-  plugins: [pluginReact()],
   source: {
     entry: {
-      index: './examples/index.tsx',
+      index: './examples/core/index.ts',
     },
+    define: {
+      'import.meta.WSEndpoint': JSON.stringify(process.env.WSEndpoint),
+    },
+  },
+  html: {
+    template: './examples/core/index.html',
   },
   output: {
     distPath: {
-      root: './distExample',
+      root: './distExample/core',
     },
     minify: true,
     assetPrefix: './',

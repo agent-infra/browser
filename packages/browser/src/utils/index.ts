@@ -4,3 +4,4 @@
  */
 export { iife } from './iife';
 export { Mutex } from './mutex';
+export { validateNavigationUrl } from './url';

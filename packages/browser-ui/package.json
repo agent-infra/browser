@@ -30,10 +30,8 @@
   "scripts": {
     "prepublishOnly": "pnpm run build",
     "build": "rslib build",
-    "dev": "rsbuild dev --open",
-    "test": "vitest run",
-    "demo:boot": "tsx examples/boot.ts",
-    "demo:core": "rsbuild dev --config rsbuild.core.ts"
+    "dev": "tsx examples/boot.ts",
+    "test": "vitest run"
   },
   "dependencies": {
     "@agent-infra/browser": "workspace:*",

@@ -5,7 +5,7 @@
 import { proxy, subscribe } from 'valtio';
 import { proxyMap } from 'valtio/utils';
 import { Tab } from './tab';
-import { Mutex } from '../utils';
+import { validateNavigationUrl, Mutex } from '../utils';
 
 import type { Browser, Page, Target } from 'puppeteer-core';
 import {
@@ -90,7 +90,7 @@ export class Tabs<T extends Tab = Tab> {
 
     // init all existing tabs
     const initTabTasks = existingPages
-      .filter((pptrPage) => !pptrPage.url().startsWith('devtools://')) // not allowed chrome devtools frontend
+      .filter((pptrPage) => !validateNavigationUrl(pptrPage.url()).ignored) // not allowed chrome devtools frontend
       .map(async (pptrPage) => {
         // @ts-ignore
         const tabId = pptrPage.target()._targetId;
