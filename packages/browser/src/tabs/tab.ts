@@ -4,7 +4,7 @@
  */
 import { EventEmitter } from 'eventemitter3';
 import { disableWebdriver, visibilityScript } from '../injected-script';
-import { iife } from '../utils';
+import { iife, validateNavigationUrl } from '../utils';
 
 import type { Page, Frame, Dialog } from 'puppeteer-core';
 import {
@@ -141,8 +141,14 @@ export class Tab extends EventEmitter<TabEventsMap> {
       throw new Error('Cannot navigate while dialog is open');
     }
 
-    this.#url = url;
-    this.#title = url;
+    // validate / normalize url before navigation
+    const validated = validateNavigationUrl(url);
+    if (validated.ignored) {
+      throw new Error(validated.message);
+    }
+
+    this.#url = validated.url;
+    this.#title = validated.url;
 
     this.#setLoading(true);
 
@@ -152,7 +158,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
         height: this.#options.viewport.height,
         deviceScaleFactor: this.#options.viewport.deviceScaleFactor,
       });
-      await this.#pptrPage.goto(url, {
+      await this.#pptrPage.goto(validated.url, {
         waitUntil: options.waitUntil,
         timeout: options.timeout,
       });
