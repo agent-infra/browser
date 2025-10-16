@@ -17,6 +17,7 @@ import {
   type TabsOperationTracker,
   type TabsOptions,
   type NavigationOptions,
+  DialogMeta,
 } from '../types/tabs';
 
 export class Tabs<T extends Tab = Tab> {
@@ -392,6 +393,18 @@ export class Tabs<T extends Tab = Tab> {
     this.state.tabs.set(tabId, tabMeta);
   }
 
+  #updateTabDialog(tabId: string, dialogMeta: DialogMeta | null): void {
+    const currentTabMeta = this.state.tabs.get(tabId);
+    if (!currentTabMeta) return;
+
+    const updatedTabMeta: TabMeta = {
+      ...currentTabMeta,
+      dialog: dialogMeta || undefined,
+    };
+
+    this.state.tabs.set(tabId, updatedTabMeta);
+  }
+
   #setupTabEvents(tab: Tab, tabId: string): void {
     tab.on(
       TabEvents.TabLoadingStateChanged,
@@ -405,10 +418,22 @@ export class Tabs<T extends Tab = Tab> {
     tab.on(
       TabEvents.TabVisibilityChanged,
       (event: TabEventsMap[TabEvents.TabVisibilityChanged]) => {
-        // console.log('TabVisibilityChanged', event);
-
         if (event.isVisible) {
           this.#activeTab(event.tabId);
+        }
+      },
+    );
+    tab.on(
+      TabEvents.TabDialogChanged,
+      (event: TabEventsMap[TabEvents.TabDialogChanged]) => {
+        if (event.isOpen) {
+          this.#updateTabDialog(tabId, {
+            type: event.type!,
+            message: event.message!,
+            defaultValue: event.defaultValue!,
+          });
+        } else {
+          this.#updateTabDialog(tabId, null);
         }
       },
     );

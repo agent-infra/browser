@@ -20,7 +20,7 @@ export const enum TabEvents {
   TabLoadingStateChanged = 'tabLoadingStateChanged',
   TabUrlChanged = 'tabUrlChanged',
   TabVisibilityChanged = 'TabVisibilityChanged',
-  TabDialog = 'TabDialog',
+  TabDialogChanged = 'TabDialogChanged',
 }
 
 export interface TabEventsMap {
@@ -37,13 +37,19 @@ export interface TabEventsMap {
     tabId: string;
     isVisible: boolean;
   };
-  [TabEvents.TabDialog]: {
-    type: Protocol.Page.DialogType;
-    message: string;
-    defaultValue: string;
-    accept: (promptText?: string) => Promise<void>;
-    dismiss: () => Promise<void>;
+  [TabEvents.TabDialogChanged]: {
+    tabId: string;
+    isOpen: boolean;
+    type?: Protocol.Page.DialogType;
+    message?: string;
+    defaultValue?: string;
   };
+}
+
+export interface DialogMeta {
+  type: Protocol.Page.DialogType;
+  message: string;
+  defaultValue: string;
 }
 
 export interface TabMeta {
@@ -53,6 +59,7 @@ export interface TabMeta {
   favicon: string | null;
   isLoading: boolean;
   isActive: boolean;
+  dialog?: DialogMeta;
 }
 
 export interface TabsState {

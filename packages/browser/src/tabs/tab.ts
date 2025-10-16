@@ -13,6 +13,7 @@ import {
   type TabEventsMap,
   type TabOptions,
 } from '../types';
+import { TabDialog } from './dialog';
 
 
 export class Tab extends EventEmitter<TabEventsMap> {
@@ -26,7 +27,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
   #favicon = '';
   #title = '';
 
-  #dialog: Dialog | null = null;
+  #dialogWrapper: TabDialog;
 
   #isLoading = false;
   #reloadAbortController: AbortController | null = null;
@@ -45,6 +46,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
     this.#url = page.url();
 
     this.#status = 'active';
+    this.#dialogWrapper = new TabDialog(this);
 
     this.#setupVisibilityTracking();
     this.#executeScriptsOnCreate();
@@ -89,8 +91,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
   // #endregion
 
   // #region events handler
-
-  #dialogHandler = (dialog: Dialog) => this.#onDialog(dialog);
 
   #dclHandler = () => {
     this.emit(TabEvents.TabLoadingStateChanged, {
@@ -137,10 +137,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
   }
 
   async goto(url: string, options: NavigationOptions = {}): Promise<void> {
-    if (this.#dialog) {
-      throw new Error('Cannot navigate while dialog is open');
-    }
-
     // validate / normalize url before navigation
     const validated = validateNavigationUrl(url);
     if (validated.ignored) {
@@ -174,10 +170,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
   }
 
   async goBack(options: NavigationOptions = {}): Promise<boolean> {
-    if (this.#dialog) {
-      return false;
-    }
-
     await this.#pptrPage.goBack({
       waitUntil: options.waitUntil,
       timeout: options.timeout,
@@ -186,10 +178,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
   }
 
   async goForward(options: NavigationOptions = {}): Promise<boolean> {
-    if (this.#dialog) {
-      return false;
-    }
-
     await this.#pptrPage.goForward({
       waitUntil: options.waitUntil,
       timeout: options.timeout,
@@ -264,8 +252,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   // #endregion
 
-  // #region pravite methods
-
   async #getFavicon() {
     if (this.url === 'about:blank' || this.url.startsWith('chrome://')) {
       return '';
@@ -314,23 +300,29 @@ export class Tab extends EventEmitter<TabEventsMap> {
     });
   }
 
-  async #onDialog(dialog: Dialog) {
-    this.#dialog = dialog;
+  // #region dialog
 
-    this.emit(TabEvents.TabDialog, {
+  get dialog() {
+    return this.#dialogWrapper;
+  }
+
+  #dialogHandler = (dialog: Dialog) => this.#onDialog(dialog);
+
+  async #onDialog(dialog: Dialog) {
+    this.#dialogWrapper.setDialog(dialog);
+
+    this.emit(TabEvents.TabDialogChanged, {
+      tabId: this.#id,
+      isOpen: true,
       type: dialog.type,
       message: dialog.message,
       defaultValue: dialog.defaultValue,
-      accept: async (promptText?: string) => {
-        await dialog.accept(promptText);
-        this.#dialog = null;
-      },
-      dismiss: async () => {
-        await dialog.dismiss();
-        this.#dialog = null;
-      },
     });
   }
+
+  // #endregion
+
+  // #region pravite methods
 
   async #onFrameNavigated(frame: Frame) {
     if (!frame.parentFrame()) {
