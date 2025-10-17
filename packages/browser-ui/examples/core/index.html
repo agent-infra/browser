@@ -13,6 +13,8 @@
     }
 
     .browser-container {
+      position: relative;
+
       border: 1px solid #ccc;
       border-radius: 8px;
       overflow: hidden;
@@ -143,6 +145,7 @@
 
     .canvas-container {
       background-color: #fff;
+      position: relative;
     }
 
     #browserCanvas {
@@ -176,9 +179,115 @@
       from {
         transform: rotate(0deg);
       }
+
       to {
         transform: rotate(360deg);
       }
+    }
+
+    /* Dialog Styles */
+    .dialog-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dialog-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .dialog-box {
+      position: relative;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      min-width: 300px;
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .dialog-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e0e0e0;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .dialog-content {
+      padding: 20px;
+    }
+
+    .dialog-message {
+      margin: 0 0 16px 0;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .dialog-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .dialog-input:focus {
+      outline: none;
+      border-color: #2196f3;
+      box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+    }
+
+    .dialog-actions {
+      padding: 16px 20px;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .dialog-btn {
+      padding: 8px 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: white;
+      cursor: pointer;
+      font-size: 14px;
+      min-width: 60px;
+    }
+
+    .dialog-btn:hover {
+      background-color: #f5f5f5;
+    }
+
+    .dialog-btn-accept {
+      background-color: #2196f3;
+      color: white;
+      border-color: #2196f3;
+    }
+
+    .dialog-btn-accept:hover {
+      background-color: #1976d2;
+    }
+
+    .dialog-btn-dismiss {
+      background-color: #f5f5f5;
+      color: #333;
+    }
+
+    .dialog-btn-dismiss:hover {
+      background-color: #e0e0e0;
     }
   </style>
 </head>
@@ -209,6 +318,24 @@
     <div class="canvas-container">
       <canvas id="browserCanvas" width="900" height="900"></canvas>
       <div class="loading-indicator" id="loadingIndicator">Loading...</div>
+
+      <!-- Dialog Container -->
+      <div class="dialog-container" id="dialogContainer" style="display: none;">
+        <div class="dialog-overlay"></div>
+        <div class="dialog-box">
+          <div class="dialog-header">
+            <span class="dialog-title" id="dialogTitle">Dialog</span>
+          </div>
+          <div class="dialog-content">
+            <p class="dialog-message" id="dialogMessage"></p>
+            <input type="text" class="dialog-input" id="dialogInput" placeholder="Enter value..." />
+          </div>
+          <div class="dialog-actions">
+            <button class="dialog-btn dialog-btn-dismiss" id="dialogDismiss">Cancel</button>
+            <button class="dialog-btn dialog-btn-accept" id="dialogAccept">OK</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

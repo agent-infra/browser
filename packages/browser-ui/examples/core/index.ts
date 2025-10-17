@@ -19,6 +19,14 @@ const loadingIndicator = document.getElementById(
   'loadingIndicator',
 ) as HTMLDivElement;
 
+// Dialog elements
+const dialogContainer = document.getElementById('dialogContainer') as HTMLDivElement;
+const dialogTitle = document.getElementById('dialogTitle') as HTMLSpanElement;
+const dialogMessage = document.getElementById('dialogMessage') as HTMLParagraphElement;
+const dialogInput = document.getElementById('dialogInput') as HTMLInputElement;
+const dialogAccept = document.getElementById('dialogAccept') as HTMLButtonElement;
+const dialogDismiss = document.getElementById('dialogDismiss') as HTMLButtonElement;
+
 const canvasBrowser = await UIBrowser.create(canvasEle, {
   // @ts-ignore
   browserWSEndpoint: import.meta.WSEndpoint,
@@ -29,6 +37,66 @@ const canvasBrowser = await UIBrowser.create(canvasEle, {
 });
 
 const tabs = canvasBrowser.tabs;
+
+// Dialog state
+let currentDialogTabId: string | null = null;
+
+// Dialog functions
+function showDialog(tabId: string, dialogMeta: any) {
+  currentDialogTabId = tabId;
+
+  // Set dialog title based on type
+  const titles = {
+    alert: 'Alert',
+    confirm: 'Confirm',
+    prompt: 'Prompt',
+    beforeunload: 'Confirm Leave'
+  };
+
+  // @ts-ignore
+  dialogTitle.textContent = titles[dialogMeta.type] || 'Dialog';
+  dialogMessage.textContent = dialogMeta.message;
+
+  // Show/hide input based on dialog type
+  if (dialogMeta.type === 'prompt') {
+    dialogInput.style.display = 'block';
+    dialogInput.value = dialogMeta.defaultValue || '';
+    dialogInput.focus();
+  } else {
+    dialogInput.style.display = 'none';
+  }
+
+  dialogContainer.style.display = 'flex';
+}
+
+function hideDialog() {
+  dialogContainer.style.display = 'none';
+  currentDialogTabId = null;
+  dialogInput.value = '';
+}
+
+async function handleDialogAccept() {
+  const activeTab = tabs.getActiveTab();
+  if (!activeTab || !activeTab.dialog.isOpen) return;
+
+  const promptText = dialogInput.style.display !== 'none' ? dialogInput.value : undefined;
+  const success = await activeTab.dialog.accept(promptText);
+
+  if (success) {
+    hideDialog();
+  }
+}
+
+async function handleDialogDismiss() {
+  const activeTab = tabs.getActiveTab();
+  if (!activeTab || !activeTab.dialog.isOpen) return;
+
+  const success = await activeTab.dialog.dismiss();
+
+  if (success) {
+    hideDialog();
+  }
+}
 
 // 初始化：创建第一个 tab
 function createTabElement(tabMeta: any, isActive: boolean): HTMLDivElement {
@@ -125,7 +193,31 @@ function updateControls() {
 // 订阅 tabs 状态变化
 tabs.subscribe(() => {
   renderTabs();
+  updateDialog();
 });
+
+// 更新对话框显示
+function updateDialog() {
+  const snapshot = tabs.getSnapshot();
+  const activeTabId = snapshot.activeTabId;
+
+  if (!activeTabId) {
+    hideDialog();
+    return;
+  }
+
+  const activeTab = snapshot.tabs.get(activeTabId);
+  if (!activeTab) {
+    hideDialog();
+    return;
+  }
+
+  if (activeTab.dialog) {
+    showDialog(activeTabId, activeTab.dialog);
+  } else {
+    hideDialog();
+  }
+}
 
 // 新建 tab
 newTabBtn.addEventListener('click', async () => {
@@ -163,6 +255,24 @@ urlBar.addEventListener('keypress', async (e) => {
       }
       await tabs.navigate(finalUrl);
     }
+  }
+});
+
+// Dialog 事件监听
+dialogAccept.addEventListener('click', handleDialogAccept);
+dialogDismiss.addEventListener('click', handleDialogDismiss);
+
+// 支持 Enter 键确认对话框
+dialogInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    handleDialogAccept();
+  }
+});
+
+// 支持 Escape 键取消对话框
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && dialogContainer.style.display !== 'none') {
+    handleDialogDismiss();
   }
 });
 
