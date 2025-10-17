@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import type { Dialog } from 'puppeteer-core';
+import type { Dialog, CDPSession } from 'puppeteer-core';
 
 import type { Tab } from './tab';
 import { TabEvents } from '../types';
@@ -13,6 +13,8 @@ export class TabDialog {
 
   constructor(tab: Tab) {
     this.#tab = tab;
+
+    this.#handleClosedEvent();
   }
 
   get isOpen(): boolean {
@@ -33,6 +35,46 @@ export class TabDialog {
 
   setDialog(dialog: Dialog | null) {
     this.#dialog = dialog;
+  }
+
+  #handleClosedEvent() {
+    this.#tab.page.on('dialog', this.#dialogHandler);
+
+    // @ts-ignore
+    (this.#tab.page._client() as CDPSession).on(
+      'Page.javascriptDialogClosed',
+      (params) => {
+        console.log('Page.javascriptDialogClosed', params);
+
+        if (this.#dialog) {
+          this.#tab.emit(TabEvents.TabDialogChanged, {
+            tabId: this.#tab.tabId,
+            isOpen: false,
+          });
+          this.#dialog = null;
+        }
+      },
+    );
+  }
+
+  #dialogHandler = (dialog: Dialog) => this.#onDialog(dialog);
+
+  async #onDialog(dialog: Dialog) {
+    this.#dialog = dialog;
+
+    this.#tab.emit(TabEvents.TabDialogChanged, {
+      tabId: this.#tab.tabId,
+      isOpen: true,
+      type: dialog.type(),
+      message: dialog.message(),
+      defaultValue: dialog.defaultValue(),
+    });
+  }
+
+  cleanup() {
+    this.#tab.page.off('dialog', this.#dialogHandler);
+
+    this.#dialog = null;
   }
 
   async accept(promptText?: string): Promise<boolean> {
