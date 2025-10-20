@@ -14,6 +14,7 @@ import {
   type TabOptions,
 } from '../types';
 import { TabDialog } from './dialog';
+import { Keyboard } from '../actions/keyboard';
 
 
 export class Tab extends EventEmitter<TabEventsMap> {
@@ -28,6 +29,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
   #title = '';
 
   #tabDialog: TabDialog;
+  #keyboard: Keyboard;
 
   #isLoading = false;
   #reloadAbortController: AbortController | null = null;
@@ -47,6 +49,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
     this.#status = 'active';
     this.#tabDialog = new TabDialog(this);
+    this.#keyboard = new Keyboard(page, options.envInfo);
 
     this.#setupVisibilityTracking();
     this.#executeScriptsOnCreate();
@@ -263,6 +266,14 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   get dialog() {
     return this.#tabDialog;
+  }
+
+  // #endregion
+
+  // #region keyboard
+
+  get keyboard() {
+    return this.#keyboard;
   }
 
   // #endregion
