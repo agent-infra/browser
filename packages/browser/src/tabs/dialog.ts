@@ -14,7 +14,7 @@ export class TabDialog {
   constructor(tab: Tab) {
     this.#tab = tab;
 
-    this.#handleClosedEvent();
+    this.#handleEvent();
   }
 
   get isOpen(): boolean {
@@ -37,29 +37,13 @@ export class TabDialog {
     this.#dialog = dialog;
   }
 
-  #handleClosedEvent() {
-    this.#tab.page.on('dialog', this.#dialogHandler);
-
+  #handleEvent() {
+    this.#tab.page.on('dialog', this.#openHandler);
     // @ts-ignore
-    (this.#tab.page._client() as CDPSession).on(
-      'Page.javascriptDialogClosed',
-      (params) => {
-        console.log('Page.javascriptDialogClosed', params);
-
-        if (this.#dialog) {
-          this.#tab.emit(TabEvents.TabDialogChanged, {
-            tabId: this.#tab.tabId,
-            isOpen: false,
-          });
-          this.#dialog = null;
-        }
-      },
-    );
+    (this.#tab.page._client() as CDPSession).on('Page.javascriptDialogClosed', this.#closeHandler);
   }
 
-  #dialogHandler = (dialog: Dialog) => this.#onDialog(dialog);
-
-  async #onDialog(dialog: Dialog) {
+  #openHandler = (dialog: Dialog) => {
     this.#dialog = dialog;
 
     this.#tab.emit(TabEvents.TabDialogChanged, {
@@ -71,8 +55,20 @@ export class TabDialog {
     });
   }
 
+  #closeHandler = () => {
+    if (this.#dialog) {
+      this.#tab.emit(TabEvents.TabDialogChanged, {
+        tabId: this.#tab.tabId,
+        isOpen: false,
+      });
+      this.#dialog = null;
+    }
+  }
+
   cleanup() {
-    this.#tab.page.off('dialog', this.#dialogHandler);
+    this.#tab.page.off('dialog', this.#openHandler);
+    // @ts-ignore
+    (this.#tab.page._client() as CDPSession).off('Page.javascriptDialogClosed', this.#closeHandler);
 
     this.#dialog = null;
   }
