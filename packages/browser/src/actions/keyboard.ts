@@ -11,8 +11,8 @@ import {
   KEY_LOW_TO_STANDARD_MAP,
 } from '../hotkey/key-map';
 
-import { EnvInfo, KeyboardOptions } from '../types';
 import type { KeyInput, Page } from 'puppeteer-core';
+import { EnvInfo, KeyboardOptions, KeyOrHotKeyInput } from '../types';
 
 export class Keyboard {
   #page: Page;
@@ -86,8 +86,14 @@ export class Keyboard {
     return false;
   }
 
-  async press(hotkey: string, options: KeyboardOptions = {}): Promise<void> {
-    const formattedHotkey = this.#formatHotkey(hotkey);
+  /**
+   * Enhance puppeteer's [keyboard.press()](https://pptr.dev/api/puppeteer.keyboard.press) to support combination hotkeys.
+   */
+  async press(
+    key: KeyOrHotKeyInput,
+    options: KeyboardOptions = {},
+  ): Promise<void> {
+    const formattedHotkey = this.#formatHotkey(key);
 
     if (this.#env.osName === 'macOS' && this.#env.browserName === 'Chrome') {
       const success = await this.#macOSCDPHotKey(formattedHotkey, options);
@@ -106,8 +112,14 @@ export class Keyboard {
     }
   }
 
-  async down(hotkey: string, options: KeyboardOptions = {}): Promise<void> {
-    const formattedHotkey = this.#formatHotkey(hotkey);
+  /**
+   * Enhance puppeteer's [keyboard.down()](https://pptr.dev/api/puppeteer.keyboard.down) to support combination hotkeys.
+   */
+  async down(
+    key: KeyOrHotKeyInput,
+    options: KeyboardOptions = {},
+  ): Promise<void> {
+    const formattedHotkey = this.#formatHotkey(key);
 
     if (this.#env.osName === 'macOS' && this.#env.browserName === 'Chrome') {
       const success = await this.#macOSCDPHotKey(formattedHotkey, options);
@@ -121,8 +133,11 @@ export class Keyboard {
     }
   }
 
-  async up(hotkey: string): Promise<void> {
-    const formattedHotkey = this.#formatHotkey(hotkey);
+  /**
+   * Enhance puppeteer's [keyboard.up()](https://pptr.dev/api/puppeteer.keyboard.up) to support combination hotkeys.
+   */
+  async up(key: KeyOrHotKeyInput): Promise<void> {
+    const formattedHotkey = this.#formatHotkey(key);
 
     for (const key of formattedHotkey.reverse()) {
       await this.#page.keyboard.up(key);
@@ -130,6 +145,10 @@ export class Keyboard {
   }
 
   async type(text: string, options: KeyboardOptions = {}): Promise<void> {
-    await this.#page.keyboard.type(text, options);
+    if (text.length < 15 && options.delay) {
+      await this.#page.keyboard.type(text, options);
+    } else {
+      await this.#page.keyboard.sendCharacter(text);
+    }
   }
 }

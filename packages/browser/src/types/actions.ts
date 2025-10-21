@@ -1,3 +1,5 @@
-import type { KeyboardTypeOptions } from 'puppeteer-core';
+import type { KeyInput, KeyboardTypeOptions } from 'puppeteer-core';
 
 export interface KeyboardOptions extends KeyboardTypeOptions {}
+
+export type KeyOrHotKeyInput = KeyInput | string & {};
