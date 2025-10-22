@@ -83,6 +83,9 @@ importers:
       '@agent-infra/logger':
         specifier: 0.0.2-beta.2
         version: 0.0.2-beta.2
+      '@agent-infra/media-utils':
+        specifier: workspace:*
+        version: link:../media-utils
       delay:
         specifier: 6.0.0
         version: 6.0.0

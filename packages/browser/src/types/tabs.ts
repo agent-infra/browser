@@ -6,6 +6,7 @@ import type {
   Viewport,
   Protocol,
   PuppeteerLifeCycleEvent,
+  ScreenshotOptions,
 } from 'puppeteer-core';
 
 import type { EnvInfo } from './env';
@@ -80,3 +81,9 @@ export interface NavigationOptions {
   waitUntil?: PuppeteerLifeCycleEvent[];
   timeout?: number;
 }
+
+// TODO: add path options
+export type TabScreenshotOptions = Pick<
+  ScreenshotOptions,
+  'type' | 'quality' | 'fullPage'
+>;

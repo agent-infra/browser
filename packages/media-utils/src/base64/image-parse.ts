@@ -12,12 +12,18 @@ export const IMAGE_TYPE_MAP = new Map<string, ImageType>([
   ['Qk', 'bmp'], // BMP: 42 4D
 ]);
 
-export function base64String2Uint8Array(base64: string) {
-  if (typeof Buffer !== 'undefined') {
+export function base64String2Uint8Array(base64: string): Uint8Array<ArrayBuffer> {
+  // @ts-ignore
+  if (typeof Uint8Array.fromBase64 === 'function') {
+    // New Uint8Array API
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/fromBase64
+    // @ts-ignore
+    return Uint8Array.fromBase64(base64);
+  } else if (typeof Buffer !== 'undefined') {
     // Node.js environment
     return new Uint8Array(Buffer.from(base64, 'base64'));
   } else {
-    // Browser environment
+    // Browser environment (legacy browsers)
     const binaryString = atob(base64);
     const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {

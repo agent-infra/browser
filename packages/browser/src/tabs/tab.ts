@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { EventEmitter } from 'eventemitter3';
+import { Base64ImageParser } from "@agent-infra/media-utils";
 import { disableWebdriver, visibilityScript } from '../injected-script';
 import { iife, validateNavigationUrl } from '../utils';
 import { TabDialog } from './dialog';
@@ -14,6 +15,7 @@ import {
   type NavigationOptions,
   type TabEventsMap,
   type TabOptions,
+  type TabScreenshotOptions,
 } from '../types';
 
 
@@ -154,6 +156,27 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   get mouse() {
     return this.#mouse;
+  }
+
+  // #endregion
+
+  // #region screenshot
+
+  async screenshot(options: TabScreenshotOptions = {}) {
+    const base64Image = await this.#pptrPage.screenshot({
+      encoding: 'base64',
+      type: options.type,
+      quality: options.quality,
+      fullPage: options.fullPage,
+    });
+    const meta = new Base64ImageParser(base64Image);
+
+    return {
+      data: base64Image,
+      type: meta.getImageType()!,
+      width: meta.getDimensions()!.width,
+      height: meta.getDimensions()!.height,
+    };
   }
 
   // #endregion

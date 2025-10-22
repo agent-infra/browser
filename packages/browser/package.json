@@ -40,6 +40,7 @@
   "dependencies": {
     "@agent-infra/logger": "0.0.2-beta.2",
     "@agent-infra/browser-finder": "workspace:*",
+    "@agent-infra/media-utils": "workspace:*",
     "puppeteer-core": "24.23.0",
     "delay": "6.0.0",
     "valtio": "2.1.8",
