@@ -4,7 +4,7 @@
  */
 import {
   base64String2Uint8Array,
-  IMAGE_TYPE_MAP,
+  IMAGE_MAGIC_STRINGS,
   parseBmpDimensions,
   parseGifDimensions,
   parseJpegDimensions,
@@ -45,7 +45,7 @@ export class Base64ImageParser {
 
     const prefix = this.pureBase64.substring(0, 8);
 
-    for (const [signature, type] of IMAGE_TYPE_MAP) {
+    for (const [signature, type] of IMAGE_MAGIC_STRINGS) {
       if (prefix.startsWith(signature)) {
         this.imageType = type;
         break;

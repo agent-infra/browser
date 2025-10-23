@@ -4,12 +4,20 @@
  */
 import type { ImageType, ImageDimensions } from '../type';
 
-export const IMAGE_TYPE_MAP = new Map<string, ImageType>([
+export const IMAGE_MAGIC_STRINGS = new Map<string, ImageType>([
   ['/9j/', 'jpeg'], // JPEG: FF D8 FF
   ['iVBORw', 'png'], // PNG: 89 50 4E 47
   ['UklGR', 'webp'], // WebP: 52 49 46 46
   ['R0lGOD', 'gif'], // GIF: 47 49 46 38
   ['Qk', 'bmp'], // BMP: 42 4D
+]);
+
+export const IMAGE_MAGIC_NUMBERS = new Map<Uint8Array, ImageType>([
+  [new Uint8Array([0xFF, 0xD8, 0xFF]), 'jpeg'], // JPEG: FF D8 FF
+  [new Uint8Array([0x89, 0x50, 0x4E, 0x47]), 'png'], // PNG: 89 50 4E 47
+  [new Uint8Array([0x52, 0x49, 0x46, 0x46]), 'webp'], // WebP: 52 49 46 46 (RIFF)
+  [new Uint8Array([0x47, 0x49, 0x46, 0x38]), 'gif'], // GIF: 47 49 46 38
+  [new Uint8Array([0x42, 0x4D]), 'bmp'], // BMP: 42 4D
 ]);
 
 export function base64String2Uint8Array(base64: string): Uint8Array<ArrayBuffer> {
