@@ -25,37 +25,58 @@
     .tabs-bar {
       display: flex;
       align-items: center;
-      background-color: #f5f5f5;
-      border-bottom: 1px solid #ddd;
-      padding: 0 10px;
-      min-height: 40px;
+      background-color: #e3e3e3;
+      user-select: none;
+      box-sizing: border-box;
+      height: 36px;
+      padding: 4px;
     }
 
     .tabs-container {
       display: flex;
       flex: 1;
-      overflow-x: auto;
+      gap: 6px;
     }
 
     .tab {
-      display: flex;
+      position: relative;
+      box-sizing: border-box;
       align-items: center;
-      padding: 8px 12px;
-      border: 1px solid #ddd;
-      border-bottom: none;
-      background-color: #fff;
-      cursor: pointer;
+      display: flex;
+      box-sizing: border-box;
+      height: 28px;
       width: 220px;
       min-width: 220px;
       max-width: 220px;
-      margin-right: 2px;
-      border-radius: 4px 4px 0 0;
+      padding: 0 6px;
+      border-radius: 8px;
+      background-color: #e3e3e3;
+    }
+
+    .tab:hover {
+      background-color: #c7c7c7;
+    }
+    .tab.active:hover {
+      background-color: #ffffff;
     }
 
     .tab.active {
-      background-color: #e3f2fd;
-      border-color: #2196f3;
+      background-color: #ffffff;
+      border-radius: 8px 8px 0 0;
+      box-shadow: 0 4px 0 0 #fff;
     }
+
+    /* .tab.active::after {
+      content: " ";
+      display: block;
+      position: absolute;
+      left: 0;
+      bottom: -4px;
+      width: 100%;
+      height: 4px;
+      background: red;
+      z-index: 10;
+    } */
 
     .tab-favicon {
       width: 16px;
@@ -78,25 +99,24 @@
       margin-left: 8px;
       border: none;
       background: none;
-      cursor: pointer;
-      border-radius: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+      border-radius: 8px;
+      padding: 0;
+    }
+
+    .tab.active .tab-close:hover {
+      background-color: #dbdbdc;
     }
 
     .tab-close:hover {
-      background-color: #f0f0f0;
+      background-color: #acacac;
     }
 
     .new-tab-btn {
-      padding: 8px 12px;
+      /* padding: 8px 12px;
       border: 1px solid #ddd;
       background-color: #fff;
-      cursor: pointer;
       border-radius: 4px;
-      margin-left: 5px;
+      margin-left: 5px; */
     }
 
     .new-tab-btn:hover {
@@ -104,12 +124,14 @@
     }
 
     .controls-bar {
+      box-sizing: border-box;
+      height: 44px;
       display: flex;
       align-items: center;
-      padding: 10px;
-      background-color: #fafafa;
-      border-bottom: 1px solid #ddd;
-      gap: 10px;
+      padding: 6px;
+      background-color: #ffffff;
+      border-bottom: 1px solid #e1e3e1;
+      gap: 4px;
     }
 
     .nav-buttons {
@@ -118,16 +140,19 @@
     }
 
     .nav-btn {
-      padding: 6px 12px;
-      border: 1px solid #ddd;
-      background-color: #fff;
-      cursor: pointer;
-      border-radius: 4px;
-      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: none;
+      border-radius: 16px;
+      background-color: transparent;
     }
 
     .nav-btn:hover {
-      background-color: #f0f0f0;
+      background-color: #f2f2f2;
     }
 
     .nav-btn:disabled {
@@ -137,10 +162,20 @@
 
     .url-bar {
       flex: 1;
+      height: 32px;
+      box-sizing: border-box;
       padding: 8px 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+      border: none;
+      border-radius: 16px;
+      background-color: #efeded;
       font-size: 14px;
+    }
+
+    .url-bar:active {
+      background-color: #ffffff;
+    }
+    .url-bar:focus {
+      background-color: #ffffff;
     }
 
     .canvas-container {
@@ -262,7 +297,6 @@
       border: 1px solid #ddd;
       border-radius: 4px;
       background-color: white;
-      cursor: pointer;
       font-size: 14px;
       min-width: 60px;
     }
@@ -307,9 +341,27 @@
     <!-- Controls Bar -->
     <div class="controls-bar">
       <div class="nav-buttons">
-        <button class="nav-btn" id="backBtn">← Back</button>
-        <button class="nav-btn" id="forwardBtn">Forward →</button>
-        <button class="nav-btn" id="refreshBtn">⟳ Refresh</button>
+        <button class="nav-btn" id="backBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-short"
+            viewBox="0 0 16 16">
+            <path fill-rule="evenodd"
+              d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5" />
+          </svg>
+        </button>
+        <button class="nav-btn" id="forwardBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-short"
+            viewBox="0 0 16 16">
+            <path fill-rule="evenodd"
+              d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8" />
+          </svg>
+        </button>
+        <button class="nav-btn" id="refreshBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise"
+            viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
+            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
+          </svg>
+        </button>
       </div>
       <input type="text" class="url-bar" id="urlBar" placeholder="Enter URL..." />
     </div>

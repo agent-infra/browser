@@ -108,11 +108,16 @@ function createTabElement(tabMeta: any, isActive: boolean): HTMLDivElement {
 
   // 根据加载状态决定显示的图标
   const iconHtml = tabMeta.isLoading
-    ? `<div class="tab-loading-icon" data-tab-id="ico-${tabMeta.id}">⟳</div>`
+    ? `<div class="tab-loading-icon" data-tab-id="ico-${tabMeta.id}">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+      <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+    </svg>
+    </div>`
     : tabMeta.favicon
       ? `<img class="tab-favicon" data-tab-id="ico-${tabMeta.id}" src="${tabMeta.favicon}" />`
-      : `<div class="tab-favicon" data-tab-id="ico-${tabMeta.id}" style="display: flex; align-items: center; justify-content: center; background-color: #5F6368; border-radius: 50%; width: 14px; height: 14px;">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="white">
+      : `<div class="tab-favicon" data-tab-id="ico-${tabMeta.id}" style="display: flex; align-items: center; justify-content: center; background-color: #5F6368; border-radius: 50%;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="white">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
           </svg>
         </div>`;
@@ -120,7 +125,11 @@ function createTabElement(tabMeta: any, isActive: boolean): HTMLDivElement {
   tabElement.innerHTML = `
     ${iconHtml}
     <span class="tab-title" data-tab-id="title-${tabMeta.id}">${tabMeta.title}</span>
-    <button class="tab-close" data-tab-id="close-${tabMeta.id}">X</button>
+    <button class="tab-close" data-tab-id="close-${tabMeta.id}">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+      </svg>
+    </button>
   `;
 
   return tabElement;
