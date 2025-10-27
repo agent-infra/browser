@@ -12,6 +12,9 @@ export default defineConfig({
     define: {
       'import.meta.WSEndpoint': JSON.stringify(process.env.WSEndpoint),
     },
+    decorators: {
+      version: 'legacy',
+    },
   },
   html: {
     template: './examples/core/index.html',

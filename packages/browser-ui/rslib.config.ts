@@ -15,6 +15,9 @@ export default defineConfig({
     entry: {
       index: ['src/**/*.ts', '!src/**/*.{test,bench}.ts'],
     },
+    decorators: {
+      version: 'legacy'
+    }
   },
   lib: [
     {
