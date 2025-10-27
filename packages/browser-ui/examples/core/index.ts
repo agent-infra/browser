@@ -4,9 +4,6 @@
  */
 import { BrowserUI } from '../../src/core';
 
-// Import the web components to register them
-import '../../src/core/ui';
-
 // Get the container element
 const container = document.getElementById('browserContainer');
 
@@ -31,7 +28,3 @@ const browserUI = new BrowserUI({
 
 // Initialize the browser UI
 await browserUI.init();
-
-window.addEventListener('beforeunload', async () => {
-  await browserUI.destroy();
-});

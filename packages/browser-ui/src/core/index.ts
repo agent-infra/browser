@@ -4,6 +4,9 @@
  */
 
 import { UIBrowser } from './browser';
+// Import all UI components to ensure they are registered
+import './ui';
+
 import { BrowserContainer } from './ui';
 
 import type { ConnectOptions } from 'puppeteer-core';
@@ -320,5 +323,3 @@ export class BrowserUI {
     }
   };
 }
-
-export { UIBrowser } from './browser';
