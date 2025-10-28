@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { LitElement, html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 import { TabMeta } from './tab';
 
@@ -71,12 +71,21 @@ export class TabBar extends LitElement {
     .new-tab-btn:hover {
       background-color: #c7c7c7;
     }
+
+    :host([disabled]) {
+      pointer-events: none;
+      opacity: 0.6;
+    }
   `;
 
   static properties = {
     tabs: { type: Array },
-    activeTabId: { type: String }
+    activeTabId: { type: String },
+    disabled: { type: Boolean, reflect: true }
   };
+
+  @property({ type: Boolean, reflect: true })
+  disabled = false;
 
   tabs: TabMeta[] = [];
   activeTabId?: string;
@@ -89,19 +98,26 @@ export class TabBar extends LitElement {
             <ai-browser-tab
               .tab=${tab}
               .isActive=${tab.id === this.activeTabId}
+              .disabled=${this.disabled}
               @tab-activate=${this._handleTabActivate}
               @tab-close=${this._handleTabClose}
             ></ai-browser-tab>
+            <div class="tab-divider"></div>
           `,
-          // Add divider after each tab except the last one
-          index < this.tabs.length - 1
-            ? html`<div class="tab-divider"></div>`
-            : null,
         ])}
       </div>
       <button class="new-tab-btn" @click=${this._handleNewTab}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M5 12h14" />
           <path d="M12 5v14" />
         </svg>

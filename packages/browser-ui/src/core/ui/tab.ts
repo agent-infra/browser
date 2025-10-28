@@ -39,6 +39,12 @@ export class TabComponent extends LitElement {
       background-color: #ffffff;
     }
 
+    :host([disabled]) {
+      opacity: 0.6;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
     :host(.active) {
       background-color: #ffffff;
       border-radius: 8px 8px 0 0;
@@ -124,6 +130,9 @@ export class TabComponent extends LitElement {
 
   @property({ type: Boolean })
   isActive = false;
+
+  @property({ type: Boolean, reflect: true })
+  disabled = false;
 
   private _renderFavicon() {
     if (this.tab.isLoading) {

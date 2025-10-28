@@ -76,6 +76,7 @@ export class BrowserContainer extends LitElement {
       <ai-browser-tab-bar
         .tabs=${this.tabs}
         .activeTabId=${this.activeTabId}
+        .disabled=${!!this.dialog}
         @tab-activate=${this._handleTabActivate}
         @tab-close=${this._handleTabClose}
         @new-tab=${this._handleNewTab}
