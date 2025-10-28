@@ -35,6 +35,9 @@ export class DialogComponent extends LitElement {
       width: 100%;
       height: 100%;
       background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .dialog-box {
@@ -157,12 +160,6 @@ export class DialogComponent extends LitElement {
     }
   }
 
-  private _handleOverlayClick(event: MouseEvent) {
-    if (event.target === event.currentTarget) {
-      this._handleDismiss();
-    }
-  }
-
   updated(changedProperties: Map<string, any>) {
     super.updated(changedProperties);
 
@@ -187,7 +184,7 @@ export class DialogComponent extends LitElement {
     }
 
     return html`
-      <div class="dialog-overlay" @click=${this._handleOverlayClick}>
+      <div class="dialog-overlay">
         <div class="dialog-box" @click=${(e: Event) => e.stopPropagation()}>
           <div class="dialog-header">
             ${this._getDialogTitle()}
@@ -206,9 +203,11 @@ export class DialogComponent extends LitElement {
             ` : ''}
           </div>
           <div class="dialog-actions">
-            <button class="dialog-btn dialog-btn-dismiss" @click=${this._handleDismiss}>
-              Cancel
-            </button>
+            ${this.dialog.type !== 'alert' ? html`
+              <button class="dialog-btn dialog-btn-dismiss" @click=${this._handleDismiss}>
+                Cancel
+              </button>
+            ` : ''}
             <button class="dialog-btn dialog-btn-accept" @click=${this._handleAccept}>
               OK
             </button>
