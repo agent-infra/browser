@@ -14,29 +14,20 @@ export class BrowserContainer extends LitElement {
       position: relative;
       border-radius: 8px;
       overflow: hidden;
-      max-width: 1200px;
       margin: 0 auto;
+      display: block;
+      border: 0;
+    }
+
+    @media (min-resolution: 2dppx) {
+      :host {
+        border: 0.5px solid #a8a8a8;
+      }
     }
 
     .canvas-container {
       background-color: #fff;
       position: relative;
-    }
-
-    .loading-indicator {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 4px;
-    }
-
-    .loading-indicator.visible {
-      display: block;
     }
 
     canvas {
@@ -65,11 +56,8 @@ export class BrowserContainer extends LitElement {
   @property({ type: Boolean })
   isLoading = false;
 
-  @property({ attribute: 'canvas-width', type: Number })
-  canvasWidth = 900;
-
-  @property({ attribute: 'canvas-height', type: Number })
-  canvasHeight = 900;
+  @property({ type: Object })
+  defaultViewport = { width: 1280, height: 1024 };
 
   render() {
     return html`
@@ -92,13 +80,9 @@ export class BrowserContainer extends LitElement {
 
       <div class="canvas-container">
         <canvas
-          width=${this.canvasWidth}
-          height=${this.canvasHeight}
+          width=${this.defaultViewport.width}
+          height=${this.defaultViewport.height}
         ></canvas>
-        <div class="loading-indicator ${this.isLoading ? 'visible' : ''}">
-          Loading...
-        </div>
-
         <ai-browser-dialog
           .dialog=${this.dialog}
           .visible=${!!this.dialog}
@@ -110,15 +94,19 @@ export class BrowserContainer extends LitElement {
   }
 
   private _handleTabActivate(event: CustomEvent<{ tabId: string }>) {
-    this.dispatchEvent(new CustomEvent('tab-activate', {
-      detail: { tabId: event.detail.tabId }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('tab-activate', {
+        detail: { tabId: event.detail.tabId },
+      }),
+    );
   }
 
   private _handleTabClose(event: CustomEvent<{ tabId: string }>) {
-    this.dispatchEvent(new CustomEvent('tab-close', {
-      detail: { tabId: event.detail.tabId }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('tab-close', {
+        detail: { tabId: event.detail.tabId },
+      }),
+    );
   }
 
   private _handleNewTab() {
@@ -126,21 +114,27 @@ export class BrowserContainer extends LitElement {
   }
 
   private _handleNavigate(event: CustomEvent<{ url: string }>) {
-    this.dispatchEvent(new CustomEvent('navigate', {
-      detail: { url: event.detail.url }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('navigate', {
+        detail: { url: event.detail.url },
+      }),
+    );
   }
 
   private _handleNavigateAction(event: CustomEvent<{ action: string }>) {
-    this.dispatchEvent(new CustomEvent('navigate-action', {
-      detail: { action: event.detail.action }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('navigate-action', {
+        detail: { action: event.detail.action },
+      }),
+    );
   }
 
   private _handleDialogAccept(event: CustomEvent<{ inputValue?: string }>) {
-    this.dispatchEvent(new CustomEvent('dialog-accept', {
-      detail: { inputValue: event.detail.inputValue }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('dialog-accept', {
+        detail: { inputValue: event.detail.inputValue },
+      }),
+    );
   }
 
   private _handleDialogDismiss() {

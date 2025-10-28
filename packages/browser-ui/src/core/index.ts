@@ -16,11 +16,9 @@ export interface BrowserUIOptions {
   root: HTMLElement;
   /** Browser connection options */
   browserOptions: ConnectOptions;
-  /** Canvas width */
-  canvasWidth?: number;
-  /** Canvas height */
-  canvasHeight?: number;
 }
+
+export { UIBrowser } from './browser';
 
 export class BrowserUI {
   #options: BrowserUIOptions;
@@ -41,12 +39,12 @@ export class BrowserUI {
       throw new Error('BrowserUI is already initialized');
     }
 
-    const { root, browserOptions, canvasWidth = 900, canvasHeight = 900 } = this.#options;
+    const { root, browserOptions } = this.#options;
 
     // Create browser container element
     this.#browserContainer = document.createElement('ai-browser-container') as BrowserContainer;
-    this.#browserContainer.setAttribute('canvas-width', canvasWidth.toString());
-    this.#browserContainer.setAttribute('canvas-height', canvasHeight.toString());
+    this.#browserContainer.defaultViewport = browserOptions.defaultViewport || { width: 1280, height: 1024 };
+    this.#browserContainer.style.width = `${this.#browserContainer.defaultViewport.width}px`;
 
     // Clear root and append container
     root.innerHTML = '';

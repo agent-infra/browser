@@ -22,8 +22,6 @@ const browserUI = new BrowserUI({
       height: 900,
     },
   },
-  canvasWidth: 900,
-  canvasHeight: 900,
 });
 
 // Initialize the browser UI
