@@ -305,13 +305,11 @@ export class BrowserUI {
       case 'keydown':
         if (this.#canvasBrowser!.envInfo.osName === 'macOS') {
           const hotkey = getMacOSHotkey(detail);
-
           if (hotkey) {
             await activeTab.page.keyboard.down(hotkey.key, { commands: [hotkey.commands] });
-          } else {
-            await activeTab.page.keyboard.down(code as KeyInput);
           }
         }
+
         await activeTab.page.keyboard.down(code as KeyInput);
         break;
       case 'keyup':

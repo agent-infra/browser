@@ -282,7 +282,7 @@ export class BrowserContainer extends LitElement {
   };
 
   #handleMouseEnter = () => {
-    this.#canvas?.focus();
+    this.#canvas?.focus({ preventScroll: true });
   };
 
   #handleMouseLeave = () => {
