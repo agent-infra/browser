@@ -49,7 +49,7 @@ export class UIBrowser {
     return uiBrowser;
   }
 
-  private constructor(element: HTMLCanvasElement) {
+  constructor(element: HTMLCanvasElement) {
     this.#element = element;
   }
 

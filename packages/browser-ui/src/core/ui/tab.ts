@@ -134,7 +134,7 @@ export class TabComponent extends LitElement {
   @property({ type: Boolean, reflect: true })
   disabled = false;
 
-  private _renderFavicon() {
+  #renderFavicon() {
     if (this.tab.isLoading) {
       return html`
         <div class="tab-loading-icon">
@@ -173,9 +173,9 @@ export class TabComponent extends LitElement {
 
   render() {
     return html`
-      ${this._renderFavicon()}
+      ${this.#renderFavicon()}
       <span class="tab-title">${this.tab.title}</span>
-      <button class="tab-close" @click=${this._handleCloseClick} @click.stop>
+      <button class="tab-close" @click=${this.#handleCloseClick} @click.stop>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="14"
@@ -194,7 +194,7 @@ export class TabComponent extends LitElement {
     `;
   }
 
-  private _handleActivateClick() {
+  #handleActivateClick() {
     this.dispatchEvent(
       new CustomEvent('tab-activate', {
         detail: { tabId: this.tab.id },
@@ -203,7 +203,7 @@ export class TabComponent extends LitElement {
     );
   }
 
-  private _handleCloseClick(event: Event) {
+  #handleCloseClick(event: Event) {
     event.stopPropagation();
     this.dispatchEvent(
       new CustomEvent('tab-close', {
@@ -215,7 +215,7 @@ export class TabComponent extends LitElement {
 
   // Handle click on the tab itself (not the close button)
   firstUpdated() {
-    this.addEventListener('click', this._handleActivateClick);
+    this.addEventListener('click', this.#handleActivateClick);
     this.classList.toggle('active', this.isActive);
   }
 

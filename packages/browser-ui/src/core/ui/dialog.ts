@@ -135,9 +135,9 @@ export class DialogComponent extends LitElement {
   visible = false;
 
   @state()
-  private _inputValue = '';
+  inputValue = '';
 
-  private _getDialogTitle(): string {
+  #getDialogTitle(): string {
     const titles = {
       alert: 'Alert',
       confirm: 'Confirm',
@@ -147,9 +147,9 @@ export class DialogComponent extends LitElement {
     return this.dialog ? titles[this.dialog.type] || 'Dialog' : 'Dialog';
   }
 
-  private _handleAccept() {
+  #handleAccept() {
     const inputValue =
-      this.dialog?.type === 'prompt' ? this._inputValue : undefined;
+      this.dialog?.type === 'prompt' ? this.inputValue : undefined;
     this.dispatchEvent(
       new CustomEvent('dialog-accept', {
         detail: { inputValue },
@@ -157,13 +157,13 @@ export class DialogComponent extends LitElement {
     );
   }
 
-  private _handleDismiss() {
+  #handleDismiss() {
     this.dispatchEvent(new CustomEvent('dialog-dismiss'));
   }
 
-  private _handleInputKeypress(event: KeyboardEvent) {
+  #handleInputKeypress(event: KeyboardEvent) {
     if (event.key === 'Enter') {
-      this._handleAccept();
+      this.#handleAccept();
     }
   }
 
@@ -171,7 +171,7 @@ export class DialogComponent extends LitElement {
     super.updated(changedProperties);
 
     if (changedProperties.has('dialog') && this.dialog?.type === 'prompt') {
-      this._inputValue = this.dialog.defaultValue || '';
+      this.inputValue = this.dialog.defaultValue || '';
     }
 
     if (changedProperties.has('visible') && this.visible) {
@@ -195,7 +195,7 @@ export class DialogComponent extends LitElement {
     return html`
       <div class="dialog-overlay">
         <div class="dialog-box" @click=${(e: Event) => e.stopPropagation()}>
-          <div class="dialog-header">${this._getDialogTitle()}</div>
+          <div class="dialog-header">${this.#getDialogTitle()}</div>
           <div class="dialog-content">
             <p class="dialog-message">${this.dialog.message}</p>
             ${this.dialog.type === 'prompt'
@@ -203,10 +203,10 @@ export class DialogComponent extends LitElement {
                   <input
                     type="text"
                     class="dialog-input"
-                    .value=${this._inputValue}
+                    .value=${this.inputValue}
                     @input=${(e: Event) =>
-                      (this._inputValue = (e.target as HTMLInputElement).value)}
-                    @keypress=${this._handleInputKeypress}
+                      (this.inputValue = (e.target as HTMLInputElement).value)}
+                    @keypress=${this.#handleInputKeypress}
                     placeholder="Enter value..."
                   />
                 `
@@ -217,7 +217,7 @@ export class DialogComponent extends LitElement {
               ? html`
                   <button
                     class="dialog-btn dialog-btn-dismiss"
-                    @click=${this._handleDismiss}
+                    @click=${this.#handleDismiss}
                   >
                     Cancel
                   </button>
@@ -225,7 +225,7 @@ export class DialogComponent extends LitElement {
               : ''}
             <button
               class="dialog-btn dialog-btn-accept"
-              @click=${this._handleAccept}
+              @click=${this.#handleAccept}
             >
               OK
             </button>

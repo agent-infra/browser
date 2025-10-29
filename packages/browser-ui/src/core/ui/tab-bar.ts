@@ -99,14 +99,14 @@ export class TabBar extends LitElement {
               .tab=${tab}
               .isActive=${tab.id === this.activeTabId}
               .disabled=${this.disabled}
-              @tab-activate=${this._handleTabActivate}
-              @tab-close=${this._handleTabClose}
+              @tab-activate=${this.#handleTabActivate}
+              @tab-close=${this.#handleTabClose}
             ></ai-browser-tab>
             <div class="tab-divider"></div>
           `,
         ])}
       </div>
-      <button class="new-tab-btn" @click=${this._handleNewTab}>
+      <button class="new-tab-btn" @click=${this.#handleNewTab}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="14"
@@ -125,7 +125,7 @@ export class TabBar extends LitElement {
     `;
   }
 
-  private _handleTabActivate(event: CustomEvent<{ tabId: string }>) {
+  #handleTabActivate(event: CustomEvent<{ tabId: string }>) {
     this.dispatchEvent(
       new CustomEvent('tab-activate', {
         detail: { tabId: event.detail.tabId },
@@ -133,7 +133,7 @@ export class TabBar extends LitElement {
     );
   }
 
-  private _handleTabClose(event: CustomEvent<{ tabId: string }>) {
+  #handleTabClose(event: CustomEvent<{ tabId: string }>) {
     this.dispatchEvent(
       new CustomEvent('tab-close', {
         detail: { tabId: event.detail.tabId },
@@ -141,7 +141,7 @@ export class TabBar extends LitElement {
     );
   }
 
-  private _handleNewTab() {
+  #handleNewTab() {
     this.dispatchEvent(new CustomEvent('new-tab'));
   }
 }

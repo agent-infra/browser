@@ -73,17 +73,17 @@ export class BrowserContainer extends LitElement {
         .tabs=${this.tabs}
         .activeTabId=${this.activeTabId}
         .disabled=${!!this.dialog}
-        @tab-activate=${this._handleTabActivate}
-        @tab-close=${this._handleTabClose}
-        @new-tab=${this._handleNewTab}
+        @tab-activate=${this.#handleTabActivate}
+        @tab-close=${this.#handleTabClose}
+        @new-tab=${this.#handleNewTab}
       ></ai-browser-tab-bar>
 
       <ai-browser-controls-bar
         .currentUrl=${this.currentUrl}
         .canGoBack=${this.canGoBack}
         .canGoForward=${this.canGoForward}
-        @navigate=${this._handleNavigate}
-        @navigate-action=${this._handleNavigateAction}
+        @navigate=${this.#handleNavigate}
+        @navigate-action=${this.#handleNavigateAction}
       ></ai-browser-controls-bar>
 
       <div class="canvas-container">
@@ -95,14 +95,14 @@ export class BrowserContainer extends LitElement {
         <ai-browser-dialog
           .dialog=${this.dialog}
           .visible=${!!this.dialog}
-          @dialog-accept=${this._handleDialogAccept}
-          @dialog-dismiss=${this._handleDialogDismiss}
+          @dialog-accept=${this.#handleDialogAccept}
+          @dialog-dismiss=${this.#handleDialogDismiss}
         ></ai-browser-dialog>
       </div>
     `;
   }
 
-  private _handleTabActivate(event: CustomEvent<{ tabId: string }>) {
+  #handleTabActivate(event: CustomEvent<{ tabId: string }>) {
     this.dispatchEvent(
       new CustomEvent('tab-activate', {
         detail: { tabId: event.detail.tabId },
@@ -110,7 +110,7 @@ export class BrowserContainer extends LitElement {
     );
   }
 
-  private _handleTabClose(event: CustomEvent<{ tabId: string }>) {
+  #handleTabClose(event: CustomEvent<{ tabId: string }>) {
     this.dispatchEvent(
       new CustomEvent('tab-close', {
         detail: { tabId: event.detail.tabId },
@@ -118,11 +118,11 @@ export class BrowserContainer extends LitElement {
     );
   }
 
-  private _handleNewTab() {
+  #handleNewTab() {
     this.dispatchEvent(new CustomEvent('new-tab'));
   }
 
-  private _handleNavigate(event: CustomEvent<{ url: string }>) {
+  #handleNavigate(event: CustomEvent<{ url: string }>) {
     this.dispatchEvent(
       new CustomEvent('navigate', {
         detail: { url: event.detail.url },
@@ -130,7 +130,7 @@ export class BrowserContainer extends LitElement {
     );
   }
 
-  private _handleNavigateAction(event: CustomEvent<{ action: string }>) {
+  #handleNavigateAction(event: CustomEvent<{ action: string }>) {
     this.dispatchEvent(
       new CustomEvent('navigate-action', {
         detail: { action: event.detail.action },
@@ -138,7 +138,7 @@ export class BrowserContainer extends LitElement {
     );
   }
 
-  private _handleDialogAccept(event: CustomEvent<{ inputValue?: string }>) {
+  #handleDialogAccept(event: CustomEvent<{ inputValue?: string }>) {
     this.dispatchEvent(
       new CustomEvent('dialog-accept', {
         detail: { inputValue: event.detail.inputValue },
@@ -146,7 +146,7 @@ export class BrowserContainer extends LitElement {
     );
   }
 
-  private _handleDialogDismiss() {
+  #handleDialogDismiss() {
     this.dispatchEvent(new CustomEvent('dialog-dismiss'));
   }
 
@@ -155,13 +155,13 @@ export class BrowserContainer extends LitElement {
     // Wait for the component to be fully rendered
     setTimeout(() => {
       this.#canvas = this.shadowRoot?.querySelector('canvas') || null;
-      this._setupCanvasEvents();
+      this.#setupCanvasEvents();
     }, 0);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this._cleanupCanvasEvents();
+    this.#cleanupCanvasEvents();
     this.#canvas = null;
   }
 
@@ -194,43 +194,43 @@ export class BrowserContainer extends LitElement {
     this.dialog = undefined;
   }
 
-  private _setupCanvasEvents() {
+  #setupCanvasEvents() {
     const canvas = this.#canvas;
     if (!canvas) return;
 
-    canvas.addEventListener('mousemove', this._handleMouse);
-    canvas.addEventListener('mousedown', this._handleMouse);
-    canvas.addEventListener('mouseup', this._handleMouse);
+    canvas.addEventListener('mousemove', this.#handleMouse);
+    canvas.addEventListener('mousedown', this.#handleMouse);
+    canvas.addEventListener('mouseup', this.#handleMouse);
 
     // Auto-focus events
-    canvas.addEventListener('mouseenter', this._handleMouseEnter);
-    canvas.addEventListener('mouseleave', this._handleMouseLeave);
+    canvas.addEventListener('mouseenter', this.#handleMouseEnter);
+    canvas.addEventListener('mouseleave', this.#handleMouseLeave);
 
-    canvas.addEventListener('wheel', this._handleWheel);
+    canvas.addEventListener('wheel', this.#handleWheel);
 
-    canvas.addEventListener('keydown', this._handleKeyboard);
-    canvas.addEventListener('keyup', this._handleKeyboard);
+    canvas.addEventListener('keydown', this.#handleKeyboard);
+    canvas.addEventListener('keyup', this.#handleKeyboard);
   }
 
-  private _cleanupCanvasEvents() {
+  #cleanupCanvasEvents() {
     const canvas = this.#canvas;
     if (!canvas) return;
 
-    canvas.removeEventListener('mousemove', this._handleMouse);
-    canvas.removeEventListener('mousedown', this._handleMouse);
-    canvas.removeEventListener('mouseup', this._handleMouse);
+    canvas.removeEventListener('mousemove', this.#handleMouse);
+    canvas.removeEventListener('mousedown', this.#handleMouse);
+    canvas.removeEventListener('mouseup', this.#handleMouse);
 
     // Auto-focus events
-    canvas.removeEventListener('mouseenter', this._handleMouseEnter);
-    canvas.removeEventListener('mouseleave', this._handleMouseLeave);
+    canvas.removeEventListener('mouseenter', this.#handleMouseEnter);
+    canvas.removeEventListener('mouseleave', this.#handleMouseLeave);
 
-    canvas.removeEventListener('wheel', this._handleWheel);
+    canvas.removeEventListener('wheel', this.#handleWheel);
 
-    canvas.removeEventListener('keydown', this._handleKeyboard);
-    canvas.removeEventListener('keyup', this._handleKeyboard);
+    canvas.removeEventListener('keydown', this.#handleKeyboard);
+    canvas.removeEventListener('keyup', this.#handleKeyboard);
   }
 
-  private _handleMouse = (event: MouseEvent) => {
+  #handleMouse = (event: MouseEvent) => {
     const canvas = this.#canvas;
     if (!canvas) return;
 
@@ -247,13 +247,13 @@ export class BrowserContainer extends LitElement {
           type: event.type as MouseEventType,
           x,
           y,
-          button: this._getMouseButton(event.button),
+          button: this.#getMouseButton(event.button),
         },
       }),
     );
   };
 
-  private _handleWheel = (event: WheelEvent) => {
+  #handleWheel = (event: WheelEvent) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -267,7 +267,7 @@ export class BrowserContainer extends LitElement {
     );
   };
 
-  private _handleKeyboard = (event: KeyboardEvent) => {
+  #handleKeyboard = (event: KeyboardEvent) => {
     console.log('KeyboardEvent', event.type);
 
     this.dispatchEvent(
@@ -276,21 +276,21 @@ export class BrowserContainer extends LitElement {
           type: event.type as KeyboardEventType,
           key: event.key,
           code: event.code,
-          modifiers: this._getModifiers(event),
+          modifiers: this.#getModifiers(event),
         },
       }),
     );
   };
 
-  private _handleMouseEnter = () => {
+  #handleMouseEnter = () => {
     this.#canvas?.focus();
   };
 
-  private _handleMouseLeave = () => {
+  #handleMouseLeave = () => {
     this.#canvas?.blur();
   };
 
-  private _getMouseButton(buttonNumber: number): MouseButton {
+  #getMouseButton(buttonNumber: number): MouseButton {
     switch (buttonNumber) {
       case 0:
         return 'left';
@@ -307,7 +307,7 @@ export class BrowserContainer extends LitElement {
     }
   }
 
-  private _getModifiers(event: MouseEvent | KeyboardEvent): number {
+  #getModifiers(event: MouseEvent | KeyboardEvent): number {
     let modifiers = 0;
     if (event.altKey) modifiers |= 1; // Alt
     if (event.ctrlKey) modifiers |= 2; // Control

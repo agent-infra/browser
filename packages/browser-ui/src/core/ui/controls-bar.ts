@@ -81,7 +81,7 @@ export class ControlsBar extends LitElement {
   @property({ type: Boolean })
   canGoForward = false;
 
-  private _handleUrlKeypress(event: KeyboardEvent) {
+  #handleUrlKeypress(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       const target = event.target as HTMLInputElement;
       const url = target.value.trim();
@@ -101,7 +101,7 @@ export class ControlsBar extends LitElement {
         <button
           class="nav-btn"
           ?disabled=${!this.canGoBack}
-          @click=${() => this._handleNavigation('back')}
+          @click=${() => this.#handleNavigation('back')}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -121,7 +121,7 @@ export class ControlsBar extends LitElement {
         <button
           class="nav-btn"
           ?disabled=${!this.canGoForward}
-          @click=${() => this._handleNavigation('forward')}
+          @click=${() => this.#handleNavigation('forward')}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -140,7 +140,7 @@ export class ControlsBar extends LitElement {
         </button>
         <button
           class="nav-btn"
-          @click=${() => this._handleNavigation('refresh')}
+          @click=${() => this.#handleNavigation('refresh')}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -163,12 +163,12 @@ export class ControlsBar extends LitElement {
         class="url-bar"
         .value=${this.currentUrl}
         placeholder="Enter URL..."
-        @keypress=${this._handleUrlKeypress}
+        @keypress=${this.#handleUrlKeypress}
       />
     `;
   }
 
-  private _handleNavigation(action: 'back' | 'forward' | 'refresh') {
+  #handleNavigation(action: 'back' | 'forward' | 'refresh') {
     this.dispatchEvent(
       new CustomEvent('navigate-action', {
         detail: { action },
