@@ -12,11 +12,11 @@ export class BrowserContainer extends LitElement {
   static styles = css`
     :host {
       position: relative;
-      border-radius: 8px;
+      display: block;
       overflow: hidden;
       margin: 0 auto;
-      display: block;
       border: 0;
+      border-radius: 8px;
     }
 
     @media (min-resolution: 2dppx) {
@@ -26,12 +26,15 @@ export class BrowserContainer extends LitElement {
     }
 
     .canvas-container {
-      background-color: #fff;
       position: relative;
+      background-color: #fff;
     }
 
     canvas {
       display: block;
+    }
+    canvas:focus {
+      outline: none;
     }
   `;
 
@@ -80,6 +83,7 @@ export class BrowserContainer extends LitElement {
 
       <div class="canvas-container">
         <canvas
+          tabindex=${99}
           width=${this.defaultViewport.width}
           height=${this.defaultViewport.height}
         ></canvas>

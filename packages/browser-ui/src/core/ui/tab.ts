@@ -17,12 +17,12 @@ export class TabComponent extends LitElement {
   static styles = css`
     :host {
       position: relative;
-      box-sizing: border-box;
-      align-items: center;
       display: flex;
-      height: 28px;
       flex: 1;
       flex-shrink: 0;
+      align-items: center;
+      box-sizing: border-box;
+      height: 28px;
       min-width: 30px;
       max-width: 220px;
       padding: 0 6px;
@@ -73,7 +73,7 @@ export class TabComponent extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
-      background-color: #5F6368;
+      background-color: #5f6368;
       border-radius: 50%;
       width: 16px;
       height: 16px;
@@ -138,8 +138,17 @@ export class TabComponent extends LitElement {
     if (this.tab.isLoading) {
       return html`
         <div class="tab-loading-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
             <path d="M21 3v5h-5" />
           </svg>
@@ -148,15 +157,15 @@ export class TabComponent extends LitElement {
     }
 
     if (this.tab.favicon) {
-      return html`
-        <img class="tab-favicon" src="${this.tab.favicon}" />
-      `;
+      return html` <img class="tab-favicon" src="${this.tab.favicon}" /> `;
     }
 
     return html`
       <div class="tab-favicon-fallback">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="white">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"
+          />
         </svg>
       </div>
     `;
@@ -166,33 +175,42 @@ export class TabComponent extends LitElement {
     return html`
       ${this._renderFavicon()}
       <span class="tab-title">${this.tab.title}</span>
-      <button
-        class="tab-close"
-        @click=${this._handleCloseClick}
-        @click.stop
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 6 6 18"/>
-          <path d="m6 6 12 12"/>
+      <button class="tab-close" @click=${this._handleCloseClick} @click.stop>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
         </svg>
       </button>
     `;
   }
 
   private _handleActivateClick() {
-    this.dispatchEvent(new CustomEvent('tab-activate', {
-      detail: { tabId: this.tab.id },
-      bubbles: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent('tab-activate', {
+        detail: { tabId: this.tab.id },
+        bubbles: true,
+      }),
+    );
   }
 
   private _handleCloseClick(event: Event) {
     event.stopPropagation();
-    this.dispatchEvent(new CustomEvent('tab-close', {
-      detail: { tabId: this.tab.id },
-      bubbles: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent('tab-close', {
+        detail: { tabId: this.tab.id },
+        bubbles: true,
+      }),
+    );
   }
 
   // Handle click on the tab itself (not the close button)

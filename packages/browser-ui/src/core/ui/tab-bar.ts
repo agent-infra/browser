@@ -13,11 +13,11 @@ export class TabBar extends LitElement {
     :host {
       display: flex;
       align-items: center;
-      background-color: #e3e3e3;
-      user-select: none;
       box-sizing: border-box;
       height: 36px;
       padding: 4px;
+      background-color: #e3e3e3;
+      user-select: none;
     }
 
     .tabs-container {
@@ -28,11 +28,11 @@ export class TabBar extends LitElement {
     }
 
     .tab-divider {
+      flex-shrink: 0;
+      align-self: center;
       width: 1px;
       height: 14px;
       background-color: #b0b0b0;
-      flex-shrink: 0;
-      align-self: center;
       transition: background-color 0.15s ease;
     }
 
@@ -56,15 +56,15 @@ export class TabBar extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
       width: 28px;
       min-width: 28px;
       height: 28px;
-      flex-shrink: 0;
       padding: 0;
+      margin-left: 5px;
       border: none;
       border-radius: 14px;
       background-color: transparent;
-      margin-left: 5px;
       cursor: pointer;
     }
 
@@ -81,7 +81,7 @@ export class TabBar extends LitElement {
   static properties = {
     tabs: { type: Array },
     activeTabId: { type: String },
-    disabled: { type: Boolean, reflect: true }
+    disabled: { type: Boolean, reflect: true },
   };
 
   @property({ type: Boolean, reflect: true })
@@ -126,15 +126,19 @@ export class TabBar extends LitElement {
   }
 
   private _handleTabActivate(event: CustomEvent<{ tabId: string }>) {
-    this.dispatchEvent(new CustomEvent('tab-activate', {
-      detail: { tabId: event.detail.tabId }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('tab-activate', {
+        detail: { tabId: event.detail.tabId },
+      }),
+    );
   }
 
   private _handleTabClose(event: CustomEvent<{ tabId: string }>) {
-    this.dispatchEvent(new CustomEvent('tab-close', {
-      detail: { tabId: event.detail.tabId }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('tab-close', {
+        detail: { tabId: event.detail.tabId },
+      }),
+    );
   }
 
   private _handleNewTab() {
