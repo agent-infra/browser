@@ -5,7 +5,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { DialogMeta } from '../../types';
+import type { DialogMeta, DialogAcceptEventDetail } from '../../types';
 
 @customElement('ai-browser-dialog')
 export class DialogComponent extends LitElement {
@@ -145,7 +145,7 @@ export class DialogComponent extends LitElement {
     const inputValue =
       this.dialog?.type === 'prompt' ? this.inputValue : undefined;
     this.dispatchEvent(
-      new CustomEvent('dialog-accept', {
+      new CustomEvent<DialogAcceptEventDetail>('dialog-accept', {
         detail: { inputValue },
       }),
     );

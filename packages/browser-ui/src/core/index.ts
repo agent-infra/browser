@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ClipboardDetail, KeyboardDetail, MouseDetail, WheelDetail } from '../types';
+import { ClipboardDetail, KeyboardDetail, MouseDetail, WheelDetail, TabEventDetail, NavigationEventDetail, NavigationActionEventDetail, DialogAcceptEventDetail } from '../types';
 import { UIBrowser } from './browser';
 import './ui';
 import { BrowserContainer } from './ui';
@@ -24,7 +24,6 @@ export class BrowserUI {
   #options: BrowserUIOptions;
   #browserContainer?: BrowserContainer;
   #canvasBrowser?: UIBrowser;
-  #currentDialogTabId?: string | null;
   #isInitialized: boolean = false;
   #clipboardContent: string = '';
 
@@ -67,9 +66,6 @@ export class BrowserUI {
       this.#updateBrowserContainer();
       this.#updateDialog();
     });
-
-    // Setup keyboard shortcuts
-    this.#setupKeyboardShortcuts();
 
     // Initial update
     this.#updateBrowserContainer();
@@ -114,7 +110,6 @@ export class BrowserUI {
 
     // Remove event listeners
     this.#removeEventListeners();
-    this.#removeKeyboardShortcuts();
 
     // Disconnect browser
     if (this.#canvasBrowser) {
@@ -202,13 +197,15 @@ export class BrowserUI {
   }
 
   #handleTabActivate = async (e: Event): Promise<void> => {
-    const customEvent = e as CustomEvent;
-    await this.#canvasBrowser!.tabs.activeTab(customEvent.detail.tabId);
+    await this.#canvasBrowser!.tabs.activeTab(
+      (e as CustomEvent<TabEventDetail>).detail.tabId,
+    );
   };
 
   #handleTabClose = async (e: Event): Promise<void> => {
-    const customEvent = e as CustomEvent;
-    await this.#canvasBrowser!.tabs.closeTab(customEvent.detail.tabId);
+    await this.#canvasBrowser!.tabs.closeTab(
+      (e as CustomEvent<TabEventDetail>).detail.tabId,
+    );
   };
 
   #handleNewTab = async (): Promise<void> => {
@@ -216,8 +213,7 @@ export class BrowserUI {
   };
 
   #handleNavigate = async (e: Event): Promise<void> => {
-    const customEvent = e as CustomEvent;
-    const url = customEvent.detail.url;
+    const url = (e as CustomEvent<NavigationEventDetail>).detail.url;
     let finalUrl = url;
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       if (url.includes('.') && !url.includes(' ')) {
@@ -230,8 +226,7 @@ export class BrowserUI {
   };
 
   #handleNavigateAction = async (e: Event): Promise<void> => {
-    const customEvent = e as CustomEvent;
-    const action = customEvent.detail.action;
+    const action = (e as CustomEvent<NavigationActionEventDetail>).detail.action;
     const tabs = this.#canvasBrowser!.tabs;
 
     switch (action) {
@@ -248,11 +243,10 @@ export class BrowserUI {
   };
 
   #handleDialogAccept = async (e: Event): Promise<void> => {
-    const customEvent = e as CustomEvent;
     const activeTab = this.#canvasBrowser!.tabs.getActiveTab();
     if (!activeTab || !activeTab.dialog.isOpen) return;
 
-    const promptText = customEvent.detail.inputValue;
+    const promptText = (e as CustomEvent<DialogAcceptEventDetail>).detail.inputValue;
     const success = await activeTab.dialog.accept(promptText);
     if (success) {
       this.#browserContainer!.hideDialog();
@@ -386,29 +380,14 @@ export class BrowserUI {
     }
 
     if (activeTab.dialog) {
-      this.#currentDialogTabId = activeTabId;
       this.#browserContainer.showDialog(activeTab.dialog);
     } else {
       this.#browserContainer.hideDialog();
     }
   }
 
-  #setupKeyboardShortcuts(): void {
-    document.addEventListener('keydown', this.#handleKeyDown);
-  }
-
-  #removeKeyboardShortcuts(): void {
-    document.removeEventListener('keydown', this.#handleKeyDown);
-  }
-
   #handleClipboardChange = (e: Event): void => {
     this.#clipboardContent =
       (e as CustomEvent<ClipboardDetail>).detail.content || '';
-  };
-
-  #handleKeyDown = (e: KeyboardEvent): void => {
-    if (e.key === 'Escape' && this.#browserContainer?.dialog) {
-      this.#browserContainer.dispatchEvent(new CustomEvent('dialog-dismiss'));
-    }
   };
 }

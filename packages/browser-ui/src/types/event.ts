@@ -34,3 +34,19 @@ export interface KeyboardDetail {
 export interface ClipboardDetail {
   content: string;
 }
+
+export interface TabEventDetail {
+  tabId: string;
+}
+
+export interface NavigationEventDetail {
+  url: string;
+}
+
+export interface NavigationActionEventDetail {
+  action: 'back' | 'forward' | 'refresh';
+}
+
+export interface DialogAcceptEventDetail {
+  inputValue?: string;
+}

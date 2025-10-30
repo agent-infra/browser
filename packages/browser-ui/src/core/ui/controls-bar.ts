@@ -4,6 +4,7 @@
  */
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { NavigationEventDetail, NavigationActionEventDetail } from '../../types';
 
 @customElement('ai-browser-controls-bar')
 export class ControlsBar extends LitElement {
@@ -87,7 +88,7 @@ export class ControlsBar extends LitElement {
       const url = target.value.trim();
       if (url) {
         this.dispatchEvent(
-          new CustomEvent('navigate', {
+          new CustomEvent<NavigationEventDetail>('navigate', {
             detail: { url },
           }),
         );
@@ -170,7 +171,7 @@ export class ControlsBar extends LitElement {
 
   #handleNavigation(action: 'back' | 'forward' | 'refresh') {
     this.dispatchEvent(
-      new CustomEvent('navigate-action', {
+      new CustomEvent<NavigationActionEventDetail>('navigate-action', {
         detail: { action },
       }),
     );
