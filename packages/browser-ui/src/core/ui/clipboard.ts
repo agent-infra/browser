@@ -4,6 +4,9 @@
  */
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { ref } from 'lit/directives/ref.js';
+
+import type { ClipboardDetail } from '../../types';
 
 @customElement('ai-browser-clipboard')
 export class ClipboardWidget extends LitElement {
@@ -20,10 +23,13 @@ export class ClipboardWidget extends LitElement {
       display: flex;
       align-items: center;
       transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      background: white;
       border: 1px solid #a8a8a8;
       border-left: none;
       border-radius: 0 8px 8px 0;
-      box-shadow: 4px 0 6px -1px rgb(0 0 0 / 0.1), 2px 0 4px -2px rgb(0 0 0 / 0.1);
+      box-shadow:
+        4px 0 6px -1px rgb(0 0 0 / 0.1),
+        2px 0 4px -2px rgb(0 0 0 / 0.1);
       transform: translateX(-200px);
     }
 
@@ -39,7 +45,9 @@ export class ClipboardWidget extends LitElement {
     }
 
     .widget-container:hover {
-      box-shadow: 10px 0 15px -3px rgb(0 0 0 / 0.1), 4px 0 6px -4px rgb(0 0 0 / 0.1);
+      box-shadow:
+        10px 0 15px -3px rgb(0 0 0 / 0.1),
+        4px 0 6px -4px rgb(0 0 0 / 0.1);
     }
 
     .widget-content {
@@ -47,7 +55,6 @@ export class ClipboardWidget extends LitElement {
       width: 200px;
       height: 80px;
       padding: 4px 0 4px 10px;
-      background: white;
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       overflow: hidden;
     }
@@ -124,9 +131,7 @@ export class ClipboardWidget extends LitElement {
             .value=${this.clipboardContent}
             @input=${this.#handleInputChange}
             placeholder="Enter text..."
-            ref=${(el: HTMLTextAreaElement) => {
-              this.#inputRef = el;
-            }}
+            ${ref(this.#inputRefCallback)}
           ></textarea>
         </div>
         <div
@@ -152,6 +157,10 @@ export class ClipboardWidget extends LitElement {
     `;
   }
 
+  #inputRefCallback = (el: Element | undefined) => {
+    this.#inputRef = el as HTMLTextAreaElement | null;
+  };
+
   #toggleWidget() {
     this.expanded = !this.expanded;
     if (this.expanded) {
@@ -166,9 +175,8 @@ export class ClipboardWidget extends LitElement {
     const target = event.target as HTMLTextAreaElement;
     this.clipboardContent = target.value;
 
-    // Dispatch event to notify external components of content change
     this.dispatchEvent(
-      new CustomEvent('clipboard-change', {
+      new CustomEvent<ClipboardDetail>('clipboard-change', {
         detail: { content: this.clipboardContent },
         bubbles: true,
         composed: true,

@@ -100,7 +100,6 @@ export class BrowserContainer extends LitElement {
 
         <ai-browser-clipboard
           @clipboard-change=${this.#handleClipboardChange}
-          @clipboard-send=${this.#handleClipboardSend}
         ></ai-browser-clipboard>
       </div>
     `;
@@ -157,14 +156,6 @@ export class BrowserContainer extends LitElement {
   #handleClipboardChange(event: CustomEvent<ClipboardDetail>) {
     this.dispatchEvent(
       new CustomEvent<ClipboardDetail>('clipboard-change', {
-        detail: { content: event.detail.content },
-      }),
-    );
-  }
-
-  #handleClipboardSend(event: CustomEvent<ClipboardDetail>) {
-    this.dispatchEvent(
-      new CustomEvent<ClipboardDetail>('clipboard-send', {
         detail: { content: event.detail.content },
       }),
     );

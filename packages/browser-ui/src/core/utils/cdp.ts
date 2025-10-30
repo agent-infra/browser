@@ -5,6 +5,7 @@
 
 import type { KeyInput, MouseButton } from 'puppeteer-core';
 import type { KeyboardDetail } from '../../types';
+import { OSType } from '@agent-infra/browser/web';
 
 export function getCdpMouseButton(buttonNumber: number): MouseButton {
   switch (buttonNumber) {
@@ -69,4 +70,17 @@ export function getMacOSHotkey(params: KeyboardDetail): {
   }
 
   return null;
+}
+
+export function isPasteHotkey(params: KeyboardDetail, os: OSType) {
+  const { metaKey, ctrlKey, altKey, shiftKey, code } = params;
+
+  if (os === 'macOS' && metaKey && !ctrlKey && !altKey && !shiftKey && code === 'KeyV') {
+    return true;
+  }
+  if (!metaKey && ctrlKey && !altKey && !shiftKey && code === 'KeyV') {
+    return true;
+  }
+
+  return false;
 }

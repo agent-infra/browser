@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { KeyboardDetail, MouseDetail, WheelDetail } from '../types';
+import { ClipboardDetail, KeyboardDetail, MouseDetail, WheelDetail } from '../types';
 import { UIBrowser } from './browser';
 import './ui';
 import { BrowserContainer } from './ui';
-import { getMacOSHotkey } from './utils';
+import { getMacOSHotkey, isPasteHotkey } from './utils';
 
 import type { ConnectOptions, KeyInput } from 'puppeteer-core';
 
@@ -26,6 +26,7 @@ export class BrowserUI {
   #canvasBrowser?: UIBrowser;
   #currentDialogTabId?: string | null;
   #isInitialized: boolean = false;
+  #clipboardContent: string = '';
 
   constructor(options: BrowserUIOptions) {
     this.#options = options;
@@ -168,6 +169,9 @@ export class BrowserUI {
     this.#browserContainer.addEventListener('canvas-mouse-event', this.#handleCanvasMouseEvent);
     this.#browserContainer.addEventListener('canvas-wheel-event', this.#handleCanvasWheelEvent);
     this.#browserContainer.addEventListener('canvas-keyboard-event', this.#handleCanvasKeyboardEvent);
+
+    // Clipboard events
+    this.#browserContainer.addEventListener('clipboard-change', this.#handleClipboardChange);
   }
 
   #removeEventListeners(): void {
@@ -192,6 +196,9 @@ export class BrowserUI {
     this.#browserContainer.removeEventListener('canvas-mouse-event', this.#handleCanvasMouseEvent);
     this.#browserContainer.removeEventListener('canvas-wheel-event', this.#handleCanvasWheelEvent);
     this.#browserContainer.removeEventListener('canvas-keyboard-event', this.#handleCanvasKeyboardEvent);
+
+    // Clipboard events
+    this.#browserContainer.removeEventListener('clipboard-change', this.#handleClipboardChange);
   }
 
   #handleTabActivate = async (e: Event): Promise<void> => {
@@ -303,10 +310,20 @@ export class BrowserUI {
     // Handle keyboard events on the page
     switch (type) {
       case 'keydown':
-        if (this.#canvasBrowser!.envInfo.osName === 'macOS') {
+        const os = this.#canvasBrowser!.envInfo.osName;
+
+        // clipboard mock
+        if (isPasteHotkey(detail, os) && this.#clipboardContent) {
+          await activeTab.page.keyboard.sendCharacter(this.#clipboardContent);
+          return;
+        }
+
+        // macOS hotkey
+        if (os === 'macOS') {
           const hotkey = getMacOSHotkey(detail);
           if (hotkey) {
             await activeTab.page.keyboard.down(hotkey.key, { commands: [hotkey.commands] });
+            return;
           }
         }
 
@@ -383,6 +400,11 @@ export class BrowserUI {
   #removeKeyboardShortcuts(): void {
     document.removeEventListener('keydown', this.#handleKeyDown);
   }
+
+  #handleClipboardChange = (e: Event): void => {
+    this.#clipboardContent =
+      (e as CustomEvent<ClipboardDetail>).detail.content || '';
+  };
 
   #handleKeyDown = (e: KeyboardEvent): void => {
     if (e.key === 'Escape' && this.#browserContainer?.dialog) {
