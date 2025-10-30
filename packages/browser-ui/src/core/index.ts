@@ -3,13 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ClipboardDetail, KeyboardDetail, MouseDetail, WheelDetail } from '../types';
 import { UIBrowser } from './browser';
 import './ui';
 import { BrowserContainer } from './ui';
 import { getMacOSHotkey, isPasteHotkey } from './utils';
 
 import type { ConnectOptions, KeyInput } from 'puppeteer-core';
+import type {
+  ClipboardDetail,
+  KeyboardDetail,
+  MouseDetail,
+  WheelDetail,
+  TabEventDetail,
+  NavigationEventDetail,
+  NavigationActionEventDetail,
+  DialogAcceptEventDetail,
+} from '../types';
 
 export interface BrowserUIOptions {
   /** Root element to mount the browser UI */
@@ -24,7 +33,6 @@ export class BrowserUI {
   #options: BrowserUIOptions;
   #browserContainer?: BrowserContainer;
   #canvasBrowser?: UIBrowser;
-  #currentDialogTabId?: string | null;
   #isInitialized: boolean = false;
   #clipboardContent: string = '';
 
@@ -43,8 +51,13 @@ export class BrowserUI {
     const { root, browserOptions } = this.#options;
 
     // Create browser container element
-    this.#browserContainer = document.createElement('ai-browser-container') as BrowserContainer;
-    this.#browserContainer.defaultViewport = browserOptions.defaultViewport || { width: 1280, height: 1024 };
+    this.#browserContainer = document.createElement(
+      'ai-browser-container',
+    ) as BrowserContainer;
+    this.#browserContainer.defaultViewport = browserOptions.defaultViewport || {
+      width: 1280,
+      height: 1024,
+    };
     this.#browserContainer.style.width = `${this.#browserContainer.defaultViewport.width}px`;
 
     // Clear root and append container
@@ -67,9 +80,6 @@ export class BrowserUI {
       this.#updateBrowserContainer();
       this.#updateDialog();
     });
-
-    // Setup keyboard shortcuts
-    this.#setupKeyboardShortcuts();
 
     // Initial update
     this.#updateBrowserContainer();
@@ -114,7 +124,6 @@ export class BrowserUI {
 
     // Remove event listeners
     this.#removeEventListeners();
-    this.#removeKeyboardShortcuts();
 
     // Disconnect browser
     if (this.#canvasBrowser) {
@@ -130,7 +139,7 @@ export class BrowserUI {
   }
 
   #waitForCanvas(): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (this.#browserContainer!.getCanvas()) {
         resolve(void 0);
       } else {
@@ -152,26 +161,50 @@ export class BrowserUI {
       return;
     }
 
-    // Tab events
-    this.#browserContainer.addEventListener('tab-activate', this.#handleTabActivate);
+    // Tab events - now bubble up directly from components
+    this.#browserContainer.addEventListener(
+      'tab-activate',
+      this.#handleTabActivate,
+    );
     this.#browserContainer.addEventListener('tab-close', this.#handleTabClose);
     this.#browserContainer.addEventListener('new-tab', this.#handleNewTab);
 
-    // Navigation events
+    // Navigation events - now bubble up directly from components
     this.#browserContainer.addEventListener('navigate', this.#handleNavigate);
-    this.#browserContainer.addEventListener('navigate-action', this.#handleNavigateAction);
+    this.#browserContainer.addEventListener(
+      'navigate-action',
+      this.#handleNavigateAction,
+    );
 
     // Dialog events
-    this.#browserContainer.addEventListener('dialog-accept', this.#handleDialogAccept);
-    this.#browserContainer.addEventListener('dialog-dismiss', this.#handleDialogDismiss);
+    this.#browserContainer.addEventListener(
+      'dialog-accept',
+      this.#handleDialogAccept,
+    );
+    this.#browserContainer.addEventListener(
+      'dialog-dismiss',
+      this.#handleDialogDismiss,
+    );
 
     // Canvas events
-    this.#browserContainer.addEventListener('canvas-mouse-event', this.#handleCanvasMouseEvent);
-    this.#browserContainer.addEventListener('canvas-wheel-event', this.#handleCanvasWheelEvent);
-    this.#browserContainer.addEventListener('canvas-keyboard-event', this.#handleCanvasKeyboardEvent);
+    this.#browserContainer.addEventListener(
+      'canvas-mouse-event',
+      this.#handleCanvasMouseEvent,
+    );
+    this.#browserContainer.addEventListener(
+      'canvas-wheel-event',
+      this.#handleCanvasWheelEvent,
+    );
+    this.#browserContainer.addEventListener(
+      'canvas-keyboard-event',
+      this.#handleCanvasKeyboardEvent,
+    );
 
     // Clipboard events
-    this.#browserContainer.addEventListener('clipboard-change', this.#handleClipboardChange);
+    this.#browserContainer.addEventListener(
+      'clipboard-change',
+      this.#handleClipboardChange,
+    );
   }
 
   #removeEventListeners(): void {
@@ -179,45 +212,84 @@ export class BrowserUI {
       return;
     }
 
-    // Tab events
-    this.#browserContainer.removeEventListener('tab-activate', this.#handleTabActivate);
-    this.#browserContainer.removeEventListener('tab-close', this.#handleTabClose);
+    // Tab events - now bubble up directly from components
+    this.#browserContainer.removeEventListener(
+      'tab-activate',
+      this.#handleTabActivate,
+    );
+    this.#browserContainer.removeEventListener(
+      'tab-close',
+      this.#handleTabClose,
+    );
     this.#browserContainer.removeEventListener('new-tab', this.#handleNewTab);
 
-    // Navigation events
-    this.#browserContainer.removeEventListener('navigate', this.#handleNavigate);
-    this.#browserContainer.removeEventListener('navigate-action', this.#handleNavigateAction);
+    // Navigation events - now bubble up directly from components
+    this.#browserContainer.removeEventListener(
+      'navigate',
+      this.#handleNavigate,
+    );
+    this.#browserContainer.removeEventListener(
+      'navigate-action',
+      this.#handleNavigateAction,
+    );
 
     // Dialog events
-    this.#browserContainer.removeEventListener('dialog-accept', this.#handleDialogAccept);
-    this.#browserContainer.removeEventListener('dialog-dismiss', this.#handleDialogDismiss);
+    this.#browserContainer.removeEventListener(
+      'dialog-accept',
+      this.#handleDialogAccept,
+    );
+    this.#browserContainer.removeEventListener(
+      'dialog-dismiss',
+      this.#handleDialogDismiss,
+    );
 
     // Canvas events
-    this.#browserContainer.removeEventListener('canvas-mouse-event', this.#handleCanvasMouseEvent);
-    this.#browserContainer.removeEventListener('canvas-wheel-event', this.#handleCanvasWheelEvent);
-    this.#browserContainer.removeEventListener('canvas-keyboard-event', this.#handleCanvasKeyboardEvent);
+    this.#browserContainer.removeEventListener(
+      'canvas-mouse-event',
+      this.#handleCanvasMouseEvent,
+    );
+    this.#browserContainer.removeEventListener(
+      'canvas-wheel-event',
+      this.#handleCanvasWheelEvent,
+    );
+    this.#browserContainer.removeEventListener(
+      'canvas-keyboard-event',
+      this.#handleCanvasKeyboardEvent,
+    );
 
     // Clipboard events
-    this.#browserContainer.removeEventListener('clipboard-change', this.#handleClipboardChange);
+    this.#browserContainer.removeEventListener(
+      'clipboard-change',
+      this.#handleClipboardChange,
+    );
   }
 
   #handleTabActivate = async (e: Event): Promise<void> => {
-    const customEvent = e as CustomEvent;
-    await this.#canvasBrowser!.tabs.activeTab(customEvent.detail.tabId);
+    e.stopPropagation();
+
+    await this.#canvasBrowser!.tabs.activeTab(
+      (e as CustomEvent<TabEventDetail>).detail.tabId,
+    );
   };
 
   #handleTabClose = async (e: Event): Promise<void> => {
-    const customEvent = e as CustomEvent;
-    await this.#canvasBrowser!.tabs.closeTab(customEvent.detail.tabId);
+    e.stopPropagation();
+
+    await this.#canvasBrowser!.tabs.closeTab(
+      (e as CustomEvent<TabEventDetail>).detail.tabId,
+    );
   };
 
-  #handleNewTab = async (): Promise<void> => {
+  #handleNewTab = async (e: Event): Promise<void> => {
+    e.stopPropagation();
+
     await this.#canvasBrowser!.tabs.createTab();
   };
 
   #handleNavigate = async (e: Event): Promise<void> => {
-    const customEvent = e as CustomEvent;
-    const url = customEvent.detail.url;
+    e.stopPropagation();
+
+    const url = (e as CustomEvent<NavigationEventDetail>).detail.url;
     let finalUrl = url;
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       if (url.includes('.') && !url.includes(' ')) {
@@ -230,8 +302,10 @@ export class BrowserUI {
   };
 
   #handleNavigateAction = async (e: Event): Promise<void> => {
-    const customEvent = e as CustomEvent;
-    const action = customEvent.detail.action;
+    e.stopPropagation();
+
+    const action = (e as CustomEvent<NavigationActionEventDetail>).detail
+      .action;
     const tabs = this.#canvasBrowser!.tabs;
 
     switch (action) {
@@ -248,18 +322,22 @@ export class BrowserUI {
   };
 
   #handleDialogAccept = async (e: Event): Promise<void> => {
-    const customEvent = e as CustomEvent;
+    e.stopPropagation();
+
     const activeTab = this.#canvasBrowser!.tabs.getActiveTab();
     if (!activeTab || !activeTab.dialog.isOpen) return;
 
-    const promptText = customEvent.detail.inputValue;
+    const promptText = (e as CustomEvent<DialogAcceptEventDetail>).detail
+      .inputValue;
     const success = await activeTab.dialog.accept(promptText);
     if (success) {
       this.#browserContainer!.hideDialog();
     }
   };
 
-  #handleDialogDismiss = async (): Promise<void> => {
+  #handleDialogDismiss = async (e: Event): Promise<void> => {
+    e.stopPropagation();
+
     const activeTab = this.#canvasBrowser!.tabs.getActiveTab();
     if (!activeTab || !activeTab.dialog.isOpen) return;
 
@@ -270,8 +348,9 @@ export class BrowserUI {
   };
 
   #handleCanvasMouseEvent = async (e: Event): Promise<void> => {
-    const { type, x, y, button } = (e as CustomEvent<MouseDetail>)
-      .detail;
+    e.stopPropagation();
+
+    const { type, x, y, button } = (e as CustomEvent<MouseDetail>).detail;
 
     const activeTab = this.#canvasBrowser!.tabs.getActiveTab();
     if (!activeTab) return;
@@ -292,15 +371,19 @@ export class BrowserUI {
   };
 
   #handleCanvasWheelEvent = async (e: Event): Promise<void> => {
+    e.stopPropagation();
+
     const { deltaX, deltaY } = (e as CustomEvent<WheelDetail>).detail;
 
     const activeTab = this.#canvasBrowser!.tabs.getActiveTab();
     if (!activeTab) return;
-    
+
     await activeTab.page.mouse.wheel({ deltaX, deltaY });
-  }
+  };
 
   #handleCanvasKeyboardEvent = async (e: Event): Promise<void> => {
+    e.stopPropagation();
+
     const detail = (e as CustomEvent<KeyboardDetail>).detail;
     const { type, code } = detail;
 
@@ -322,7 +405,9 @@ export class BrowserUI {
         if (os === 'macOS') {
           const hotkey = getMacOSHotkey(detail);
           if (hotkey) {
-            await activeTab.page.keyboard.down(hotkey.key, { commands: [hotkey.commands] });
+            await activeTab.page.keyboard.down(hotkey.key, {
+              commands: [hotkey.commands],
+            });
             return;
           }
         }
@@ -343,20 +428,27 @@ export class BrowserUI {
     const tabs = this.#canvasBrowser.tabs;
     const snapshot = tabs.getSnapshot();
     const tabIds = Array.from(snapshot.tabs.keys());
-    const tabsData = tabIds.map(tabId => {
-      const tabMeta = snapshot.tabs.get(tabId);
-      return tabMeta ? {
-        id: tabId,
-        title: tabMeta.title,
-        favicon: tabMeta.favicon || undefined,
-        isLoading: tabMeta.isLoading,
-      } : null;
-    }).filter((tab): tab is NonNullable<typeof tab> => tab !== null);
+    const tabsData = tabIds
+      .map((tabId) => {
+        const tabMeta = snapshot.tabs.get(tabId);
+        return tabMeta
+          ? {
+              id: tabId,
+              title: tabMeta.title,
+              favicon: tabMeta.favicon || undefined,
+              isLoading: tabMeta.isLoading,
+            }
+          : null;
+      })
+      .filter((tab): tab is NonNullable<typeof tab> => tab !== null);
 
     const activeTab = snapshot.tabs.get(snapshot.activeTabId || '');
     const currentUrl = tabs.getCurrentUrl();
 
-    this.#browserContainer.updateTabs(tabsData, snapshot.activeTabId || undefined);
+    this.#browserContainer.updateTabs(
+      tabsData,
+      snapshot.activeTabId || undefined,
+    );
     this.#browserContainer.updateNavigation(currentUrl, true, true); // TODO: Get actual navigation state
 
     if (activeTab?.isLoading) {
@@ -386,29 +478,16 @@ export class BrowserUI {
     }
 
     if (activeTab.dialog) {
-      this.#currentDialogTabId = activeTabId;
       this.#browserContainer.showDialog(activeTab.dialog);
     } else {
       this.#browserContainer.hideDialog();
     }
   }
 
-  #setupKeyboardShortcuts(): void {
-    document.addEventListener('keydown', this.#handleKeyDown);
-  }
-
-  #removeKeyboardShortcuts(): void {
-    document.removeEventListener('keydown', this.#handleKeyDown);
-  }
-
   #handleClipboardChange = (e: Event): void => {
+    e.stopPropagation();
+
     this.#clipboardContent =
       (e as CustomEvent<ClipboardDetail>).detail.content || '';
-  };
-
-  #handleKeyDown = (e: KeyboardEvent): void => {
-    if (e.key === 'Escape' && this.#browserContainer?.dialog) {
-      this.#browserContainer.dispatchEvent(new CustomEvent('dialog-dismiss'));
-    }
   };
 }

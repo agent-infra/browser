@@ -5,9 +5,19 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getCdpMouseButton } from '../utils';
-
-import type { TabMeta, DialogMeta, MouseEventType, KeyboardEventType, MouseDetail, KeyboardDetail, WheelDetail, ClipboardDetail } from '../../types';
 import './clipboard';
+
+import type {
+  TabMeta,
+  DialogMeta,
+  MouseEventType,
+  KeyboardEventType,
+  MouseDetail,
+  KeyboardDetail,
+  WheelDetail,
+  ClipboardDetail,
+  DialogAcceptEventDetail,
+} from '../../types';
 
 @customElement('ai-browser-container')
 export class BrowserContainer extends LitElement {
@@ -72,17 +82,12 @@ export class BrowserContainer extends LitElement {
         .tabs=${this.tabs}
         .activeTabId=${this.activeTabId}
         .disabled=${!!this.dialog}
-        @tab-activate=${this.#handleTabActivate}
-        @tab-close=${this.#handleTabClose}
-        @new-tab=${this.#handleNewTab}
       ></ai-browser-tab-bar>
 
       <ai-browser-controls-bar
         .currentUrl=${this.currentUrl}
         .canGoBack=${this.canGoBack}
         .canGoForward=${this.canGoForward}
-        @navigate=${this.#handleNavigate}
-        @navigate-action=${this.#handleNavigateAction}
       ></ai-browser-controls-bar>
 
       <div class="canvas-container">
@@ -105,45 +110,9 @@ export class BrowserContainer extends LitElement {
     `;
   }
 
-  #handleTabActivate(event: CustomEvent<{ tabId: string }>) {
+  #handleDialogAccept(event: CustomEvent<DialogAcceptEventDetail>) {
     this.dispatchEvent(
-      new CustomEvent('tab-activate', {
-        detail: { tabId: event.detail.tabId },
-      }),
-    );
-  }
-
-  #handleTabClose(event: CustomEvent<{ tabId: string }>) {
-    this.dispatchEvent(
-      new CustomEvent('tab-close', {
-        detail: { tabId: event.detail.tabId },
-      }),
-    );
-  }
-
-  #handleNewTab() {
-    this.dispatchEvent(new CustomEvent('new-tab'));
-  }
-
-  #handleNavigate(event: CustomEvent<{ url: string }>) {
-    this.dispatchEvent(
-      new CustomEvent('navigate', {
-        detail: { url: event.detail.url },
-      }),
-    );
-  }
-
-  #handleNavigateAction(event: CustomEvent<{ action: string }>) {
-    this.dispatchEvent(
-      new CustomEvent('navigate-action', {
-        detail: { action: event.detail.action },
-      }),
-    );
-  }
-
-  #handleDialogAccept(event: CustomEvent<{ inputValue?: string }>) {
-    this.dispatchEvent(
-      new CustomEvent('dialog-accept', {
+      new CustomEvent<DialogAcceptEventDetail>('dialog-accept', {
         detail: { inputValue: event.detail.inputValue },
       }),
     );

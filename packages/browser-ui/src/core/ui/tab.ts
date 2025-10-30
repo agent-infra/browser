@@ -5,7 +5,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { TabMeta } from '../../types';
+import type { TabMeta, TabEventDetail } from '../../types';
 
 @customElement('ai-browser-tab')
 export class TabComponent extends LitElement {
@@ -191,7 +191,7 @@ export class TabComponent extends LitElement {
 
   #handleActivateClick() {
     this.dispatchEvent(
-      new CustomEvent('tab-activate', {
+      new CustomEvent<TabEventDetail>('tab-activate', {
         detail: { tabId: this.tab.id },
         bubbles: true,
       }),
@@ -201,7 +201,7 @@ export class TabComponent extends LitElement {
   #handleCloseClick(event: Event) {
     event.stopPropagation();
     this.dispatchEvent(
-      new CustomEvent('tab-close', {
+      new CustomEvent<TabEventDetail>('tab-close', {
         detail: { tabId: this.tab.id },
         bubbles: true,
       }),
