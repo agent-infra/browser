@@ -9,7 +9,7 @@ async function main() {
     headless: false,
   })
 
-  const tab = browser.tabs.getActiveTab();
+  const tab = browser.getActiveTab();
 
   await tab!.goto('https://bot-detector.rebrowser.net/');
   await new Promise((resolve) => setTimeout(resolve, 3000));

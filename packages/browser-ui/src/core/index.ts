@@ -2,10 +2,9 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-
-import { UIBrowser } from './browser';
-import './ui';
-import { BrowserContainer } from './ui';
+import { UIBrowser } from './model/browser';
+import './view';
+import { BrowserContainer } from './view';
 import { getMacOSHotkey, isPasteHotkey } from './utils';
 
 import type { ConnectOptions, KeyInput } from 'puppeteer-core';
@@ -26,8 +25,6 @@ export interface BrowserUIOptions {
   /** Browser connection options */
   browserOptions: ConnectOptions;
 }
-
-export { UIBrowser } from './browser';
 
 export class BrowserUI {
   #options: BrowserUIOptions;
@@ -76,7 +73,7 @@ export class BrowserUI {
     this.#setupEventListeners();
 
     // Subscribe to tabs state changes
-    this.#canvasBrowser.tabs.subscribe(() => {
+    this.#canvasBrowser.subscribeTabChange(() => {
       this.#updateBrowserContainer();
       this.#updateDialog();
     });
@@ -267,7 +264,7 @@ export class BrowserUI {
   #handleTabActivate = async (e: Event): Promise<void> => {
     e.stopPropagation();
 
-    await this.#canvasBrowser!.tabs.activeTab(
+    await this.#canvasBrowser!.activeTab(
       (e as CustomEvent<TabEventDetail>).detail.tabId,
     );
   };
@@ -275,7 +272,7 @@ export class BrowserUI {
   #handleTabClose = async (e: Event): Promise<void> => {
     e.stopPropagation();
 
-    await this.#canvasBrowser!.tabs.closeTab(
+    await this.#canvasBrowser!.closeTab(
       (e as CustomEvent<TabEventDetail>).detail.tabId,
     );
   };
@@ -283,7 +280,7 @@ export class BrowserUI {
   #handleNewTab = async (e: Event): Promise<void> => {
     e.stopPropagation();
 
-    await this.#canvasBrowser!.tabs.createTab();
+    await this.#canvasBrowser!.createTab();
   };
 
   #handleNavigate = async (e: Event): Promise<void> => {
@@ -298,25 +295,28 @@ export class BrowserUI {
         finalUrl = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
       }
     }
-    await this.#canvasBrowser!.tabs.navigate(finalUrl);
+
+    const activeTab = this.#canvasBrowser!.getActiveTab();
+    if (!activeTab) return;
+    await activeTab.goto(finalUrl);
   };
 
   #handleNavigateAction = async (e: Event): Promise<void> => {
     e.stopPropagation();
 
-    const action = (e as CustomEvent<NavigationActionEventDetail>).detail
-      .action;
-    const tabs = this.#canvasBrowser!.tabs;
+    const activeTab = this.#canvasBrowser!.getActiveTab();
+    if (!activeTab) return;
 
+    const action = (e as CustomEvent<NavigationActionEventDetail>).detail.action;
     switch (action) {
       case 'back':
-        await tabs.goBack();
+        await activeTab.goBack();
         break;
       case 'forward':
-        await tabs.goForward();
+        await activeTab.goForward();
         break;
       case 'refresh':
-        await tabs.reload();
+        await activeTab.reload();
         break;
     }
   };
@@ -324,7 +324,7 @@ export class BrowserUI {
   #handleDialogAccept = async (e: Event): Promise<void> => {
     e.stopPropagation();
 
-    const activeTab = this.#canvasBrowser!.tabs.getActiveTab();
+    const activeTab = this.#canvasBrowser!.getActiveTab();
     if (!activeTab || !activeTab.dialog.isOpen) return;
 
     const promptText = (e as CustomEvent<DialogAcceptEventDetail>).detail
@@ -338,7 +338,7 @@ export class BrowserUI {
   #handleDialogDismiss = async (e: Event): Promise<void> => {
     e.stopPropagation();
 
-    const activeTab = this.#canvasBrowser!.tabs.getActiveTab();
+    const activeTab = this.#canvasBrowser!.getActiveTab();
     if (!activeTab || !activeTab.dialog.isOpen) return;
 
     const success = await activeTab.dialog.dismiss();
@@ -352,7 +352,7 @@ export class BrowserUI {
 
     const { type, x, y, button } = (e as CustomEvent<MouseDetail>).detail;
 
-    const activeTab = this.#canvasBrowser!.tabs.getActiveTab();
+    const activeTab = this.#canvasBrowser!.getActiveTab();
     if (!activeTab) return;
 
     switch (type) {
@@ -375,7 +375,7 @@ export class BrowserUI {
 
     const { deltaX, deltaY } = (e as CustomEvent<WheelDetail>).detail;
 
-    const activeTab = this.#canvasBrowser!.tabs.getActiveTab();
+    const activeTab = this.#canvasBrowser!.getActiveTab();
     if (!activeTab) return;
 
     await activeTab.page.mouse.wheel({ deltaX, deltaY });
@@ -387,7 +387,7 @@ export class BrowserUI {
     const detail = (e as CustomEvent<KeyboardDetail>).detail;
     const { type, code } = detail;
 
-    const activeTab = this.#canvasBrowser!.tabs.getActiveTab();
+    const activeTab = this.#canvasBrowser!.getActiveTab();
     if (!activeTab) return;
 
     // Handle keyboard events on the page
@@ -425,8 +425,7 @@ export class BrowserUI {
       return;
     }
 
-    const tabs = this.#canvasBrowser.tabs;
-    const snapshot = tabs.getSnapshot();
+    const snapshot = this.#canvasBrowser.getTabsSnapshot();
     const tabIds = Array.from(snapshot.tabs.keys());
     const tabsData = tabIds
       .map((tabId) => {
@@ -443,7 +442,7 @@ export class BrowserUI {
       .filter((tab): tab is NonNullable<typeof tab> => tab !== null);
 
     const activeTab = snapshot.tabs.get(snapshot.activeTabId || '');
-    const currentUrl = tabs.getCurrentUrl();
+    const currentUrl = activeTab?.url || '';
 
     this.#browserContainer.updateTabs(
       tabsData,
@@ -463,7 +462,7 @@ export class BrowserUI {
       return;
     }
 
-    const snapshot = this.#canvasBrowser.tabs.getSnapshot();
+    const snapshot = this.#canvasBrowser.getTabsSnapshot();
     const activeTabId = snapshot.activeTabId;
 
     if (!activeTabId) {

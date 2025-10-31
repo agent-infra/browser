@@ -104,46 +104,23 @@ export class UIBrowser extends BaseBrowser<UITabs> {
     }
   };
 
-  protected async attemptReconnect(): Promise<void> {
-    if (this.reconnectAttempts >= 5) {
-      console.error('Max reconnect attempts reached. Giving up reconnecting');
-      return;
-    }
-    if (!this.wsEndpoint) {
-      console.error('No wsEndpoint found. Cannot reconnect');
-      return;
-    }
+  protected async performReconnect(): Promise<void> {
+    const connectOptions = {
+      browserWSEndpoint: this.wsEndpoint,
+      defaultViewport: this.defaultViewport,
+    };
+    this.pptrBrowser = (await connect(connectOptions)) as unknown as Browser;
 
-    const delay = this.getReconnectDelay();
-    await new Promise((resolve) => setTimeout(resolve, delay));
-    this.incrementReconnectAttempts();
+    this.wsEndpoint = this.pptrBrowser.wsEndpoint();
+    this._tabs = await UITabs.UICreate(this.pptrBrowser, this.element, {
+      viewport: this.defaultViewport,
+      envInfo: this._envInfo!,
+    });
 
-    try {
-      const connectOptions = {
-        browserWSEndpoint: this.wsEndpoint,
-        defaultViewport: this.defaultViewport,
-      };
-      this.pptrBrowser = (await connect(connectOptions)) as unknown as Browser;
-
-      this.wsEndpoint = this.pptrBrowser.wsEndpoint();
-      this._tabs = await UITabs.UICreate(this.pptrBrowser, this.element, {
-        viewport: this.defaultViewport,
-        envInfo: this._envInfo!,
-      });
-
-      // Restore active tab's ScreencastRenderer after reconnection
-      const activeTab = this.tabs.getActiveTab();
-      if (activeTab) {
-        await activeTab.active();
-      }
-
-      await this.handleReconnectSuccess();
-    } catch (error) {
-      if (this.reconnectAttempts < 5) {
-        this.attemptReconnect();
-      } else {
-        console.error('Failed to reconnect after max retries:', error);
-      }
+    // Restore active tab's ScreencastRenderer after reconnection
+    const activeTab = this.tabs.getActiveTab();
+    if (activeTab) {
+      await activeTab.active();
     }
   }
 }

@@ -5,6 +5,8 @@
 
 import type { Browser as pptrBrowser, Viewport } from 'puppeteer-core';
 
+import type { Tabs } from '../tabs/tabs';
+
 const MAX_RETRIES = 5;
 const INITIAL_BACKOFF = 2000;
 
@@ -12,7 +14,7 @@ const INITIAL_BACKOFF = 2000;
  * Abstract base class for browser implementations
  * Contains common functionality shared between Browser and UIBrowser
  */
-export abstract class BaseBrowser<TTabs> {
+export abstract class BaseBrowser<TTabs extends Tabs> {
   public pptrBrowser?: pptrBrowser;
   public _tabs?: TTabs;
   public _envInfo?: any;
@@ -36,49 +38,31 @@ export abstract class BaseBrowser<TTabs> {
     if (!this._tabs) {
       throw new Error('Tabs not initialized');
     }
-    return this._tabs!;
+    return this._tabs;
   }
 
-  async getTabsSnapshot() {
-    if (!this._tabs) {
-      throw new Error('Tabs not initialized');
-    }
-    return (this._tabs as any).getSnapshot();
+  getTabsSnapshot() {
+    return this.tabs.getSnapshot();
   }
 
-  async subscribeTabChange(callback: () => void) {
-    if (!this._tabs) {
-      throw new Error('Tabs not initialized');
-    }
-    return (this._tabs as any).subscribe(callback);
+  subscribeTabChange(callback: () => void) {
+    return this.tabs.subscribe(callback);
+  }
+
+  getActiveTab() {
+    return this.tabs.getActiveTab();
   }
 
   async createTab() {
-    if (!this._tabs) {
-      throw new Error('Tabs not initialized');
-    }
-    return (this._tabs as any).createTab();
+    return this.tabs.createTab();
   }
 
   async activeTab(tabId: string) {
-    if (!this._tabs) {
-      throw new Error('Tabs not initialized');
-    }
-    return (this._tabs as any).activeTab(tabId);
+    return this.tabs.activeTab(tabId);
   }
 
   async closeTab(tabId: string) {
-    if (!this._tabs) {
-      throw new Error('Tabs not initialized');
-    }
-    return (this._tabs as any).closeTab(tabId);
-  }
-
-  async getActiveTab() {
-    if (!this._tabs) {
-      throw new Error('Tabs not initialized');
-    }
-    return (this._tabs as any).getActiveTab();
+    return this.tabs.closeTab(tabId);
   }
 
   // #endregion
@@ -142,22 +126,32 @@ export abstract class BaseBrowser<TTabs> {
     });
   }
 
-  protected abstract attemptReconnect(): Promise<void>;
+  protected abstract performReconnect(): Promise<void>;
 
-  public async handleReconnectSuccess(): Promise<void> {
-    this.reconnectAttempts = 0;
-  }
+  protected async attemptReconnect(): Promise<void> {
+    if (this.reconnectAttempts >= MAX_RETRIES) {
+      console.error('Max reconnect attempts reached. Giving up reconnecting');
+      return;
+    }
+    if (!this.wsEndpoint) {
+      console.error('No wsEndpoint found. Cannot reconnect');
+      return;
+    }
 
-  public shouldAttemptReconnect(): boolean {
-    return this.reconnectAttempts < MAX_RETRIES && !!this.wsEndpoint;
-  }
-
-  public getReconnectDelay(): number {
-    return INITIAL_BACKOFF * this.reconnectAttempts;
-  }
-
-  public incrementReconnectAttempts(): void {
+    const delay = INITIAL_BACKOFF * this.reconnectAttempts;
+    await new Promise((resolve) => setTimeout(resolve, delay));
     this.reconnectAttempts++;
+
+    try {
+      await this.performReconnect();
+      this.reconnectAttempts = 0;
+    } catch (error) {
+      if (this.reconnectAttempts < MAX_RETRIES) {
+        this.attemptReconnect();
+      } else {
+        console.error('Failed to reconnect after max retries:', error);
+      }
+    }
   }
 
   // #endregion
