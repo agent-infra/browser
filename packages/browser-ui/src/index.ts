@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { UIBrowser } from './core';
+export { BrowserUI } from './core';

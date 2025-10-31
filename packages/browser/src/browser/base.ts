@@ -34,7 +34,7 @@ export abstract class BaseBrowser<TTabs extends Tabs> {
 
   // #region tabs
 
-  get tabs(): TTabs {
+  private get tabs(): TTabs {
     if (!this._tabs) {
       throw new Error('Tabs not initialized');
     }
@@ -63,6 +63,10 @@ export abstract class BaseBrowser<TTabs extends Tabs> {
 
   async closeTab(tabId: string) {
     return this.tabs.closeTab(tabId);
+  }
+
+  async destroyAllTabs() {
+    return this.tabs.destroy();
   }
 
   // #endregion

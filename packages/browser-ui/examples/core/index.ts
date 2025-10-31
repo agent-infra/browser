@@ -2,17 +2,14 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { BrowserUI } from '../../src/core';
+import { BrowserUI } from '../../src';
 
-// Get the container element
 const container = document.getElementById('browserContainer');
-
 if (!container) {
   throw new Error('Browser container element not found');
 }
 
-// Create and initialize BrowserUI
-const browserUI = new BrowserUI({
+BrowserUI.create({
   root: container,
   browserOptions: {
     // @ts-ignore
@@ -23,6 +20,3 @@ const browserUI = new BrowserUI({
     },
   },
 });
-
-// Initialize the browser UI
-await browserUI.init();

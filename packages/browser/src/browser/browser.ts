@@ -30,7 +30,7 @@ export class Browser extends BaseBrowser<Tabs> {
   async close() {
     this.isIntentionalDisconnect = true;
 
-    await this.tabs?.destroy();
+    await this.destroyAllTabs();
     await this.pptrBrowser?.close();
   }
 
@@ -192,7 +192,7 @@ export class Browser extends BaseBrowser<Tabs> {
       envInfo: this._envInfo!,
     });
 
-    const activeTab = this.tabs.getActiveTab();
+    const activeTab = this.getActiveTab();
     if (activeTab) {
       await activeTab.active();
     }

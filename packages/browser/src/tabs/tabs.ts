@@ -16,7 +16,6 @@ import {
   type TabsState,
   type TabsOperationTracker,
   type TabsOptions,
-  type NavigationOptions,
   type DialogMeta,
 } from '../types/tabs';
 
@@ -283,70 +282,6 @@ export class Tabs<T extends Tab = Tab> {
   // #endregion
 
   // #region public methods
-
-  #backMutex = new Mutex();
-  async goBack(options: NavigationOptions = {}): Promise<boolean> {
-    using _ = await this.#backMutex.acquire();
-
-    const activeTab = this.getActiveTab();
-
-    if (!activeTab) {
-      return false;
-    }
-
-    return await activeTab.goBack(options);
-  }
-
-  #forwardMutex = new Mutex();
-  async goForward(options: NavigationOptions = {}): Promise<boolean> {
-    using _ = await this.#forwardMutex.acquire();
-
-    const activeTab = this.getActiveTab();
-
-    if (!activeTab) {
-      return false;
-    }
-
-    return await activeTab.goForward(options);
-  }
-
-  #reloadMutex = new Mutex();
-  async reload(options: NavigationOptions = {}): Promise<boolean> {
-    using _ = await this.#reloadMutex.acquire();
-
-    const activeTab = this.getActiveTab();
-
-    if (!activeTab) {
-      return false;
-    }
-
-    try {
-      await activeTab.reload(options);
-      return true;
-    } catch (error) {
-      console.error('Reload failed:', error);
-      return false;
-    }
-  }
-
-  async navigate(
-    url: string,
-    options: NavigationOptions = {},
-  ): Promise<boolean> {
-    const activeTab = this.getActiveTab();
-
-    if (!activeTab) {
-      return false;
-    }
-
-    try {
-      await activeTab.goto(url, options);
-      return true;
-    } catch (error) {
-      console.error('Navigation failed:', error);
-      return false;
-    }
-  }
 
   getCurrentUrl(): string {
     const activeTab = this.getActiveTab();

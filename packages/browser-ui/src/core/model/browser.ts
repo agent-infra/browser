@@ -118,7 +118,7 @@ export class UIBrowser extends BaseBrowser<UITabs> {
     });
 
     // Restore active tab's ScreencastRenderer after reconnection
-    const activeTab = this.tabs.getActiveTab();
+    const activeTab = this.getActiveTab();
     if (activeTab) {
       await activeTab.active();
     }
