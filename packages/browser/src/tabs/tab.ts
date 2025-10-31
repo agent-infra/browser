@@ -5,7 +5,7 @@
 import { EventEmitter } from 'eventemitter3';
 import { BinaryImageParser, Base64ImageParser } from '@agent-infra/media-utils';
 import { disableWebdriver, visibilityScript } from '../injected-script';
-import { iife, validateNavigationUrl } from '../utils';
+import { iife, Mutex, validateNavigationUrl } from '../utils';
 import { TabDialog } from './dialog';
 import { Mouse, Keyboard } from '../actions';
 
@@ -235,7 +235,10 @@ export class Tab extends EventEmitter<TabEventsMap> {
     }
   }
 
+  #backMutex = new Mutex();
   async goBack(options: NavigationOptions = {}): Promise<boolean> {
+    using _ = await this.#backMutex.acquire();
+
     await this.#pptrPage.goBack({
       waitUntil: options.waitUntil,
       timeout: options.timeout,
@@ -243,7 +246,10 @@ export class Tab extends EventEmitter<TabEventsMap> {
     return true;
   }
 
+  #forwardMutex = new Mutex();
   async goForward(options: NavigationOptions = {}): Promise<boolean> {
+    using _ = await this.#forwardMutex.acquire();
+
     await this.#pptrPage.goForward({
       waitUntil: options.waitUntil,
       timeout: options.timeout,
@@ -251,7 +257,10 @@ export class Tab extends EventEmitter<TabEventsMap> {
     return true;
   }
 
+  #reloadMutex = new Mutex();
   async reload(options: NavigationOptions = {}): Promise<void> {
+    using _ = await this.#reloadMutex.acquire();
+
     if (this.#reloadAbortController) {
       this.#reloadAbortController.abort();
     }

@@ -37,9 +37,6 @@ export class BrowserUI {
     this.#options = options;
   }
 
-  /**
-   * Initialize the Browser UI
-   */
   async init(): Promise<void> {
     if (this.#isInitialized) {
       throw new Error('BrowserUI is already initialized');
@@ -84,9 +81,8 @@ export class BrowserUI {
     this.#isInitialized = true;
   }
 
-  /**
-   * Get the underlying UIBrowser instance
-   */
+  // #region instance getters
+
   get browser(): UIBrowser {
     if (!this.#canvasBrowser) {
       throw new Error('BrowserUI not initialized');
@@ -94,9 +90,6 @@ export class BrowserUI {
     return this.#canvasBrowser;
   }
 
-  /**
-   * Get the browser container element
-   */
   get container(): BrowserContainer {
     if (!this.#browserContainer) {
       throw new Error('BrowserUI not initialized');
@@ -104,16 +97,12 @@ export class BrowserUI {
     return this.#browserContainer;
   }
 
-  /**
-   * Check if the BrowserUI is initialized
-   */
   get isInitialized(): boolean {
     return this.#isInitialized;
   }
 
-  /**
-   * Destroy the Browser UI and clean up resources
-   */
+  // #endregion
+
   async destroy(): Promise<void> {
     if (!this.#isInitialized) {
       return;
@@ -152,6 +141,8 @@ export class BrowserUI {
     }
     return canvas;
   }
+
+  // #region event listeners
 
   #setupEventListeners(): void {
     if (!this.#browserContainer || !this.#canvasBrowser) {
@@ -261,6 +252,10 @@ export class BrowserUI {
     );
   }
 
+  // #endregion
+
+  // #region tab handlers
+
   #handleTabActivate = async (e: Event): Promise<void> => {
     e.stopPropagation();
 
@@ -282,6 +277,10 @@ export class BrowserUI {
 
     await this.#canvasBrowser!.createTab();
   };
+
+  // #endregion
+
+  // #region nav handlers
 
   #handleNavigate = async (e: Event): Promise<void> => {
     e.stopPropagation();
@@ -307,7 +306,8 @@ export class BrowserUI {
     const activeTab = this.#canvasBrowser!.getActiveTab();
     if (!activeTab) return;
 
-    const action = (e as CustomEvent<NavigationActionEventDetail>).detail.action;
+    const action = (e as CustomEvent<NavigationActionEventDetail>).detail
+      .action;
     switch (action) {
       case 'back':
         await activeTab.goBack();
@@ -321,31 +321,9 @@ export class BrowserUI {
     }
   };
 
-  #handleDialogAccept = async (e: Event): Promise<void> => {
-    e.stopPropagation();
+  // #endregion
 
-    const activeTab = this.#canvasBrowser!.getActiveTab();
-    if (!activeTab || !activeTab.dialog.isOpen) return;
-
-    const promptText = (e as CustomEvent<DialogAcceptEventDetail>).detail
-      .inputValue;
-    const success = await activeTab.dialog.accept(promptText);
-    if (success) {
-      this.#browserContainer!.hideDialog();
-    }
-  };
-
-  #handleDialogDismiss = async (e: Event): Promise<void> => {
-    e.stopPropagation();
-
-    const activeTab = this.#canvasBrowser!.getActiveTab();
-    if (!activeTab || !activeTab.dialog.isOpen) return;
-
-    const success = await activeTab.dialog.dismiss();
-    if (success) {
-      this.#browserContainer!.hideDialog();
-    }
-  };
+  // #region input handlers
 
   #handleCanvasMouseEvent = async (e: Event): Promise<void> => {
     e.stopPropagation();
@@ -420,6 +398,77 @@ export class BrowserUI {
     }
   };
 
+  // #endregion
+
+  // #region widget handlers
+
+  #handleClipboardChange = (e: Event): void => {
+    e.stopPropagation();
+
+    this.#clipboardContent =
+      (e as CustomEvent<ClipboardDetail>).detail.content || '';
+  };
+
+  // #endregion
+
+  // #region dialog handlers
+
+  #handleDialogAccept = async (e: Event): Promise<void> => {
+    e.stopPropagation();
+
+    const activeTab = this.#canvasBrowser!.getActiveTab();
+    if (!activeTab || !activeTab.dialog.isOpen) return;
+
+    const promptText = (e as CustomEvent<DialogAcceptEventDetail>).detail
+      .inputValue;
+    const success = await activeTab.dialog.accept(promptText);
+    if (success) {
+      this.#browserContainer!.hideDialog();
+    }
+  };
+
+  #handleDialogDismiss = async (e: Event): Promise<void> => {
+    e.stopPropagation();
+
+    const activeTab = this.#canvasBrowser!.getActiveTab();
+    if (!activeTab || !activeTab.dialog.isOpen) return;
+
+    const success = await activeTab.dialog.dismiss();
+    if (success) {
+      this.#browserContainer!.hideDialog();
+    }
+  };
+
+  // #endregion
+
+  // #region update UI
+
+  #updateDialog(): void {
+    if (!this.#browserContainer || !this.#canvasBrowser) {
+      return;
+    }
+
+    const snapshot = this.#canvasBrowser.getTabsSnapshot();
+    const activeTabId = snapshot.activeTabId;
+
+    if (!activeTabId) {
+      this.#browserContainer.hideDialog();
+      return;
+    }
+
+    const activeTab = snapshot.tabs.get(activeTabId);
+    if (!activeTab) {
+      this.#browserContainer.hideDialog();
+      return;
+    }
+
+    if (activeTab.dialog) {
+      this.#browserContainer.showDialog(activeTab.dialog);
+    } else {
+      this.#browserContainer.hideDialog();
+    }
+  }
+
   #updateBrowserContainer(): void {
     if (!this.#browserContainer || !this.#canvasBrowser) {
       return;
@@ -457,36 +506,5 @@ export class BrowserUI {
     }
   }
 
-  #updateDialog(): void {
-    if (!this.#browserContainer || !this.#canvasBrowser) {
-      return;
-    }
-
-    const snapshot = this.#canvasBrowser.getTabsSnapshot();
-    const activeTabId = snapshot.activeTabId;
-
-    if (!activeTabId) {
-      this.#browserContainer.hideDialog();
-      return;
-    }
-
-    const activeTab = snapshot.tabs.get(activeTabId);
-    if (!activeTab) {
-      this.#browserContainer.hideDialog();
-      return;
-    }
-
-    if (activeTab.dialog) {
-      this.#browserContainer.showDialog(activeTab.dialog);
-    } else {
-      this.#browserContainer.hideDialog();
-    }
-  }
-
-  #handleClipboardChange = (e: Event): void => {
-    e.stopPropagation();
-
-    this.#clipboardContent =
-      (e as CustomEvent<ClipboardDetail>).detail.content || '';
-  };
+  // #endregion
 }
