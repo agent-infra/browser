@@ -16,8 +16,8 @@ export default defineConfig({
       index: ['src/**/*.ts', '!src/**/*.{test,bench}.ts'],
     },
     decorators: {
-      version: 'legacy'
-    }
+      version: 'legacy',
+    },
   },
   lib: [
     {
@@ -39,5 +39,6 @@ export default defineConfig({
     target: 'web',
     cleanDistPath: true,
     sourceMap: true,
+    externals: ['chromium-bidi/lib/cjs/bidiMapper/BidiMapper.js'],
   },
 });
