@@ -9,7 +9,7 @@ import { Tabs } from '../tabs/tabs';
 import { getEnvInfo } from '../env';
 import { BaseBrowser } from './base';
 
-import type { LaunchOptions } from 'puppeteer-core';
+import type { Cookie, CookieData, LaunchOptions } from 'puppeteer-core';
 
 export class Browser extends BaseBrowser<Tabs> {
   /**
@@ -25,7 +25,29 @@ export class Browser extends BaseBrowser<Tabs> {
     super();
   }
 
-  // #region public methods
+  // #region cookies
+
+  /**
+   * cookies API
+   *
+   * @doc: https://pptr.dev/guides/cookies#setting-cookies
+   */
+
+  cookies() {
+    return this.pptrBrowser!.cookies();
+  }
+
+  setCookie(...cookies: CookieData[]) {
+    return this.pptrBrowser!.setCookie(...cookies);
+  }
+
+  deleteCookie(...cookies: Cookie[]) {
+    return this.pptrBrowser!.deleteCookie(...cookies);
+  }
+
+  // #endregion
+
+  // #region lifecycle
 
   async close() {
     this.isIntentionalDisconnect = true;
@@ -179,7 +201,7 @@ export class Browser extends BaseBrowser<Tabs> {
     this.setupAutoReconnect();
   }
 
-  protected async performReconnect(): Promise<void> {
+  override async performReconnect(): Promise<void> {
     const connectOptions = {
       browserWSEndpoint: this.wsEndpoint,
       defaultViewport: this.defaultViewport,

@@ -19,7 +19,7 @@ import {
   EMPTY,
 } from 'rxjs';
 import { EventEmitter } from 'eventemitter3';
-import { drawBase64ToCanvas } from '../../utils/image';
+import { drawBase64ToCanvas } from '../utils/image';
 
 import type { Page, CDPSession, Protocol } from 'puppeteer-core';
 import { ScreenCastOptions } from '../../types';

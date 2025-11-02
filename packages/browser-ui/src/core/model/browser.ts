@@ -104,7 +104,7 @@ export class UIBrowser extends BaseBrowser<UITabs> {
     }
   };
 
-  protected async performReconnect(): Promise<void> {
+  override async performReconnect(): Promise<void> {
     const connectOptions = {
       browserWSEndpoint: this.wsEndpoint,
       defaultViewport: this.defaultViewport,

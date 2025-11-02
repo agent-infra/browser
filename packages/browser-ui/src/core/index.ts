@@ -27,9 +27,8 @@ export interface BrowserUIOptions {
 }
 
 export class BrowserUI {
-
   static async create(options: BrowserUIOptions): Promise<BrowserUI> {
-    const browserUI =  new BrowserUI(options);
+    const browserUI = new BrowserUI(options);
     await browserUI.#init();
 
     return browserUI;
