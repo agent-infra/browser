@@ -23,7 +23,9 @@ export default defineConfig({
     distPath: {
       root: './distExample/core',
     },
+    target: 'web',
     minify: true,
     assetPrefix: './',
+    externals: ['chromium-bidi/lib/cjs/bidiMapper/BidiMapper.js'],
   },
 });
