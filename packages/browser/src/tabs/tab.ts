@@ -58,6 +58,11 @@ export class Tab extends EventEmitter<TabEventsMap> {
     this.#setupVisibilityTracking();
     this.#executeScriptsOnCreate();
 
+    // Set user agent if provided
+    if (options.userAgentInfo) {
+      this.#pptrPage.setUserAgent(options.userAgentInfo);
+    }
+
     // page events: https://pptr.dev/api/puppeteer.pageevent
     this.#pptrPage.on('domcontentloaded', this.#dclHandler);
     this.#pptrPage.on('load', this.#loadHandler);

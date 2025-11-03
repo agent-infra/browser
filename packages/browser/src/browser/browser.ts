@@ -184,6 +184,7 @@ export class Browser extends BaseBrowser<Tabs> {
     this._tabs = await Tabs.create(this.pptrBrowser, {
       viewport: this.defaultViewport,
       envInfo: this._envInfo,
+      userAgentInfo: this.userAgentInfo,
     });
     this.setupAutoReconnect();
   }
@@ -201,6 +202,7 @@ export class Browser extends BaseBrowser<Tabs> {
     this._tabs = await Tabs.create(this.pptrBrowser, {
       viewport: this.defaultViewport,
       envInfo: this._envInfo,
+      userAgentInfo: this.userAgentInfo,
     });
     this.setupAutoReconnect();
   }

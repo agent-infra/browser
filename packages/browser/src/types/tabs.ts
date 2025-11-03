@@ -10,10 +10,12 @@ import type {
 } from 'puppeteer-core';
 
 import type { EnvInfo } from './env';
+import type { UserAgentInfo } from './browser';
 
 export interface TabsOptions {
   viewport: Viewport;
   envInfo: EnvInfo;
+  userAgentInfo?: UserAgentInfo;
 }
 
 export interface TabOptions extends TabsOptions {

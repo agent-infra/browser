@@ -4,6 +4,7 @@
  */
 
 export * from './env';
+export * from './browser';
 export * from './tabs';
 export * from './dialog';
 export * from './actions';

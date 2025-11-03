@@ -6,7 +6,7 @@
 import type { Browser as pptrBrowser, Viewport } from 'puppeteer-core';
 
 import type { Tabs } from '../tabs/tabs';
-import type { EnvInfo } from '../types';
+import type { EnvInfo, UserAgentInfo } from '../types';
 
 const MAX_RETRIES = 5;
 const INITIAL_BACKOFF = 2000;
@@ -30,6 +30,7 @@ export abstract class BaseBrowser<TTabs extends Tabs> {
   };
   public isIntentionalDisconnect: boolean = false;
   public reconnectAttempts: number = 0;
+  public userAgentInfo?: UserAgentInfo;
 
   constructor() {}
 
@@ -68,6 +69,29 @@ export abstract class BaseBrowser<TTabs extends Tabs> {
 
   async destroyAllTabs() {
     return this.tabs.destroy();
+  }
+
+  // #endregion
+
+  // #region userAgent
+
+  /**
+   * Set the user agent for the browser and future tabs
+   */
+  setUserAgent(options: UserAgentInfo): void {
+    this.userAgentInfo = options;
+  }
+
+  /**
+   * Get the current user agent
+   */
+  async getUserAgent() {
+    if (this.userAgentInfo) {
+      return this.userAgentInfo;
+    }
+
+    const uaString = await this.pptrBrowser?.userAgent();
+    return { userAgent: uaString };
   }
 
   // #endregion

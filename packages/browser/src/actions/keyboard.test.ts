@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Keyboard } from './keyboard';
 import type { Page } from 'puppeteer-core';
 import type { EnvInfo } from '../types';
+import type { TabDialog } from '../tabs/dialog';
 
 // Mock delay module
 vi.mock('delay', () => ({
@@ -20,6 +21,7 @@ describe('Keyboard', () => {
     type: ReturnType<typeof vi.fn>;
     sendCharacter: ReturnType<typeof vi.fn>;
   };
+  let mockDialog: TabDialog;
 
   beforeEach(() => {
     mockKeyboard = {
@@ -33,12 +35,17 @@ describe('Keyboard', () => {
       keyboard: mockKeyboard,
     } as unknown as Page;
 
+    // @ts-ignore
+    mockDialog = {
+      isOpen: false,
+    }
+
     vi.clearAllMocks();
   });
 
   describe('constructor', () => {
     it('should create instance with correct OS and browser', () => {
-      const keyboard = new Keyboard(mockPage, { osName: 'macOS', browserName: 'Chrome', browserVersion: '140' });
+      const keyboard = new Keyboard(mockPage, mockDialog, { osName: 'macOS', browserName: 'Chrome', browserVersion: '140' });
       expect(keyboard).toBeInstanceOf(Keyboard);
     });
 
@@ -51,7 +58,7 @@ describe('Keyboard', () => {
       ];
 
       combinations.forEach(([os, browser]) => {
-        const keyboard = new Keyboard(mockPage, {
+        const keyboard = new Keyboard(mockPage, mockDialog, {
           osName: os,
           browserName: browser,
           browserVersion: '140',
@@ -63,7 +70,7 @@ describe('Keyboard', () => {
 
   describe('press method', () => {
     it('should handle simple key combinations', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -78,7 +85,7 @@ describe('Keyboard', () => {
     });
 
     it('should handle abbreviations correctly', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -91,7 +98,7 @@ describe('Keyboard', () => {
     });
 
     it('should handle multiple modifier keys', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -108,7 +115,7 @@ describe('Keyboard', () => {
     });
 
     it('should handle case insensitive input', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -121,7 +128,7 @@ describe('Keyboard', () => {
     });
 
     it('should handle custom delay option', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -134,7 +141,7 @@ describe('Keyboard', () => {
     });
 
     it('should use default delay when no options provided', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -147,7 +154,7 @@ describe('Keyboard', () => {
     });
 
     it('should throw error for unsupported keys', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -161,7 +168,7 @@ describe('Keyboard', () => {
 
   describe('macOS Chrome special handling', () => {
     it('should use CDP commands for common macOS shortcuts', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'macOS',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -178,7 +185,7 @@ describe('Keyboard', () => {
     });
 
     it('should handle Control key as Meta on macOS', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'macOS',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -192,7 +199,7 @@ describe('Keyboard', () => {
     });
 
     it('should handle various macOS shortcuts', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'macOS',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -227,7 +234,7 @@ describe('Keyboard', () => {
     });
 
     it('should fallback to regular key press for unsupported macOS shortcuts', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'macOS',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -243,7 +250,7 @@ describe('Keyboard', () => {
     });
 
     it('should not use CDP commands for non-macOS systems', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -260,7 +267,7 @@ describe('Keyboard', () => {
     });
 
     it('should not use CDP commands for non-Chrome browsers on macOS', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'macOS',
         browserName: 'Firefox',
         browserVersion: '140',
@@ -279,7 +286,7 @@ describe('Keyboard', () => {
 
   describe('key formatting', () => {
     it('should handle spaces in hotkey string', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -292,7 +299,7 @@ describe('Keyboard', () => {
     });
 
     it('should handle different key abbreviations', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -327,7 +334,7 @@ describe('Keyboard', () => {
     });
 
     it('should handle function keys', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -340,7 +347,7 @@ describe('Keyboard', () => {
     });
 
     it('should handle number keys', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -355,7 +362,7 @@ describe('Keyboard', () => {
 
   describe('key press sequence', () => {
     it('should press keys in correct order and release in reverse order', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -377,7 +384,7 @@ describe('Keyboard', () => {
 
   describe('down method', () => {
     it('should press keys down in correct order', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -392,7 +399,7 @@ describe('Keyboard', () => {
     });
 
     it('should handle macOS Chrome CDP commands for down method', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'macOS',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -409,7 +416,7 @@ describe('Keyboard', () => {
 
   describe('up method', () => {
     it('should release keys in reverse order', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -426,7 +433,7 @@ describe('Keyboard', () => {
 
   describe('type method', () => {
     it('should use keyboard.type for short text with delay', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -439,7 +446,7 @@ describe('Keyboard', () => {
     });
 
     it('should use sendCharacter for long text', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
@@ -452,7 +459,7 @@ describe('Keyboard', () => {
     });
 
     it('should use sendCharacter for text without delay', async () => {
-      const keyboard = new Keyboard(mockPage, {
+      const keyboard = new Keyboard(mockPage, mockDialog, {
         osName: 'Windows',
         browserName: 'Chrome',
         browserVersion: '140',
