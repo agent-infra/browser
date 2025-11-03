@@ -15,7 +15,7 @@
 我们借助相关 API，显示了远程浏览器的所有 tabs，并实现了 `switchTab`/`createTab`/`closeTab` 这些基础功能：
 
 <p>
-<video src="./videos/tabs-switch.mp4" controls="true" width="600"></video>
+<video src="https://github.com/user-attachments/assets/21e1ef6b-8977-48ac-895a-0e76ee07c26d" controls="true" width="600"></video>
 </p>
 
 ## Navigation
@@ -23,7 +23,7 @@
 在单个 tab 内，你可以实现 `goBack`/`goForward`/`reload`/`goto` 等基础功能：
 
 <p>
-<video src="./videos/navigation.mp4" controls="true" width="600"></video>
+<video src="https://github.com/user-attachments/assets/f6e805c2-8545-4ca7-85fb-8641054880a4" controls="true" width="600"></video>
 </p>
 
 ## Dialog
@@ -31,7 +31,7 @@
 如果页面内有 `Alert`/`Conform` 等阻塞性弹窗，**@agent-infra/browser-ui** 也可以实时展示并同步响应状态：
 
 <p>
-<video src="./videos/dialog.mp4" controls="true" width="600"></video>
+<video src="https://github.com/user-attachments/assets/524c899d-0f61-4de3-9242-3b25c7c48d73" controls="true" width="600"></video>
 </p>
 
 ## 鼠标输入
@@ -39,7 +39,7 @@
 鼠标基础的 `move`/`hover`/`click`/`drag` 等操作都有良好的支持：
 
 <p>
-<video src="./videos/mouse.mp4" controls="true" width="600"></video>
+<video src="https://github.com/user-attachments/assets/fe29fbe1-4791-4942-9a98-6c38ae55d727" controls="true" width="600"></video>
 </p>
 
 ## 键盘输入
@@ -47,7 +47,7 @@
 键盘输入也支持，并支持了部分常见的快捷键（例如 `全选`/`复制`/`剪切`/`黏贴` 等）：
 
 <p>
-<video src="./videos/keyboard.mp4" controls="true" width="600"></video>
+<video src="https://github.com/user-attachments/assets/23fcb3a5-78a4-4434-9068-e42810b1e91d" controls="true" width="600"></video>
 </p>
 
 ## 剪切板模拟
@@ -65,5 +65,5 @@ if (clipboardContent && isPasteHotkey) {
 ```
 
 <p>
-<video src="./videos/clipboard.mp4" controls="true" width="600"></video>
+<video src="https://github.com/user-attachments/assets/001811a4-5a15-441e-a007-b93ad841f592" controls="true" width="600"></video>
 </p>
