@@ -103,7 +103,7 @@ export class Tabs<T extends Tab = Tab> {
         this.#setupTabEvents(tab, tabId);
         await this.#syncTabMeta(tabId);
 
-        const isActive = await tab.checkActiveStatusWithRuntime();
+        const isActive = await tab._checkActiveStatusWithRuntime();
         return { tabId, pptrPage, isActive };
       });
     const initedTabs = await Promise.all(initTabTasks);
@@ -201,14 +201,14 @@ export class Tabs<T extends Tab = Tab> {
 
     // active select tab
     this.state.activeTabId = tabId;
-    await tab.active();
+    await tab._active();
     await this.#syncTabMeta(this.state.activeTabId);
 
     // inactivate other tabs
     const inactivePromises = [];
     for (const [id, tabInstance] of this.#tabs) {
       if (id !== tabId) {
-        inactivePromises.push(tabInstance.inactive());
+        inactivePromises.push(tabInstance._inactive());
       }
     }
     await Promise.all(inactivePromises);
@@ -249,7 +249,7 @@ export class Tabs<T extends Tab = Tab> {
     if (!tab) {
       return false;
     }
-    await tab.close();
+    await tab._close();
     this.#tabs.delete(tabId);
     this.state.tabs.delete(tabId);
 

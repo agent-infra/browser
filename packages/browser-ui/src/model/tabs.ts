@@ -28,13 +28,13 @@ export class UITab extends Tab {
     return this.#renderer;
   }
 
-  override async active() {
-    super.active();
+  override async _active() {
+    super._active();
     this.#renderer.start();
   }
 
-  override async inactive() {
-    super.inactive();
+  override async _inactive() {
+    super._inactive();
     this.#renderer.stop();
   }
 }

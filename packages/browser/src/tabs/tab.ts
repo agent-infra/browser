@@ -124,16 +124,16 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   // #region active status
 
-  async active() {
+  async _active() {
     await this.#pptrPage.bringToFront();
     this.#status = 'active';
   }
 
-  async inactive() {
+  async _inactive() {
     this.#status = 'inactive';
   }
 
-  async checkActiveStatusWithRuntime() {
+  async _checkActiveStatusWithRuntime() {
     try {
       await this.#pptrPage.waitForFunction(
         () => document.visibilityState === 'visible',
@@ -287,7 +287,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
     }
   }
 
-  async close() {
+  async _close() {
     this.#pptrPage.off('load', this.#loadHandler);
     this.#pptrPage.off('framenavigated', this.#frameNavigatedHandler);
 

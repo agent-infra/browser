@@ -222,7 +222,7 @@ export class Browser extends BaseBrowser<Tabs> {
 
     const activeTab = this.getActiveTab();
     if (activeTab) {
-      await activeTab.active();
+      await activeTab._active();
     }
   }
 
