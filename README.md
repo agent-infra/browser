@@ -1,10 +1,12 @@
-# @agent-infra/browser
+<div align="right">
+  <a href="README.zh-CN.md">简体中文</a> | <b>English</b>
+</div>
+
+# Agent Infra Browser
 
 @agent-infra/browser is dedicated to building a comprehensive browser infrastructure toolkit designed for AI agents and browser automation.
 
 This monorepo provides a complete set of packages for browser detection, control and UI interaction —— everything you need to build intelligent browser automation systems.
-
-Currently, the business users of this Infra include [UI-TARS-desktop](https://github.com/bytedance/UI-TARS-desktop/#ui-tars-desktop) and [Agent TARS](https://github.com/bytedance/UI-TARS-desktop/#agent-tars), with more agents or apps to be integrated in the future.
 
 <br />
 
