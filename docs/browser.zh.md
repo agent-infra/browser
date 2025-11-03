@@ -28,6 +28,11 @@ import { Browser } from '@agent-infra/browser';
 // 创建浏览器实例
 const browser = await Browser.create();
 
+// 设置 User-Agent（可选）
+browser.setUserAgent({
+  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+});
+
 // 获取当前活跃标签页
 const activeTab = browser.getActiveTab();
 
@@ -366,6 +371,41 @@ interface DialogMeta {
 #### `deleteMatchingCookies(...filters: DeleteCookiesRequest[]): Promise<void>`
 
 批量删除匹配指定条件的 cookies。可直接参考 [Browser.deleteMatchingCookies | Puppeteer](https://pptr.dev/api/puppeteer.browser.deleteMatchingCookies)。
+
+<br />
+
+### UserAgent 管理
+
+#### `setUserAgent(options: UserAgentInfo): void`
+
+设置浏览器的 User-Agent。该设置会影响浏览器本身以及后续创建的所有标签页。
+
+**参数类型：**
+
+```typescript
+interface UserAgentInfo {
+  userAgent?: string;
+  userAgentMetadata?: Protocol.Emulation.UserAgentMetadata;
+  platform?: string;
+}
+```
+
+**使用示例：**
+
+```typescript
+// 设置简单的 User-Agent 字符串
+browser.setUserAgent({
+  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+});
+```
+
+#### `getUserAgent(): Promise<UserAgentInfo>`
+
+获取当前浏览器的 User-Agent 信息。
+
+**返回值：**
+- 如果之前通过 `setUserAgent` 设置过，返回设置的 UserAgentInfo
+- 否则返回从浏览器获取的当前 User-Agent 字符串
 
 <br />
 
