@@ -1,10 +1,10 @@
 # 前言
 
-@agent-infra/browser 是一套基于 puppeteer 的专为 browser agent 提供基础功能的 sdk。
+**@agent-infra/browser** 是一套基于 **puppeteer** 的专为 browser agent 提供基础功能的 sdk。
 
-puppeteer 是一款非常优秀的浏览器自动化控制软件，它封装了许多 CDP 操作，并提供了一套非常简洁的 API 供用户去使用。但是基于 puppeteer 构建 GUI Agent 的过程中，会发现它缺乏一些更为上层和通用的封装，例如 tabs 的管理，dialog 状态管理，hotkey 支持等。
+**puppeteer** 是一款非常优秀的浏览器自动化控制软件，它封装了许多 CDP 操作，并提供了一套非常简洁的 API 供用户去使用。但是基于 **puppeteer** 构建 GUI Agent 的过程中，会发现它缺乏一些更为上层和通用的封装，例如 tabs 的管理，dialog 状态管理，hotkey 支持等。
 
-@agent-infra/browser 就是为了解决上述的痛点而生，它提供的 API 在保持简洁的同时，还非常贴近操作浏览器的直觉，基于这点可以非常快速的封装出一个 Browser GUI Agent，一个 Browser Use Demo，或者是一个 Browser-Use-MCP。
+**@agent-infra/browser** 就是为了解决上述的痛点而生，它提供的 API 在保持简洁的同时，还非常贴近操作浏览器的直觉，基于这点可以非常快速的封装出一个 Browser GUI Agent，一个 Browser Use Demo，或者是一个 Browser-Use-MCP。
 
 <br />
 
@@ -50,7 +50,7 @@ await browser.close();
 
 ## 标签页管理
 
-不同于 puppeteer，@agent-infra/browser 抽象了一套 tabs 的概念，然后提供了相关的 API 去管理它。
+不同于 puppeteer，**@agent-infra/browser** 抽象了一套 tabs 的概念，然后提供了相关的 API 去管理它。
 
 ```typescript
 // 创建新标签页
@@ -92,7 +92,7 @@ await tab.reload();
 
 ## 鼠标和键盘操作
 
-在鼠标操作上，目前 @agent-infra/browser 封装了一套 vision 方案（也就是通过坐标去执行相关 action），后续我们会支持基于 DOM 的解决方案。
+在鼠标操作上，目前 **@agent-infra/browser** 封装了一套 vision 方案（也就是通过坐标去执行相关 action），后续我们会支持基于 DOM 的解决方案。
 
 在键盘操作上，在 puppeteer 原有基础上我们内置了的常见的快捷键（例如 复制/黏贴）支持，用户可以直接使用。
 
