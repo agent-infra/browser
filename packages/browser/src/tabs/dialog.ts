@@ -6,6 +6,7 @@ import type { Dialog, CDPSession } from 'puppeteer-core';
 
 import type { Tab } from './tab';
 import { TabEvents } from '../types';
+import { DialogMetaInfo } from '../types/dialog';
 
 export class TabDialog {
   #tab: Tab;
@@ -21,7 +22,7 @@ export class TabDialog {
     return this.#dialog !== null;
   }
 
-  get meta() {
+  get meta(): DialogMetaInfo | null {
     if (this.#dialog) {
       return {
         type: this.#dialog.type(),
@@ -40,7 +41,10 @@ export class TabDialog {
   #handleEvent() {
     this.#tab.page.on('dialog', this.#openHandler);
     // @ts-ignore
-    (this.#tab.page._client() as CDPSession).on('Page.javascriptDialogClosed', this.#closeHandler);
+    (this.#tab.page._client() as CDPSession).on(
+      'Page.javascriptDialogClosed',
+      this.#closeHandler,
+    );
   }
 
   #openHandler = (dialog: Dialog) => {
@@ -53,7 +57,7 @@ export class TabDialog {
       message: dialog.message(),
       defaultValue: dialog.defaultValue(),
     });
-  }
+  };
 
   #closeHandler = () => {
     if (this.#dialog) {
@@ -63,12 +67,15 @@ export class TabDialog {
       });
       this.#dialog = null;
     }
-  }
+  };
 
   cleanup() {
     this.#tab.page.off('dialog', this.#openHandler);
     // @ts-ignore
-    (this.#tab.page._client() as CDPSession).off('Page.javascriptDialogClosed', this.#closeHandler);
+    (this.#tab.page._client() as CDPSession).off(
+      'Page.javascriptDialogClosed',
+      this.#closeHandler,
+    );
 
     this.#dialog = null;
   }
