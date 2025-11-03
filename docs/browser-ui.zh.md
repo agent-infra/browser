@@ -1,8 +1,34 @@
 # 简介
 
-**@agent-infra/browser-ui** 是一个基于 CDP 的浏览器远程投屏解决方案。它基于 **@agent-infra/browser** 实现了基础的能力封装，但是它运行在浏览器上。
+**@agent-infra/browser-ui** 是一个基于 CDP 的浏览器远程投屏解决方案。它基于 **@agent-infra/browser** 实现了基础的能力封装，可以作为一个 Web 组件直接被网页引用使用。
 
 用户只需要提供一个有权限的 CDP WebSocket Url，**@agent-infra/browser-ui** 就可以显示远程浏览器的页面，然后你还可以手动介入浏览器的操作，这在没有 VNC 和 headless browser 的场景非常有用。
+
+# 快速开始
+
+## 安装
+
+```bash
+npm install @agent-infra/browser-ui
+```
+
+## 使用
+
+```typescript
+import { BrowserUI } from '@agent-infra/browser-ui';
+
+const container = document.getElementById('browserContainer');
+if (!container) {
+  throw new Error('Browser container element not found');
+}
+
+BrowserUI.create({
+  root: container,
+  browserOptions: {
+    browserWSEndpoint: 'https://example.com/ws/url',
+  },
+});
+```
 
 # 功能
 
