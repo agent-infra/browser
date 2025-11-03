@@ -8,23 +8,23 @@ export type KeyOrHotKeyInput = KeyInput | string & {};
 export type ScrollDirection = 'up' | 'down' | 'left' | 'right';
 
 /**
- * Success response for keyboard operations
+ * Success response for browser actions (keyboard, mouse, etc.)
  */
-export interface KeyboardSuccessResponse {
+export interface ActionSuccessResponse {
   success: true;
 }
 
 /**
- * Error response for keyboard operations when dialog is open
+ * Error response for browser actions when dialog is open
  */
-export interface KeyboardErrorResponse {
+export interface ActionErrorResponse {
   success: false;
   message: string;
   detail: DialogMetaInfo;
 }
 
 /**
- * Union type for keyboard operation responses
+ * Union type for browser action responses
  * Returns only success property when successful, or includes message and detail when failed
  */
-export type KeyboardResponse = KeyboardSuccessResponse | KeyboardErrorResponse;
+export type ActionResponse = ActionSuccessResponse | ActionErrorResponse;

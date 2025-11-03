@@ -17,7 +17,7 @@ import type {
   DialogMetaInfo,
   KeyboardOptions,
   KeyOrHotKeyInput,
-  KeyboardResponse,
+  ActionResponse,
 } from '../types';
 import type { TabDialog } from '../tabs/dialog';
 
@@ -38,7 +38,7 @@ export class Keyboard {
   async press(
     key: KeyOrHotKeyInput,
     options: KeyboardOptions = {},
-  ): Promise<KeyboardResponse> {
+  ): Promise<ActionResponse> {
     if (this.#dialog.isOpen) {
       return this.#buildDialogResponse('press');
     }
@@ -70,7 +70,7 @@ export class Keyboard {
   async down(
     key: KeyOrHotKeyInput,
     options: KeyboardOptions = {},
-  ): Promise<KeyboardResponse> {
+  ): Promise<ActionResponse> {
     if (this.#dialog.isOpen) {
       return this.#buildDialogResponse('down');
     }
@@ -94,7 +94,7 @@ export class Keyboard {
   /**
    * Enhance puppeteer's [keyboard.up()](https://pptr.dev/api/puppeteer.keyboard.up) to support combination hotkeys.
    */
-  async up(key: KeyOrHotKeyInput): Promise<KeyboardResponse> {
+  async up(key: KeyOrHotKeyInput): Promise<ActionResponse> {
     if (this.#dialog.isOpen) {
       return this.#buildDialogResponse('up');
     }
@@ -108,7 +108,7 @@ export class Keyboard {
     return { success: true };
   }
 
-  async type(text: string, options: KeyboardOptions = {}): Promise<KeyboardResponse> {
+  async type(text: string, options: KeyboardOptions = {}): Promise<ActionResponse> {
     if (this.#dialog.isOpen) {
       return this.#buildDialogResponse('type');
     }
@@ -185,7 +185,7 @@ export class Keyboard {
     return false;
   }
 
-  #buildDialogResponse(type: string): KeyboardResponse {
+  #buildDialogResponse(type: string): ActionResponse {
     return {
       success: false,
       message: `Cannot perform keyboard.${type}() operation because there is a dialog on the current page.`,
