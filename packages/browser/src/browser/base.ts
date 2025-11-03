@@ -6,6 +6,7 @@
 import type { Browser as pptrBrowser, Viewport } from 'puppeteer-core';
 
 import type { Tabs } from '../tabs/tabs';
+import type { EnvInfo } from '../types';
 
 const MAX_RETRIES = 5;
 const INITIAL_BACKOFF = 2000;
@@ -17,7 +18,7 @@ const INITIAL_BACKOFF = 2000;
 export abstract class BaseBrowser<TTabs extends Tabs> {
   public pptrBrowser?: pptrBrowser;
   public _tabs?: TTabs;
-  public _envInfo?: any;
+  public _envInfo?: EnvInfo;
   public wsEndpoint = '';
   public defaultViewport: Viewport = {
     width: 1280,

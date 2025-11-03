@@ -1,6 +1,6 @@
-# Browser Agent Infra
+# @agent-infra/browser
 
-Browser Agent Infra is dedicated to building a comprehensive browser infrastructure toolkit designed for AI agents and browser automation.
+@agent-infra/browser is dedicated to building a comprehensive browser infrastructure toolkit designed for AI agents and browser automation.
 
 This monorepo provides a complete set of packages for browser detection, control and UI interaction —— everything you need to build intelligent browser automation systems.
 
