@@ -1,19 +1,12 @@
-# Browser UI
+<div align="right">
+  <a href="README.zh-CN.md">简体中文</a> | <b>English</b>
+</div>
 
-A React component library that provides remote browser interaction capabilities. This package allows you to display and interact with a remote browser instance through Chrome DevTools Protocol (CDP) in your React application.
+# @agent-infra/browser-ui
 
-## What is this package for?
+**@agent-infra/browser-ui** is a CDP-based browser remote casting solution. It implements basic capability encapsulation based on **@agent-infra/browser** and can be directly referenced as a Web component by web pages.
 
-This package enables you to:
-
-- Display a remote browser's page content in a React component
-- Interact with the remote browser (mouse clicks, keyboard input, scrolling)
-- Control browser instances programmatically through Puppeteer
-- Build browser automation tools with visual feedback
-- Create remote browser viewers or testing interfaces
-
-The main component `BrowserCanvas` renders the browser content on an HTML5 canvas and forwards user interactions to the remote browser via CDP WebSocket connection.
-
+Users only need to provide a CDP WebSocket URL with permissions, and **@agent-infra/browser-ui** can display the remote browser's page, and you can also manually intervene in browser operations, which is very useful in scenarios without VNC and headless browser.
 
 ## Installation
 
@@ -23,50 +16,32 @@ npm install @agent-infra/browser-ui
 
 ## Quick Start
 
-### 1. Start a browser with remote debugging
+```typescript
+import { BrowserUI } from '@agent-infra/browser-ui';
 
-First, you need a Chrome/Chromium browser running with remote debugging enabled:
+const container = document.getElementById('browserContainer');
+if (!container) {
+  throw new Error('Browser container element not found');
+}
 
-```javascript
-import puppeteer from 'puppeteer-core';
-
-const browser = await puppeteer.launch({
-  executablePath: '/path/to/chrome',
-  headless: false,
-  args: []
+BrowserUI.create({
+  root: container,
+  browserOptions: {
+    browserWSEndpoint: 'https://example.com/ws/url',
+  },
 });
-
-console.log('WebSocket endpoint:', browser.wsEndpoint());
 ```
 
-## API Reference
+## Features
 
-### BrowserCanvas Props
+For detailed documentation on all features, please refer to our [complete documentation](https://github.com/agent-infra/browser/blob/main/docs/browser-ui.md).
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `wsEndpoint` | `string` | No* | CDP WebSocket URL for browser connection |
-| `cdpEndpoint` | `string` | No* | CDP HTTP endpoint (higher priority than wsEndpoint) |
-| `onReady` | `(ctx: {browser: Browser, page: Page}) => void` | No | Callback when browser connection is established |
-| `onError` | `(error: Error) => void` | No | Error callback for connection/runtime errors |
-| `onSessionEnd` | `() => void` | No | Callback when browser session ends |
-| `defaultViewport` | `Viewport` | No | Initial viewport configuration |
-| `style` | `React.CSSProperties` | No | Custom CSS styles for the canvas |
-
-*Either `wsEndpoint` or `cdpEndpoint` is required.
-
-## Advanced Usage
-
-The component will automatically fetch the WebSocket URL from the CDP endpoint.
-
-
-## How It Works
-
-1. **Connection**: The component connects to a remote browser via CDP WebSocket
-2. **Screencast**: Uses CDP's `Page.startScreencast` to receive live screenshots
-3. **Rendering**: Screenshots are rendered on an HTML5 canvas element
-4. **Interaction**: Mouse and keyboard events are captured and forwarded via CDP's `Input.dispatchMouseEvent` and `Input.dispatchKeyEvent`
-5. **Scaling**: The canvas automatically scales to fit its container while maintaining aspect ratio
+- **Tab Switching** - Display all tabs and implement `switchTab`/`createTab`/`closeTab` functions
+- **Navigation** - Basic functions like `goBack`/`goForward`/`reload`/`goto`
+- **Dialog** - Real-time display and response to blocking popups like `Alert`/`Confirm`
+- **Mouse Input** - Support for `move`/`hover`/`click`/`drag` operations
+- **Keyboard Input** - Full keyboard support including common hotkeys
+- **Clipboard Simulation** - Simulated clipboard functionality for copy-paste operations
 
 ## Requirements
 
@@ -83,3 +58,4 @@ Apache License 2.0.
 Special thanks to the open source projects that inspired this toolkit:
 
 - [puppeteer](https://github.com/puppeteer/puppeteer) - The underlying browser automation library
+- [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/) - Chrome DevTools Protocol

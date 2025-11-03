@@ -1,6 +1,6 @@
 # @agent-infra/browser
 
-A powerful enhancement library for Puppeteer that provides advanced hotkey simulation capabilities with cross-platform support and browser-specific optimizations.
+**@agent-infra/browser** is an SDK based on **puppeteer** specifically designed to provide foundational functionality for browser agents. It provides high-level abstractions for tab management, dialog handling, hotkey support, and more while maintaining simple and intuitive APIs.
 
 ## Installation
 
@@ -12,86 +12,109 @@ pnpm install @agent-infra/browser
 
 ## Quick Start
 
-## API Reference
-
-### Env
-
-#### Methods: getEnvInfo
-
-Automatically detect the operating system and browser type from a Puppeteer browser instance.
+Here is a simple usage demo. Browser will find the Chrome or Edge browser installed on your computer, launch a controlled browser instance, and then execute some operations through CDP control.
 
 ```typescript
-import type { Browser } from 'puppeteer-core';
+import { Browser } from '@agent-infra/browser';
 
-export type OSType = 'Windows' | 'macOS' | 'Linux' | 'Unknown';
-export type BrowserType = 'Chrome' | 'Edge' | 'Firefox' | 'Unknown';
+// Create browser instance
+const browser = await Browser.create();
 
-export interface EnvInfo {
-  osName: OSType;
-  browserName: BrowserType;
+// Set User-Agent (optional)
+browser.setUserAgent({
+  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+});
+
+// Get current active tab
+const activeTab = browser.getActiveTab();
+
+// Navigate to specified webpage
+await activeTab.goto('https://example.com');
+
+// Take screenshot
+const screenshot = await activeTab.screenshot();
+
+// Close browser
+await browser.close();
+```
+
+## Key Features
+
+- **Tab Management** - Create, switch, and close browser tabs
+- **Navigation Control** - Go forward, back, reload, and navigate to URLs
+- **Mouse & Keyboard Operations** - Vision-based mouse control and enhanced keyboard input with hotkey support
+- **Dialog Handling** - Automatic detection and handling of browser dialogs (alert, confirm, prompt, beforeunload)
+- **Cookie Management** - Full cookie manipulation capabilities
+- **Cross-platform Support** - Works on Windows, macOS, and Linux
+
+## Usage Examples
+
+### Tab Management
+
+```typescript
+// Create new tab
+const newTabId = await browser.createTab();
+
+// Get all tabs snapshot
+const tabsSnapshot = browser.getTabsSnapshot();
+
+// Switch to specified tab
+await browser.activeTab(tabId);
+
+// Close tab
+await browser.closeTab(tabId);
+```
+
+### Mouse and Keyboard Operations
+
+```typescript
+const tab = browser.getActiveTab();
+
+// Mouse click
+const clickResult = await tab.mouse.vision.click(100, 200);
+if (clickResult.success) {
+  console.log('Click successful');
+} else {
+  console.error('Click failed:', clickResult.message);
 }
 
-export async function getEnvInfo(browser: Browser): Promise<EnvInfo>
-```
-
-### Hotkey
-
-#### Constructor
-
-```typescript
-export type OSType = 'Windows' | 'macOS' | 'Linux' | 'Unknown';
-export type BrowserType = 'Chrome' | 'Edge' | 'Firefox' | 'Unknown';
-
-new Hotkey(
-  envInfo: { osName: OSType; browserName: BrowserType },
-  logger?: Logger
-)
-```
-
-#### Methods
-
-**press(page, hotkey, options?)**
-
-Simulate a hotkey press on the given page.
-
-```typescript
-import type { Page } from "puppeteer-core";
-
-export interface HotkeyOptions {
-  delay: number; // default 100ms
+// Keyboard input
+const typeResult = await tab.keyboard.type('Hello World');
+if (typeResult.success) {
+  console.log('Type successful');
 }
 
-await hotkey.press(
-  page: Page,
-  hotkey: string,
-  options?: HotkeyOptions
-): Promise<void>
+// Keyboard hotkey
+const copyResult = await tab.keyboard.press('ctrl+c'); // Copy
 ```
 
-#### macOS + Chrome Optimization
-
-When running on macOS with Chrome, the library automatically uses Chrome DevTools Protocol (CDP) commands for common system hotkeys:
-
-> See the reasoning behind using CDP for simulation [#560](https://github.com/bytedance/UI-TARS-desktop/pull/560)
-
-| Hotkey | Action |
-|--------|--------|
-| `Cmd+A` | Select All |
-| `Cmd+X` | Cut |
-| `Cmd+C` | Copy |
-| `Cmd+V` | Paste |
-| `Cmd+Z` | Undo |
-| `Cmd+Y` / `Cmd+Shift+Z` | Redo |
-
-#### Error Handling
+### Dialog Handling
 
 ```typescript
-try {
-  await hotkey.press(page, 'invalid+key');
-} catch (error) {
-  console.error('Unsupported key combination:', error.message);
+const result = await tab.keyboard.press('ctrl+c');
+
+if (!result.success) {
+  console.log('Operation blocked:', result.message);
+
+  // Get dialog information
+  const dialog = result.detail;
+  console.log('Dialog type:', dialog.type);
+
+  // Handle based on dialog type
+  switch (dialog.type) {
+    case 'alert':
+      await tab.dialog.accept();
+      break;
+    case 'confirm':
+      await tab.dialog.accept(); // or await tab.dialog.dismiss();
+      break;
+  }
 }
 ```
+
+## Complete Documentation
+
+For detailed API documentation and advanced usage examples, please refer to our [complete documentation](../../docs/browser.md).
 
 ## License
 
