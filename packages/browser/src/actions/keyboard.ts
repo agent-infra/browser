@@ -12,15 +12,114 @@ import {
 } from './key-map';
 
 import type { KeyInput, Page } from 'puppeteer-core';
-import type { EnvInfo, KeyboardOptions, KeyOrHotKeyInput } from '../types';
+import type {
+  EnvInfo,
+  DialogMetaInfo,
+  KeyboardOptions,
+  KeyOrHotKeyInput,
+  ActionResponse,
+} from '../types';
+import type { TabDialog } from '../tabs/dialog';
 
 export class Keyboard {
   #page: Page;
   #env: EnvInfo;
+  #dialog: TabDialog;
 
-  constructor(page: Page, env: EnvInfo) {
+  constructor(page: Page, dialog: TabDialog, env: EnvInfo) {
     this.#page = page;
+    this.#dialog = dialog;
     this.#env = env;
+  }
+
+  /**
+   * Enhance puppeteer's [keyboard.press()](https://pptr.dev/api/puppeteer.keyboard.press) to support combination hotkeys.
+   */
+  async press(
+    key: KeyOrHotKeyInput,
+    options: KeyboardOptions = {},
+  ): Promise<ActionResponse> {
+    if (this.#dialog.isOpen) {
+      return this.#buildDialogResponse('press');
+    }
+
+    const formattedHotkey = this.#formatHotkey(key);
+
+    if (this.#env.osName === 'macOS' && this.#env.browserName === 'Chrome') {
+      const success = await this.#macOSCDPHotKey(formattedHotkey, options);
+      if (success) {
+        return { success: true };
+      }
+    }
+
+    // default behavior: press keys one by one
+    for (const key of formattedHotkey) {
+      await this.#page.keyboard.down(key);
+    }
+    await delay(options.delay ?? 0);
+    for (const key of formattedHotkey.reverse()) {
+      await this.#page.keyboard.up(key);
+    }
+
+    return { success: true };
+  }
+
+  /**
+   * Enhance puppeteer's [keyboard.down()](https://pptr.dev/api/puppeteer.keyboard.down) to support combination hotkeys.
+   */
+  async down(
+    key: KeyOrHotKeyInput,
+    options: KeyboardOptions = {},
+  ): Promise<ActionResponse> {
+    if (this.#dialog.isOpen) {
+      return this.#buildDialogResponse('down');
+    }
+
+    const formattedHotkey = this.#formatHotkey(key);
+
+    if (this.#env.osName === 'macOS' && this.#env.browserName === 'Chrome') {
+      const success = await this.#macOSCDPHotKey(formattedHotkey, options);
+      if (success) {
+        return { success: true };
+      }
+    }
+
+    for (const key of formattedHotkey) {
+      await this.#page.keyboard.down(key);
+    }
+
+    return { success: true };
+  }
+
+  /**
+   * Enhance puppeteer's [keyboard.up()](https://pptr.dev/api/puppeteer.keyboard.up) to support combination hotkeys.
+   */
+  async up(key: KeyOrHotKeyInput): Promise<ActionResponse> {
+    if (this.#dialog.isOpen) {
+      return this.#buildDialogResponse('up');
+    }
+
+    const formattedHotkey = this.#formatHotkey(key);
+
+    for (const key of formattedHotkey.reverse()) {
+      await this.#page.keyboard.up(key);
+    }
+
+    return { success: true };
+  }
+
+  async type(text: string, options: KeyboardOptions = {}): Promise<ActionResponse> {
+    if (this.#dialog.isOpen) {
+      return this.#buildDialogResponse('type');
+    }
+
+    if (text.length < 15 && options.delay) {
+      await this.#page.keyboard.type(text, options);
+    } else {
+      await this.#page.keyboard.sendCharacter(text);
+    }
+
+    return { success: true };
   }
 
   /**
@@ -86,69 +185,11 @@ export class Keyboard {
     return false;
   }
 
-  /**
-   * Enhance puppeteer's [keyboard.press()](https://pptr.dev/api/puppeteer.keyboard.press) to support combination hotkeys.
-   */
-  async press(
-    key: KeyOrHotKeyInput,
-    options: KeyboardOptions = {},
-  ): Promise<void> {
-    const formattedHotkey = this.#formatHotkey(key);
-
-    if (this.#env.osName === 'macOS' && this.#env.browserName === 'Chrome') {
-      const success = await this.#macOSCDPHotKey(formattedHotkey, options);
-      if (success) {
-        return;
-      }
-    }
-
-    // default behavior: press keys one by one
-    for (const key of formattedHotkey) {
-      await this.#page.keyboard.down(key);
-    }
-    await delay(options.delay ?? 0);
-    for (const key of formattedHotkey.reverse()) {
-      await this.#page.keyboard.up(key);
-    }
-  }
-
-  /**
-   * Enhance puppeteer's [keyboard.down()](https://pptr.dev/api/puppeteer.keyboard.down) to support combination hotkeys.
-   */
-  async down(
-    key: KeyOrHotKeyInput,
-    options: KeyboardOptions = {},
-  ): Promise<void> {
-    const formattedHotkey = this.#formatHotkey(key);
-
-    if (this.#env.osName === 'macOS' && this.#env.browserName === 'Chrome') {
-      const success = await this.#macOSCDPHotKey(formattedHotkey, options);
-      if (success) {
-        return;
-      }
-    }
-
-    for (const key of formattedHotkey) {
-      await this.#page.keyboard.down(key);
-    }
-  }
-
-  /**
-   * Enhance puppeteer's [keyboard.up()](https://pptr.dev/api/puppeteer.keyboard.up) to support combination hotkeys.
-   */
-  async up(key: KeyOrHotKeyInput): Promise<void> {
-    const formattedHotkey = this.#formatHotkey(key);
-
-    for (const key of formattedHotkey.reverse()) {
-      await this.#page.keyboard.up(key);
-    }
-  }
-
-  async type(text: string, options: KeyboardOptions = {}): Promise<void> {
-    if (text.length < 15 && options.delay) {
-      await this.#page.keyboard.type(text, options);
-    } else {
-      await this.#page.keyboard.sendCharacter(text);
-    }
+  #buildDialogResponse(type: string): ActionResponse {
+    return {
+      success: false,
+      message: `Cannot perform keyboard.${type}() operation because there is a dialog on the current page.`,
+      detail: this.#dialog.meta as DialogMetaInfo,
+    };
   }
 }

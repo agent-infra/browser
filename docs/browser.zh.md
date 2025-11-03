@@ -95,20 +95,104 @@ await tab.reload();
 const tab = browser.getActiveTab();
 
 // 鼠标点击
-await tab.mouse.vision.click(100, 200);
+const clickResult = await tab.mouse.vision.click(100, 200);
+if (clickResult.success) {
+  console.log('点击成功');
+} else {
+  console.error('点击失败:', clickResult.message);
+  console.log('对话框信息:', clickResult.detail);
+}
 
 // 鼠标移动
-await tab.mouse.vision.move(150, 250);
+const moveResult = await tab.mouse.vision.move(150, 250);
+if (moveResult.success) {
+  console.log('移动成功');
+} else {
+  console.error('移动失败:', moveResult.message);
+}
 
 // 鼠标滚动
-await tab.mouse.vision.scroll('down', 300);
+const scrollResult = await tab.mouse.vision.scroll('down', 300);
+if (scrollResult.success) {
+  console.log('滚动成功');
+}
 
 // 键盘输入
-await tab.keyboard.type('Hello World');
+const typeResult = await tab.keyboard.type('Hello World');
+if (typeResult.success) {
+  console.log('输入成功');
+}
 
 // 键盘快捷键
-await tab.keyboard.press('ctrl+c'); // 复制
-await tab.keyboard.press('ctrl+v'); // 粘贴
+const copyResult = await tab.keyboard.press('ctrl+c'); // 复制
+if (copyResult.success) {
+  console.log('复制成功');
+}
+
+const pasteResult = await tab.keyboard.press('ctrl+v'); // 粘贴
+if (pasteResult.success) {
+  console.log('粘贴成功');
+}
+```
+
+<br />
+
+## 对话框处理
+
+当页面出现对话框（alert、confirm、prompt、beforeunload）时，鼠标和键盘操作会被阻止。这时操作方法会返回失败响应，包含错误信息和对话框详情。
+
+对话框类型如下：
+
+```typescript
+interface DialogMeta {
+  type: "alert" | "confirm" | "prompt" | "beforeunload";
+  message: string;
+  defaultValue: string;
+}
+```
+
+下面是一个处理 dialog 的案例：
+
+```typescript
+const tab = browser.getActiveTab();
+
+// 尝试执行键盘操作
+const result = await tab.keyboard.press('ctrl+c');
+
+if (!result.success) {
+  console.log('操作被阻止:', result.message);
+
+  // 获取对话框信息
+  const dialog = result.detail;
+  console.log('对话框类型:', dialog.type);
+  console.log('对话框消息:', dialog.message);
+
+  // 根据对话框类型处理
+  switch (dialog.type) {
+    case 'alert':
+      // 确认 alert 对话框
+      await tab.dialog.accept();
+      break;
+    case 'confirm':
+      // 接受或拒绝 confirm 对话框
+      await tab.dialog.accept(); // 或 await tab.dialog.dismiss();
+      break;
+    case 'prompt':
+      // 输入文本并确认 prompt 对话框
+      await tab.dialog.accept('用户输入的文本');
+      break;
+    case 'beforeunload':
+      // 处理页面离开确认
+      await tab.dialog.accept(); // 或 await tab.dialog.dismiss();
+      break;
+  }
+
+  // 对话框处理完成后，可以重新尝试操作
+  const retryResult = await tab.keyboard.press('ctrl+c');
+  if (retryResult.success) {
+    console.log('重试操作成功');
+  }
+}
 ```
 
 <br />
@@ -311,23 +395,35 @@ interface DialogMeta {
 
 ### 键盘操控
 
-#### `press(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<void>`
+键盘操作方法现在会返回 `ActionResponse` 类型，用于处理对话框阻止操作的情况。
+
+#### `press(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<ActionResponse>`
 
 按下并释放按键或组合键。
 
 组合键类似于 `Ctrl+C`，`Ctrl+V`，类型为 `string`，单个按键之间用 `+` 连接。不用刻意区分操作系统（例如对于复制这个快捷键来说，Win/Linux 上使用 `Ctrl`，macOS 上使用 `Command`），内部已经做了兜底适配。
 
-非组合键可直接参考 [Keyboard.reload | Puppeteer](https://pptr.dev/api/puppeteer.keyboard.press)。
+**返回类型：**
 
-#### `down(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<void>`
+```typescript
+interface ActionResponse {
+  success: true;
+} | {
+  success: false;
+  message: string;
+  detail: DialogMetaInfo;
+}
+```
+
+#### `down(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<ActionResponse>`
 
 按下按键（不释放）。可参考 [Keyboard.down | Puppeteer](https://pptr.dev/api/puppeteer.keyboard.down)。
 
-#### `up(key: KeyOrHotKeyInput): Promise<void>`
+#### `up(key: KeyOrHotKeyInput): Promise<ActionResponse>`
 
 释放按键。可参考 [Keyboard.up | Puppeteer](https://pptr.dev/api/puppeteer.keyboard.up)。
 
-#### `type(text: string, options?: KeyboardOptions): Promise<void>`
+#### `type(text: string, options?: KeyboardOptions): Promise<ActionResponse>`
 
 输入文本。可参考 [Keyboard.type | Puppeteer](https://pptr.dev/api/puppeteer.keyboard.type)。
 
@@ -335,27 +431,41 @@ interface DialogMeta {
 
 ### 鼠标操控 (Vision)
 
-#### `click(x: number, y: number, options?: MouseClickOptions): Promise<void>`
+鼠标操作方法现在会返回 `ActionResponse` 类型，用于处理对话框阻止操作的情况。
+
+**返回类型：**
+
+```typescript
+interface ActionResponse {
+  success: true;
+} | {
+  success: false;
+  message: string;
+  detail: DialogMetaInfo;
+}
+```
+
+#### `click(x: number, y: number, options?: MouseClickOptions): Promise<ActionResponse>`
 
 在指定坐标点击鼠标。可直接参考 [Mouse.click | Puppeteer](https://pptr.dev/api/puppeteer.mouse.click)。
 
-#### `move(x: number, y: number, options?: MouseMoveOptions): Promise<void>`
+#### `move(x: number, y: number, options?: MouseMoveOptions): Promise<ActionResponse>`
 
 移动鼠标到指定坐标。可直接参考 [Mouse.move | Puppeteer](https://pptr.dev/api/puppeteer.mouse.move)。
 
-#### `drag(start: Point, end: Point, options?: object): Promise<void>`
+#### `drag(start: Point, end: Point, options?: object): Promise<ActionResponse>`
 
 拖拽操作。可直接参考 [Mouse.dragAndDrop | Puppeteer](https://pptr.dev/api/puppeteer.mouse.dragAndDrop)。
 
-#### `scroll(direction: ScrollDirection, delta: number): Promise<void>`
+#### `scroll(direction: ScrollDirection, delta: number): Promise<ActionResponse>`
 
 滚动页面。
 
+**滚动方向：**
+
 ```typescript
-// 滚动方向
 type ScrollDirection = 'up' | 'down' | 'left' | 'right'
 ```
-
 
 <br />
 

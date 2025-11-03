@@ -52,8 +52,8 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
     this.#status = 'active';
     this.#tabDialog = new TabDialog(this);
-    this.#keyboard = new Keyboard(page, options.envInfo);
-    this.#mouse = new Mouse(page);
+    this.#keyboard = new Keyboard(page, this.#tabDialog, options.envInfo);
+    this.#mouse = new Mouse(page, this.#tabDialog);
 
     this.#setupVisibilityTracking();
     this.#executeScriptsOnCreate();
