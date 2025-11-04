@@ -13,6 +13,7 @@ import type { Page, Frame } from 'puppeteer-core';
 import {
   TabEvents,
   type NavigationOptions,
+  type NavigationResult,
   type TabEventsMap,
   type TabOptions,
   type TabScreenshotOptions,
@@ -216,11 +217,15 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   // #region navigation
 
-  async goto(url: string, options: NavigationOptions = {}): Promise<void> {
+  async goto(url: string, options: NavigationOptions = {}): Promise<NavigationResult> {
     // validate / normalize url before navigation
     const validated = validateNavigationUrl(url);
     if (validated.ignored) {
-      throw new Error(validated.message);
+      return {
+        success: false,
+        url: url,
+        message: validated.message!,
+      };
     }
 
     this.#url = validated.url;
@@ -243,36 +248,69 @@ export class Tab extends EventEmitter<TabEventsMap> {
       this.#favicon = await this.#getFavicon();
 
       this.#setLoading(false);
+
+      return {
+        success: true,
+        url: this.#url,
+      };
     } catch (error) {
       this.#setLoading(false);
-      throw error;
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : String(error),
+        url: validated.url,
+      };
     }
   }
 
   #backMutex = new Mutex();
-  async goBack(options: NavigationOptions = {}): Promise<boolean> {
+  async goBack(options: NavigationOptions = {}): Promise<NavigationResult> {
     using _ = await this.#backMutex.acquire();
 
-    await this.#pptrPage.goBack({
-      waitUntil: options.waitUntil,
-      timeout: options.timeout,
-    });
-    return true;
+    try {
+      await this.#pptrPage.goBack({
+        waitUntil: options.waitUntil,
+        timeout: options.timeout,
+      });
+
+      return {
+        success: true,
+        url: this.#url,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        url: this.#url,
+        message: error instanceof Error ? error.message : String(error),
+      };
+    }
   }
 
   #forwardMutex = new Mutex();
-  async goForward(options: NavigationOptions = {}): Promise<boolean> {
+  async goForward(options: NavigationOptions = {}): Promise<NavigationResult> {
     using _ = await this.#forwardMutex.acquire();
 
-    await this.#pptrPage.goForward({
-      waitUntil: options.waitUntil,
-      timeout: options.timeout,
-    });
-    return true;
+    try {
+      await this.#pptrPage.goForward({
+        waitUntil: options.waitUntil,
+        timeout: options.timeout,
+      });
+
+      return {
+        success: true,
+        url: this.#url,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        url: this.#url,
+        message: error instanceof Error ? error.message : String(error),
+      };
+    }
   }
 
   #reloadMutex = new Mutex();
-  async reload(options: NavigationOptions = {}): Promise<void> {
+  async reload(options: NavigationOptions = {}): Promise<NavigationResult> {
     using _ = await this.#reloadMutex.acquire();
 
     if (this.#reloadAbortController) {
@@ -289,8 +327,19 @@ export class Tab extends EventEmitter<TabEventsMap> {
         signal: this.#reloadAbortController.signal,
       });
       this.#setLoading(false);
+
+      return {
+        success: true,
+        url: this.#url,
+      };
     } catch (error) {
       this.#setLoading(false);
+
+      return {
+        success: false,
+        url: this.#url,
+        message: error instanceof Error ? error.message : String(error),
+      };
     } finally {
       this.#reloadAbortController = null;
     }

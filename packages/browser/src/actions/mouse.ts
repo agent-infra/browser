@@ -9,7 +9,7 @@ import type {
   MouseClickOptions,
   MouseMoveOptions,
 } from 'puppeteer-core';
-import { ScrollDirection, ActionResponse } from '../types';
+import { ScrollDirection, ActionResult } from '../types';
 import type { DialogMetaInfo } from '../types';
 import type { TabDialog } from '../tabs/dialog';
 
@@ -43,7 +43,7 @@ export class VisionMouse {
     x: number,
     y: number,
     options: Omit<MouseClickOptions, 'clickCount'> = {},
-  ): Promise<ActionResponse> {
+  ): Promise<ActionResult> {
     if (this.#dialog.isOpen) {
       return this.#buildDialogResponse('click');
     }
@@ -61,7 +61,7 @@ export class VisionMouse {
     x: number,
     y: number,
     options: MouseMoveOptions = {},
-  ): Promise<ActionResponse> {
+  ): Promise<ActionResult> {
     if (this.#dialog.isOpen) {
       return this.#buildDialogResponse('move');
     }
@@ -79,7 +79,7 @@ export class VisionMouse {
     options: {
       delay?: number;
     } = {},
-  ): Promise<ActionResponse> {
+  ): Promise<ActionResult> {
     if (this.#dialog.isOpen) {
       return this.#buildDialogResponse('drag');
     }
@@ -94,7 +94,7 @@ export class VisionMouse {
   async scroll(
     direction: ScrollDirection,
     delta: number,
-  ): Promise<ActionResponse> {
+  ): Promise<ActionResult> {
     if (this.#dialog.isOpen) {
       return this.#buildDialogResponse('scroll');
     }
@@ -121,7 +121,7 @@ export class VisionMouse {
     return { success: true };
   }
 
-  #buildDialogResponse(type: string): ActionResponse {
+  #buildDialogResponse(type: string): ActionResult {
     return {
       success: false,
       message: `Cannot perform mouse.${type}() operation because there is a dialog on the current page.`,

@@ -84,6 +84,19 @@ export interface NavigationOptions {
   timeout?: number;
 }
 
+export interface NavigationSuccessResult {
+  success: true;
+  url: string;
+}
+export interface NavigationErrorResult {
+  success: false;
+  url: string;
+  message: string;
+}
+
+export type NavigationResult = NavigationSuccessResult | NavigationErrorResult;
+
+
 export type TabScreenshotOptions = Pick<
   ScreenshotOptions,
   'type' | 'quality' | 'fullPage' | 'path'
