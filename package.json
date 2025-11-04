@@ -42,14 +42,5 @@
   },
   "engines": {
     "node": ">=20.x"
-  },
-  "lint-staged": {
-    "*.{js,ts,jsx,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,yml,yaml,html}": [
-      "prettier --write"
-    ]
   }
 }
