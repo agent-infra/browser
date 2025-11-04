@@ -419,19 +419,34 @@ browser.setUserAgent({
 
 ### 导航
 
-#### `goto(url: string, options?: NavigationOptions): Promise<void>`
+导航方法现在会返回 `NavigationResult` 类型，用于提供导航成功或失败的详细信息。
+
+**返回类型：**
+
+```typescript
+interface NavigationResult {
+  success: true;
+  url: string;
+} | {
+  success: false;
+  url: string;
+  message: string;
+}
+```
+
+#### `goto(url: string, options?: NavigationOptions): Promise<NavigationResult>`
 
 导航到指定 URL。可直接参考 [Page.goto | Puppeteer](https://pptr.dev/api/puppeteer.page.goto)。
 
-#### `goBack(options?: NavigationOptions): Promise<boolean>`
+#### `goBack(options?: NavigationOptions): Promise<NavigationResult>`
 
 导航到上一页。可直接参考 [Page.goBack | Puppeteer](https://pptr.dev/api/puppeteer.page.goBack)。
 
-#### `goForward(options?: NavigationOptions): Promise<boolean>`
+#### `goForward(options?: NavigationOptions): Promise<NavigationResult>`
 
 导航到下一页。可直接参考 [Page.goForward | Puppeteer](https://pptr.dev/api/puppeteer.page.goForward)。
 
-#### `reload(options?: NavigationOptions): Promise<void>`
+#### `reload(options?: NavigationOptions): Promise<NavigationResult>`
 
 重新加载当前页面。可直接参考 [Page.reload | Puppeteer](https://pptr.dev/api/puppeteer.page.reload)。
 
@@ -439,9 +454,9 @@ browser.setUserAgent({
 
 ### 键盘操控
 
-键盘操作方法现在会返回 `ActionResponse` 类型，用于处理对话框阻止操作的情况。
+键盘操作方法现在会返回 `ActionResult` 类型，用于处理对话框阻止操作的情况。
 
-#### `press(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<ActionResponse>`
+#### `press(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<ActionResult>`
 
 按下并释放按键或组合键。
 
@@ -450,7 +465,7 @@ browser.setUserAgent({
 **返回类型：**
 
 ```typescript
-interface ActionResponse {
+interface ActionResult {
   success: true;
 } | {
   success: false;
@@ -459,15 +474,15 @@ interface ActionResponse {
 }
 ```
 
-#### `down(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<ActionResponse>`
+#### `down(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<ActionResult>`
 
 按下按键（不释放）。可参考 [Keyboard.down | Puppeteer](https://pptr.dev/api/puppeteer.keyboard.down)。
 
-#### `up(key: KeyOrHotKeyInput): Promise<ActionResponse>`
+#### `up(key: KeyOrHotKeyInput): Promise<ActionResult>`
 
 释放按键。可参考 [Keyboard.up | Puppeteer](https://pptr.dev/api/puppeteer.keyboard.up)。
 
-#### `type(text: string, options?: KeyboardOptions): Promise<ActionResponse>`
+#### `type(text: string, options?: KeyboardOptions): Promise<ActionResult>`
 
 输入文本。可参考 [Keyboard.type | Puppeteer](https://pptr.dev/api/puppeteer.keyboard.type)。
 
@@ -475,12 +490,12 @@ interface ActionResponse {
 
 ### 鼠标操控 (Vision)
 
-鼠标操作方法现在会返回 `ActionResponse` 类型，用于处理对话框阻止操作的情况。
+鼠标操作方法现在会返回 `ActionResult` 类型，用于处理对话框阻止操作的情况。
 
 **返回类型：**
 
 ```typescript
-interface ActionResponse {
+interface ActionResult {
   success: true;
 } | {
   success: false;
@@ -489,19 +504,19 @@ interface ActionResponse {
 }
 ```
 
-#### `click(x: number, y: number, options?: MouseClickOptions): Promise<ActionResponse>`
+#### `click(x: number, y: number, options?: MouseClickOptions): Promise<ActionResult>`
 
 在指定坐标点击鼠标。可直接参考 [Mouse.click | Puppeteer](https://pptr.dev/api/puppeteer.mouse.click)。
 
-#### `move(x: number, y: number, options?: MouseMoveOptions): Promise<ActionResponse>`
+#### `move(x: number, y: number, options?: MouseMoveOptions): Promise<ActionResult>`
 
 移动鼠标到指定坐标。可直接参考 [Mouse.move | Puppeteer](https://pptr.dev/api/puppeteer.mouse.move)。
 
-#### `drag(start: Point, end: Point, options?: object): Promise<ActionResponse>`
+#### `drag(start: Point, end: Point, options?: object): Promise<ActionResult>`
 
 拖拽操作。可直接参考 [Mouse.dragAndDrop | Puppeteer](https://pptr.dev/api/puppeteer.mouse.dragAndDrop)。
 
-#### `scroll(direction: ScrollDirection, delta: number): Promise<ActionResponse>`
+#### `scroll(direction: ScrollDirection, delta: number): Promise<ActionResult>`
 
 滚动页面。
 

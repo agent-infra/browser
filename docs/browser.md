@@ -419,19 +419,34 @@ Tab class providing page-level operation functionality.
 
 ### Navigation
 
-#### `goto(url: string, options?: NavigationOptions): Promise<void>`
+Navigation methods now return `NavigationResult` type to provide detailed information about navigation success or failure.
+
+**Return Type:**
+
+```typescript
+interface NavigationResult {
+  success: true;
+  url: string;
+} | {
+  success: false;
+  url: string;
+  message: string;
+}
+```
+
+#### `goto(url: string, options?: NavigationOptions): Promise<NavigationResult>`
 
 Navigate to specified URL. You can directly refer to [Page.goto | Puppeteer](https://pptr.dev/api/puppeteer.page.goto).
 
-#### `goBack(options?: NavigationOptions): Promise<boolean>`
+#### `goBack(options?: NavigationOptions): Promise<NavigationResult>`
 
 Navigate to previous page. You can directly refer to [Page.goBack | Puppeteer](https://pptr.dev/api/puppeteer.page.goBack).
 
-#### `goForward(options?: NavigationOptions): Promise<boolean>`
+#### `goForward(options?: NavigationOptions): Promise<NavigationResult>`
 
 Navigate to next page. You can directly refer to [Page.goForward | Puppeteer](https://pptr.dev/api/puppeteer.page.goForward).
 
-#### `reload(options?: NavigationOptions): Promise<void>`
+#### `reload(options?: NavigationOptions): Promise<NavigationResult>`
 
 Reload current page. You can directly refer to [Page.reload | Puppeteer](https://pptr.dev/api/puppeteer.page.reload).
 
@@ -439,9 +454,9 @@ Reload current page. You can directly refer to [Page.reload | Puppeteer](https:/
 
 ### Keyboard Control
 
-Keyboard operation methods now return `ActionResponse` type to handle cases where dialog blocks operations.
+Keyboard operation methods now return `ActionResult` type to handle cases where dialog blocks operations.
 
-#### `press(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<ActionResponse>`
+#### `press(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<ActionResult>`
 
 Press and release key or key combination.
 
@@ -450,7 +465,7 @@ Key combinations are similar to `Ctrl+C`, `Ctrl+V`, type is `string`, individual
 **Return Type:**
 
 ```typescript
-interface ActionResponse {
+interface ActionResult {
   success: true;
 } | {
   success: false;
@@ -459,15 +474,15 @@ interface ActionResponse {
 }
 ```
 
-#### `down(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<ActionResponse>`
+#### `down(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<ActionResult>`
 
 Press key (without releasing). You can refer to [Keyboard.down | Puppeteer](https://pptr.dev/api/puppeteer.keyboard.down).
 
-#### `up(key: KeyOrHotKeyInput): Promise<ActionResponse>`
+#### `up(key: KeyOrHotKeyInput): Promise<ActionResult>`
 
 Release key. You can refer to [Keyboard.up | Puppeteer](https://pptr.dev/api/puppeteer.keyboard.up).
 
-#### `type(text: string, options?: KeyboardOptions): Promise<ActionResponse>`
+#### `type(text: string, options?: KeyboardOptions): Promise<ActionResult>`
 
 Input text. You can refer to [Keyboard.type | Puppeteer](https://pptr.dev/api/puppeteer.keyboard.type).
 
@@ -475,12 +490,12 @@ Input text. You can refer to [Keyboard.type | Puppeteer](https://pptr.dev/api/pu
 
 ### Mouse Control (Vision)
 
-Mouse operation methods now return `ActionResponse` type to handle cases where dialog blocks operations.
+Mouse operation methods now return `ActionResult` type to handle cases where dialog blocks operations.
 
 **Return Type:**
 
 ```typescript
-interface ActionResponse {
+interface ActionResult {
   success: true;
 } | {
   success: false;
@@ -489,19 +504,19 @@ interface ActionResponse {
 }
 ```
 
-#### `click(x: number, y: number, options?: MouseClickOptions): Promise<ActionResponse>`
+#### `click(x: number, y: number, options?: MouseClickOptions): Promise<ActionResult>`
 
 Click mouse at specified coordinates. You can directly refer to [Mouse.click | Puppeteer](https://pptr.dev/api/puppeteer.mouse.click).
 
-#### `move(x: number, y: number, options?: MouseMoveOptions): Promise<ActionResponse>`
+#### `move(x: number, y: number, options?: MouseMoveOptions): Promise<ActionResult>`
 
 Move mouse to specified coordinates. You can directly refer to [Mouse.move | Puppeteer](https://pptr.dev/api/puppeteer.mouse.move).
 
-#### `drag(start: Point, end: Point, options?: object): Promise<ActionResponse>`
+#### `drag(start: Point, end: Point, options?: object): Promise<ActionResult>`
 
 Drag operation. You can directly refer to [Mouse.dragAndDrop | Puppeteer](https://pptr.dev/api/puppeteer.mouse.dragAndDrop).
 
-#### `scroll(direction: ScrollDirection, delta: number): Promise<ActionResponse>`
+#### `scroll(direction: ScrollDirection, delta: number): Promise<ActionResult>`
 
 Scroll page.
 
