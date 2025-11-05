@@ -1,0 +1,32 @@
+# CODEOWNERS file for @agent-infra/browser
+# This file defines individuals or teams that are responsible for code in this repository.
+#
+# Format:
+#   <file pattern> <@username1> <@username2>
+#
+# Order is important: the last matching pattern has the highest precedence.
+# For more information, see: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global owners - can review any change across the entire repository
+* @skychx @chaolinjin
+
+# Core package maintainers
+/packages/browser/ @skychx
+/packages/browser-ui/ @skychx
+/packages/browser-finder/ @skychx
+/packages/browser-context/ @skychx @chaolinjin
+/packages/media-utils/ @skychx
+
+# Documentation
+/README.md @skychx
+/docs/ @skychx
+
+# Test files
+/vitest.config.* @skychx
+/test/ @skychx
+**/*.test.ts @skychx
+**/*.spec.ts @skychx
+
+# Examples and demos
+/example/ @skychx
+/examples/ @skychx
