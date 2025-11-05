@@ -15,8 +15,8 @@ const packages = [
 module.exports = {
   extends: ['@commitlint/config-conventional'],
   rules: {
-    'scope-empty': [2, 'never'],
-    'scope-enum': [2, 'always', packages],
+    'scope-empty': [0, 'always'],
+    'scope-enum': [1, 'always', packages],
     'type-enum': [
       2,
       'always',

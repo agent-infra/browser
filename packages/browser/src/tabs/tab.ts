@@ -9,7 +9,7 @@ import { iife, Mutex, validateNavigationUrl } from '../utils';
 import { TabDialog } from './dialog';
 import { Mouse, Keyboard } from '../actions';
 
-import type { Page, Frame } from 'puppeteer-core';
+import type { Page, Frame, CDPSession } from 'puppeteer-core';
 import {
   TabEvents,
   type NavigationOptions,
@@ -23,6 +23,7 @@ import {
 export class Tab extends EventEmitter<TabEventsMap> {
   #id: string;
   #options: TabOptions;
+  // eslint-disable-next-line no-unused-private-class-members
   #status: 'active' | 'inactive';
 
   #pptrPage: Page;
@@ -217,6 +218,28 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   // #region navigation
 
+  async getHistory() {
+    // @ts-ignore
+    const history = await (this.#pptrPage._client() as CDPSession).send(
+      'Page.getNavigationHistory',
+    );
+    const index = history.currentIndex;
+    const length = history.entries.length;
+
+    const canGoBack = length > 1 && index !== 0;
+    const canGoForward = length > 1 && index < length - 1;
+
+    return {
+      index: index,
+      canGoBack: canGoBack,
+      canGoForward: canGoForward,
+      history: history.entries.map((item) => ({
+        url: item.url,
+        title: item.title,
+      })),
+    };
+  }
+
   async goto(
     url: string,
     options: NavigationOptions = {},
@@ -271,6 +294,16 @@ export class Tab extends EventEmitter<TabEventsMap> {
     using _ = await this.#backMutex.acquire();
 
     try {
+      const { canGoBack } = await this.getHistory();
+
+      if (!canGoBack) {
+        return {
+          success: false,
+          url: this.#url,
+          message: 'Cannot go back - no previous history entry',
+        };
+      }
+
       await this.#pptrPage.goBack({
         waitUntil: options.waitUntil,
         timeout: options.timeout,
@@ -294,6 +327,16 @@ export class Tab extends EventEmitter<TabEventsMap> {
     using _ = await this.#forwardMutex.acquire();
 
     try {
+      const { canGoForward } = await this.getHistory();
+
+      if (!canGoForward) {
+        return {
+          success: false,
+          url: this.#url,
+          message: 'Cannot go forward - no next history entry',
+        };
+      }
+
       await this.#pptrPage.goForward({
         waitUntil: options.waitUntil,
         timeout: options.timeout,
@@ -383,16 +426,30 @@ export class Tab extends EventEmitter<TabEventsMap> {
     if (!frame.parentFrame()) {
       const oldUrl = this.#url;
       const newUrl = frame.url();
+      const [title, favicon, historyData] = await Promise.all([
+        this.#pptrPage.title().catch(() => 'Loading...'),
+        this.#getFavicon().catch(() => ''),
+        this.getHistory().catch(() => ({
+          index: 0,
+          history: [],
+          canGoBack: false,
+          canGoForward: false,
+        })),
+      ]);
 
       this.#url = newUrl;
-      this.#title = await this.#pptrPage.title();
-      this.#favicon = await this.#getFavicon();
+      this.#title = title;
+      this.#favicon = favicon;
 
       if (oldUrl !== newUrl) {
         this.emit(TabEvents.TabUrlChanged, {
           tabId: this.#id,
-          oldUrl,
-          newUrl,
+          oldUrl: oldUrl,
+          newUrl: newUrl,
+          title: title,
+          favicon: favicon,
+          canGoBack: historyData.canGoBack,
+          canGoForward: historyData.canGoForward,
         });
       }
     }

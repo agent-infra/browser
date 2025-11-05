@@ -504,7 +504,11 @@ export class BrowserUI {
       tabsData,
       snapshot.activeTabId || undefined,
     );
-    this.#browserContainer.updateNavigation(currentUrl, true, true); // TODO: Get actual navigation state
+    this.#browserContainer.updateNavigation(
+      currentUrl,
+      activeTab?.canGoBack,
+      activeTab?.canGoForward,
+    );
 
     if (activeTab?.isLoading) {
       this.#browserContainer.setLoading(true);

@@ -306,9 +306,15 @@ export class Tabs<T extends Tab = Tab> {
     const tab = this.#tabs.get(tabId);
     if (!tab) return;
 
-    const [title, favicon] = await Promise.all([
+    const [title, favicon, historyData] = await Promise.all([
       tab.getTitle().catch(() => 'Loading...'),
-      tab.getFavicon().catch(() => null),
+      tab.getFavicon().catch(() => ''),
+      tab.getHistory().catch(() => ({
+        index: 0,
+        history: [],
+        canGoBack: false,
+        canGoForward: false,
+      })),
     ]);
 
     const tabMeta: TabMeta = {
@@ -318,6 +324,8 @@ export class Tabs<T extends Tab = Tab> {
       favicon: favicon,
       isLoading: isLoading,
       isActive: tabId === this.state.activeTabId,
+      canGoBack: historyData.canGoBack,
+      canGoForward: historyData.canGoForward,
     };
 
     // console.log('syncTabMeta', tabId, tabMeta);
@@ -341,12 +349,35 @@ export class Tabs<T extends Tab = Tab> {
     tab.on(
       TabEvents.TabLoadingStateChanged,
       (event: TabEventsMap[TabEvents.TabLoadingStateChanged]) => {
-        this.#syncTabMeta(tabId, event.isLoading);
+        const currentTabMeta = this.state.tabs.get(tabId);
+        if (!currentTabMeta) return;
+
+        const updatedTabMeta: TabMeta = {
+          ...currentTabMeta,
+          isLoading: event.isLoading,
+        };
+
+        this.state.tabs.set(tabId, updatedTabMeta);
       },
     );
-    tab.on(TabEvents.TabUrlChanged, () => {
-      this.#syncTabMeta(tabId);
-    });
+    tab.on(
+      TabEvents.TabUrlChanged,
+      (event: TabEventsMap[TabEvents.TabUrlChanged]) => {
+        const currentTabMeta = this.state.tabs.get(tabId);
+        if (!currentTabMeta) return;
+
+        const updatedTabMeta: TabMeta = {
+          ...currentTabMeta,
+          url: event.newUrl,
+          title: event.title,
+          favicon: event.favicon,
+          canGoBack: event.canGoBack,
+          canGoForward: event.canGoForward,
+        };
+
+        this.state.tabs.set(tabId, updatedTabMeta);
+      },
+    );
     tab.on(
       TabEvents.TabVisibilityChanged,
       (event: TabEventsMap[TabEvents.TabVisibilityChanged]) => {

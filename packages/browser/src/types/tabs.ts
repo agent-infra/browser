@@ -36,8 +36,12 @@ export interface TabEventsMap {
   };
   [TabEvents.TabUrlChanged]: {
     tabId: string;
+    title: string;
+    favicon: string;
     oldUrl: string;
     newUrl: string;
+    canGoBack: boolean;
+    canGoForward: boolean;
   };
   [TabEvents.TabVisibilityChanged]: {
     tabId: string;
@@ -65,6 +69,8 @@ export interface TabMeta {
   favicon: string | null;
   isLoading: boolean;
   isActive: boolean;
+  canGoBack: boolean;
+  canGoForward: boolean;
   dialog?: DialogMeta;
 }
 

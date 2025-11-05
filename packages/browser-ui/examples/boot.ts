@@ -24,7 +24,7 @@ async function main() {
       '--no-default-browser-check',
       '--window-size=900,990',
       '--remote-allow-origins=http://127.0.0.1:3000',
-      'https://www.baidu.com',
+      'https://www.bytedance.com/en/',
     ],
     ignoreDefaultArgs: ['--enable-automation'],
   });

@@ -15,11 +15,16 @@ async function launchChrome(os: OSType, path: string) {
 
   const page = await browser.newPage();
   page.goto('https://www.baidu.com');
-  const hotkey = new Keyboard(page, {
-    osName: os,
-    browserName: 'Chrome',
-    browserVersion: '1',
-  });
+  // @ts-ignore
+  const hotkey = new Keyboard(
+    page,
+    { isOpen: false },
+    {
+      osName: os,
+      browserName: 'Chrome',
+      browserVersion: '1',
+    },
+  );
 
   await delay(1000);
   await page.keyboard.type('Hello, world!');

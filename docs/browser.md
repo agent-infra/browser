@@ -342,6 +342,8 @@ interface TabMeta {
   favicon: string | null;
   isLoading: boolean;
   isActive: boolean;
+  canGoBack: boolean;
+  canGoForward: boolean;
   dialog?: DialogMeta;
 }
 
@@ -451,6 +453,24 @@ Navigate to next page. You can directly refer to [Page.goForward | Puppeteer](ht
 #### `reload(options?: NavigationOptions): Promise<NavigationResult>`
 
 Reload current page. You can directly refer to [Page.reload | Puppeteer](https://pptr.dev/api/puppeteer.page.reload).
+
+#### `getHistory(): Promise<NavigationHistory>`
+
+Get navigation history of the tab.
+
+**Return Type:**
+
+```typescript
+interface NavigationHistory {
+  index: number;
+  canGoBack: boolean;
+  canGoForward: boolean;
+  history: Array<{
+    url: string;
+    title: string;
+  }>;
+}
+```
 
 <br />
 

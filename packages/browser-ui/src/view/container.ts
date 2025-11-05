@@ -160,7 +160,7 @@ export class BrowserContainer extends LitElement {
     }
   }
 
-  updateNavigation(url: string, canGoBack: boolean, canGoForward: boolean) {
+  updateNavigation(url: string, canGoBack = true, canGoForward = true) {
     this.currentUrl = url;
     this.canGoBack = canGoBack;
     this.canGoForward = canGoForward;
