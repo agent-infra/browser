@@ -342,6 +342,8 @@ interface TabMeta {
   favicon: string | null;
   isLoading: boolean;
   isActive: boolean;
+  canGoBack: boolean;
+  canGoForward: boolean;
   dialog?: DialogMeta;
 }
 
@@ -451,6 +453,24 @@ interface NavigationResult {
 #### `reload(options?: NavigationOptions): Promise<NavigationResult>`
 
 重新加载当前页面。可直接参考 [Page.reload | Puppeteer](https://pptr.dev/api/puppeteer.page.reload)。
+
+#### `getHistory(): Promise<NavigationHistory>`
+
+获取标签页的导航历史。
+
+**返回类型：**
+
+```typescript
+interface NavigationHistory {
+  index: number;
+  canGoBack: boolean;
+  canGoForward: boolean;
+  history: Array<{
+    url: string;
+    title: string;
+  }>;
+}
+```
 
 <br />
 
