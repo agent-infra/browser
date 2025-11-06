@@ -1,7 +1,7 @@
 {
   "name": "@agent-infra/media-utils",
   "description": "media-utils",
-  "version": "0.2.0-alpha.4",
+  "version": "0.2.0",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
