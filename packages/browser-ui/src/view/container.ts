@@ -218,8 +218,8 @@ export class BrowserContainer extends LitElement {
     event.stopPropagation();
 
     const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const x = (event.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (event.clientY - rect.top) * (canvas.height / rect.height);
 
     this.dispatchEvent(
       new CustomEvent<MouseDetail>('canvas-mouse-event', {
