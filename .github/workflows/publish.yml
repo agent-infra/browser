@@ -35,7 +35,7 @@ jobs:
 
       # Ensure npm 11.5.1 or later is installed
       - name: Update npm
-        run: pnpm install --global npm@11.6.2
+        run: npm install --global npm@11.6.2
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
