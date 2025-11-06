@@ -46,5 +46,39 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Update package versions to tag version
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          echo "Updating all packages to version $VERSION"
+
+          # Update all package.json files in packages directory
+          for pkg in packages/*/package.json; do
+            echo "Updating $pkg to version $VERSION"
+            jq --arg version "$VERSION" '.version = $version' "$pkg" > tmp.json && mv tmp.json "$pkg"
+          done
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ steps.version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Publish to npm
-        run: pnpm publish -r --filter "{packages/*}" --access public --no-git-checks --provenance
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          # Check if version contains pre-release identifier
+          if [[ "$VERSION" =~ -[a-zA-Z0-9.-]+$ ]]; then
+            # This is a pre-release version
+            pnpm publish -r --filter "{packages/*}" --access public --no-git-checks --tag beta
+          else
+            # This is a stable release
+            pnpm publish -r --filter "{packages/*}" --access public --no-git-checks --tag latest
+          fi
