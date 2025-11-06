@@ -31,10 +31,14 @@ jobs:
           node-version: 22
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
+          provenance: true
 
       # Ensure npm 11.5.1 or later is installed
       - name: Update npm
         run: pnpm install --global npm@11.6.2
+
+      - name: Who am I
+        run: npm whoami
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -46,4 +50,4 @@ jobs:
         run: pnpm run build
 
       - name: Publish to npm
-        run: pnpm publish -r --filter "{packages/*}" --access public --no-git-checks
+        run: pnpm publish -r --filter "{packages/*}" --access public --no-git-checks --provenance
