@@ -71,4 +71,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to npm
-        run: pnpm publish -r --no-git-checks --tag latest
+        run: pnpm publish -r --filter "{packages/*}" --no-git-checks --tag latest
