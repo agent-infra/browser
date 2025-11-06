@@ -1,5 +1,11 @@
 # @agent-infra/browser-finder
 
+## 0.2.0
+
+### Minor Changes
+
+- Release new version for tag publish
+
 ## 0.1.6
 
 ### Patch Changes

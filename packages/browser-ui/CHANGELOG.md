@@ -1,5 +1,16 @@
 # @agent-infra/browser-ui
 
+## 0.2.0
+
+### Minor Changes
+
+- Release new version for tag publish
+
+### Patch Changes
+
+- Updated dependencies
+  - @agent-infra/browser@0.2.0
+
 ## 0.1.6
 
 ### Patch Changes

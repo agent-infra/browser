@@ -1,5 +1,17 @@
 # @agent-infra/browser-finder
 
+## 0.2.0
+
+### Minor Changes
+
+- Release new version for tag publish
+
+### Patch Changes
+
+- Updated dependencies
+  - @agent-infra/browser-finder@0.2.0
+  - @agent-infra/media-utils@0.2.0
+
 ## 0.1.6
 
 ### Patch Changes
