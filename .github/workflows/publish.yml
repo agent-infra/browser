@@ -1,0 +1,49 @@
+name: Publish Packages
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+          standalone: true
+
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      # Ensure npm 11.5.1 or later is installed
+      - name: Update npm
+        run: pnpm install --global npm@11.6.2
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Style check
+        run: pnpm run format:check
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Create and publish versions
+        uses: changesets/action@v1
+        with:
+          commit: 'chore: update versions'
+          title: 'chore: update versions'
+          publish: pnpm publish -r
