@@ -241,7 +241,7 @@ await browser.deleteMatchingCookies({ domain: 'example.com' });
 
 ### 生命周期
 
-#### `Browser.create(options?: LaunchOptions): Promise<Browser>`
+#### `Browser.create(options?: { launchOrConnect: LaunchOptions }): Promise<Browser>`
 
 创建并初始化浏览器实例。LaunchOptions 就是 puppeteer 的[启动参数类型](https://pptr.dev/browsers-api/browsers.launchoptions)，但是又有一些不一样的地方：
 

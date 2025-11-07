@@ -241,7 +241,7 @@ The main browser class, primarily providing tab management and cookie injection 
 
 ### Lifecycle
 
-#### `Browser.create(options?: LaunchOptions): Promise<Browser>`
+#### `Browser.create(options?: { launchOrConnect: LaunchOptions }): Promise<Browser>`
 
 Create and initialize browser instance. LaunchOptions is puppeteer's [launch parameter type](https://pptr.dev/browsers-api/browsers.launchoptions), but with some differences:
 

@@ -12,11 +12,13 @@ if (!container) {
 BrowserUI.create({
   root: container,
   browserOptions: {
-    // @ts-ignore
-    browserWSEndpoint: import.meta.WSEndpoint,
-    defaultViewport: {
-      width: 900,
-      height: 900,
+    connect: {
+      // @ts-ignore
+      browserWSEndpoint: import.meta.WSEndpoint,
+      defaultViewport: {
+        width: 900,
+        height: 900,
+      },
     },
   },
 });

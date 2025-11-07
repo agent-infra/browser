@@ -20,9 +20,11 @@ export class Browser extends BaseBrowser<Tabs> {
   /**
    * Create a browser instance (launch or connect based on options)
    */
-  static async create(options: LaunchOptions = {}): Promise<Browser> {
+  static async create(
+    options: { launchOrConnect: LaunchOptions } = { launchOrConnect: {} },
+  ): Promise<Browser> {
     const browser = new Browser();
-    await browser.#init(options);
+    await browser.#init(options.launchOrConnect);
     return browser;
   }
 
