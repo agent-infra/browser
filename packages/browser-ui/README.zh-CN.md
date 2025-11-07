@@ -27,7 +27,9 @@ if (!container) {
 BrowserUI.create({
   root: container,
   browserOptions: {
-    browserWSEndpoint: 'ws://localhost:9222', // 您的 CDP WebSocket 端点
+    connect: {
+      browserWSEndpoint: 'https://example.com/ws/url',
+    },
   },
 });
 ```
@@ -59,3 +61,5 @@ Apache License 2.0.
 
 - [puppeteer](https://github.com/puppeteer/puppeteer) - 底层浏览器自动化库
 - [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/) - Chrome 开发者协议
+- [Lit](https://lit.dev/) - 简单，高性能的 Web Components 库
+- [Lucide icons](https://lucide.dev/) - icons
