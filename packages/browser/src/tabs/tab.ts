@@ -2,6 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+import delay from 'delay';
 import { EventEmitter } from 'eventemitter3';
 import { BinaryImageParser, Base64ImageParser } from '@agent-infra/media-utils';
 import { disableWebdriver, visibilityScript } from '../injected-script';
@@ -87,8 +88,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   async getTitle() {
     this.#title = await this.#getTitle();
-
-    console.log('getTitle', this.#title);
 
     return this.#title;
   }
@@ -483,8 +482,11 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   // #endregion
 
+  // #region private methods
+
   async #getTitle() {
     try {
+      await delay(100);
       const pptrTitle = (await this.#pptrPage.title()).trim();
       if (pptrTitle) {
         return pptrTitle;
@@ -510,6 +512,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
     }
 
     try {
+      await delay(100);
       const favicon = await this.#pptrPage.evaluate(() => {
         const iconLink = document.querySelector(
           'link[rel*="icon"]',
