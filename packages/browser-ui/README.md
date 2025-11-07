@@ -27,7 +27,9 @@ if (!container) {
 BrowserUI.create({
   root: container,
   browserOptions: {
-    browserWSEndpoint: 'https://example.com/ws/url',
+    connect: {
+      browserWSEndpoint: 'https://example.com/ws/url',
+    },
   },
 });
 ```
@@ -59,3 +61,5 @@ Special thanks to the open source projects that inspired this toolkit:
 
 - [puppeteer](https://github.com/puppeteer/puppeteer) - The underlying browser automation library
 - [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/) - Chrome DevTools Protocol
+- [Lit](https://lit.dev/) - Simple. Fast. Web Components.
+- [Lucide icons](https://lucide.dev/) - Beautiful & consistent icons
