@@ -30,6 +30,10 @@
 
 **浏览器投屏 UI 组件**。可通过 CDP 与远程浏览器连接，然后显示它的投屏内容。
 
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/7394eccc-0d07-4764-8265-aa5b4b56d5f7" controls width="600"></video>
+</div>
+
 ### [@agent-infra/browser-finder](./packages/browser-finder)
 
 **跨平台浏览器检测**。自动定位在 Windows、macOS 和 Linux 系统上安装的浏览器（Chrome、Edge、Firefox）。
