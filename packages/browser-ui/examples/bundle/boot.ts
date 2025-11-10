@@ -42,18 +42,13 @@ async function main() {
 
       if (req.url === '/' || req.url === '/index.html') {
         const indexPath = new URL('./index.html', import.meta.url).pathname;
-        console.log(`Reading file: ${indexPath}`);
-
         let html = await readFile(indexPath, 'utf-8');
-        console.log('File read successfully');
 
         // Replace the import.meta.WSEndpoint with the actual wsEndpoint
         html = html.replace(
           'import.meta.WSEndpoint',
           JSON.stringify(wsEndpoint),
         );
-
-        console.log('HTML length:', html.length);
 
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end(html);
