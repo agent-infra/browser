@@ -30,9 +30,9 @@
 
 **浏览器投屏 UI 组件**。可通过 CDP 与远程浏览器连接，然后显示它的投屏内容。
 
-<p>
+<div align="center" style="width: 600px">
 <video src="https://github.com/user-attachments/assets/7394eccc-0d07-4764-8265-aa5b4b56d5f7" controls="true" width="600"></video>
-</p>
+</div>
 
 ### [@agent-infra/browser-finder](./packages/browser-finder)
 
