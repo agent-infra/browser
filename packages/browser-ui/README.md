@@ -8,8 +8,8 @@
 
 Users only need to provide a CDP WebSocket URL with permissions, and **@agent-infra/browser-ui** can display the remote browser's page, and you can also manually intervene in browser operations, which is very useful in scenarios without VNC and headless browser.
 
-<p>
-<video src="https://github.com/user-attachments/assets/7394eccc-0d07-4764-8265-aa5b4b56d5f7" controls="true" width="600"></video>
+<p align="center">
+  <video src="https://github.com/user-attachments/assets/7394eccc-0d07-4764-8265-aa5b4b56d5f7" controls width="600"></video>
 </p>
 
 ## Installation

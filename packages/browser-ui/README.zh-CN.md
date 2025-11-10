@@ -8,8 +8,8 @@
 
 用户只需要提供有权限的 CDP WebSocket URL，**@agent-infra/browser-ui** 就可以展示远程浏览器的页面，同时你也可以手动介入浏览器操作，在没有 VNC 和无头浏览器的场景下非常有用。
 
-<p>
-<video src="https://github.com/user-attachments/assets/7394eccc-0d07-4764-8265-aa5b4b56d5f7" controls="true" width="600"></video>
+<p align="center">
+  <video src="https://github.com/user-attachments/assets/7394eccc-0d07-4764-8265-aa5b4b56d5f7" controls width="600"></video>
 </p>
 
 ## 安装
