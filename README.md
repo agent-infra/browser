@@ -26,13 +26,13 @@ This toolkit is specifically designed for:
 
 **Core Browser Control Library**. Abstracts and encapsulates the fundamental capabilities required to manipulate browsers.
 
-<div align="center">
-  <video src="https://github.com/user-attachments/assets/7394eccc-0d07-4764-8265-aa5b4b56d5f7" controls width="600"></video>
-</div>
-
 ### [@agent-infra/browser-ui](./packages/browser-ui)
 
 **Browser Screen Casting UI Components**. Can connect to remote browsers via CDP and then display their screen casting content.
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/7394eccc-0d07-4764-8265-aa5b4b56d5f7" controls width="600"></video>
+</div>
 
 ### [@agent-infra/browser-finder](./packages/browser-finder)
 
