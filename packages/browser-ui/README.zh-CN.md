@@ -8,6 +8,10 @@
 
 用户只需要提供有权限的 CDP WebSocket URL，**@agent-infra/browser-ui** 就可以展示远程浏览器的页面，同时你也可以手动介入浏览器操作，在没有 VNC 和无头浏览器的场景下非常有用。
 
+<p>
+<video src="https://lf3-static.bytednsdoc.com/obj/eden-cn/eojfrzeh7vhouloj/agent-infra-browser/agent-infra-browser.mp4" controls="true" width="600"></video>
+</p>
+
 ## 安装
 
 ```bash
@@ -15,6 +19,8 @@ npm install @agent-infra/browser-ui
 ```
 
 ## 快速开始
+
+在前端项目中使用：
 
 ```typescript
 import { BrowserUI } from '@agent-infra/browser-ui';
@@ -33,6 +39,8 @@ BrowserUI.create({
   },
 });
 ```
+
+完整的可用示例，可直接在当前目录下运行 `npm run dev` 或查看包中的 `/examples` 目录。
 
 ## 核心功能
 
