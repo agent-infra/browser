@@ -40,7 +40,36 @@ BrowserUI.create({
 });
 ```
 
+或者直接使用 unpkg CDN 在任意网页中使用：
+
+- **CDN URL**: https://unpkg.com/@agent-infra/browser/dist/bundle/index.js
+
+```html
+<!doctype html>
+<html lang="en">
+  <body>
+    <div id="browserContainer"></div>
+    <script src="https://unpkg.com/@agent-infra/browser/dist/bundle/index.js"></script>
+    <script>
+      const BrowserUI = window.agent_infra_browser_ui.BrowserUI;
+
+      BrowserUI.create({
+        root: document.getElementById('browserContainer'),
+        browserOptions: {
+          connect: {
+            // @ts-ignore
+            browserWSEndpoint: 'https://example.com/ws/url',
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
+```
+
 完整的可用示例，可直接在当前目录下运行 `npm run dev` 或查看包中的 `/examples` 目录。
+
+<br />
 
 ## 核心功能
 

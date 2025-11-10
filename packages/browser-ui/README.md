@@ -40,6 +40,33 @@ BrowserUI.create({
 });
 ```
 
+Or use the unpkg CDN to use it on any webpage:
+
+- **CDN URL**: https://unpkg.com/@agent-infra/browser/dist/bundle/index.js
+
+```html
+<!doctype html>
+<html lang="en">
+  <body>
+    <div id="browserContainer"></div>
+    <script src="https://unpkg.com/@agent-infra/browser/dist/bundle/index.js"></script>
+    <script>
+      const BrowserUI = window.agent_infra_browser_ui.BrowserUI;
+
+      BrowserUI.create({
+        root: document.getElementById('browserContainer'),
+        browserOptions: {
+          connect: {
+            // @ts-ignore
+            browserWSEndpoint: 'https://example.com/ws/url',
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
+```
+
 A complete usable example, which can be run directly with `npm run dev` in the current directory or viewed in the `/examples` directory within the package.
 
 ## Features
