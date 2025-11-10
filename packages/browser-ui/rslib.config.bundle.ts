@@ -13,7 +13,7 @@ const BANNER = `/**
 export default defineConfig({
   source: {
     entry: {
-      index: ['src/**/*.ts', '!src/**/*.{test,bench}.ts'],
+      index: 'src/index.ts',
     },
     decorators: {
       version: 'legacy',
@@ -21,23 +21,26 @@ export default defineConfig({
   },
   lib: [
     {
-      format: 'esm',
+      format: 'umd',
       syntax: 'es2021',
-      bundle: false,
-      dts: true,
+      bundle: true,
+      dts: false,
       banner: { js: BANNER },
-    },
-    {
-      format: 'cjs',
-      syntax: 'es2021',
-      bundle: false,
-      dts: true,
-      banner: { js: BANNER },
+      umdName: 'agent_infra_browser_ui',
+      output: {
+        minify: true,
+        externals: ['chromium-bidi/lib/cjs/bidiMapper/BidiMapper.js'],
+        distPath: {
+          root: 'dist/bundle/',
+        },
+      },
     },
   ],
+  // performance: {
+  //   bundleAnalyze: {},
+  // },
   output: {
     target: 'web',
-    cleanDistPath: true,
     sourceMap: true,
   },
 });

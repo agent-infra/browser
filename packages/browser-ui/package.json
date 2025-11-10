@@ -29,7 +29,7 @@
   ],
   "scripts": {
     "prepublishOnly": "pnpm run build",
-    "build": "rslib build",
+    "build": "rslib build && rslib build --config rslib.config.bundle.ts",
     "dev": "tsx examples/boot.ts",
     "test": "vitest run"
   },
