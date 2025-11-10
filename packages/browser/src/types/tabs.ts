@@ -20,6 +20,7 @@ export interface TabsOptions {
 
 export interface TabOptions extends TabsOptions {
   tabId: string;
+  injectVisibilityScript?: boolean;
 }
 
 export const enum TabEvents {

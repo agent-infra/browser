@@ -34,4 +34,7 @@ export interface UITabsOptions extends TabsOptions {
   cast?: CastOptions;
 }
 
-export type ScreenCastOptions = Omit<UITabOptions, 'envInfo' | 'userAgentInfo'>;
+export type ScreenCastOptions = Omit<
+  UITabOptions,
+  'envInfo' | 'userAgentInfo' | 'injectVisibilityScript'
+>;

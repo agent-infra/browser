@@ -7,6 +7,11 @@
 
 export const disableWebdriver = /* javascript */ `
 function agentInfraDriver() {
+  if (window.__agent_infra_browser.webdriver) {
+    return;
+  }
+  window.__agent_infra_browser.webdriver = true;
+
   delete navigator.webdriver;
 
   const originalNavigator = navigator;

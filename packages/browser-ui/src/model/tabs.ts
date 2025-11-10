@@ -32,12 +32,19 @@ export class UITabs extends Tabs<UITab> {
     this.#options = options;
   }
 
-  override createTabInstance(page: Page, options: TabOptions): UITab {
+  override async createTabInstance(
+    page: Page,
+    options: TabOptions,
+  ): Promise<UITab> {
     const uiOptions: UITabOptions = {
       ...options,
       cast: this.#options.cast,
+      injectVisibilityScript: true,
     };
-    return new UITab(page, this.#canvas, uiOptions);
+    const tab = new UITab(page, this.#canvas, uiOptions);
+    await tab.init();
+
+    return tab;
   }
 }
 

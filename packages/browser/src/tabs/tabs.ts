@@ -70,8 +70,14 @@ export class Tabs<T extends Tab = Tab> {
     };
   }
 
-  protected createTabInstance(page: Page, options: TabOptions): T {
-    return new Tab(page, options) as T;
+  protected async createTabInstance(
+    page: Page,
+    options: TabOptions,
+  ): Promise<T> {
+    const tab = new Tab(page, options) as T;
+    await tab.init();
+
+    return tab;
   }
 
   // #region init ExistingTabs
@@ -91,7 +97,7 @@ export class Tabs<T extends Tab = Tab> {
       .map(async (pptrPage) => {
         // @ts-ignore
         const tabId = pptrPage.target()._targetId;
-        const tab = this.createTabInstance(pptrPage, {
+        const tab = await this.createTabInstance(pptrPage, {
           tabId: tabId,
           ...this.#options,
         });
@@ -127,7 +133,7 @@ export class Tabs<T extends Tab = Tab> {
     }
     this.#operations.creatingTargetIds.add(targetId);
 
-    const tab = this.createTabInstance(pptrPage, {
+    const tab = await this.createTabInstance(pptrPage, {
       tabId: targetId,
       ...this.#options,
     });

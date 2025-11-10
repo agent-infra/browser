@@ -9,6 +9,11 @@
 
 export const visibilityScript = /* javascript */ `
 function agentInfraVisibilityScript() {
+  if (window.__agent_infra_browser.visibility) {
+    return;
+  }
+  window.__agent_infra_browser.visibility = true;
+
   if (window.top !== window) {
     return;
   }

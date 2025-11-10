@@ -40,7 +40,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
   #isLoading = false;
   #reloadAbortController: AbortController | null = null;
 
-  #scriptsOnCreate: string[] = [disableWebdriver, visibilityScript];
+  #scriptsOnCreate: string[] = [disableWebdriver];
   #scriptsOnLoad: string[] = [];
 
   constructor(page: Page, options: TabOptions) {
@@ -58,18 +58,24 @@ export class Tab extends EventEmitter<TabEventsMap> {
     this.#keyboard = new Keyboard(page, this.#tabDialog, options.envInfo);
     this.#mouse = new Mouse(page, this.#tabDialog);
 
-    this.#setupVisibilityTracking();
-    this.#executeScriptsOnCreate();
-
-    // Set user agent if provided
-    if (options.userAgentInfo) {
-      this.#pptrPage.setUserAgent(options.userAgentInfo);
-    }
-
     // page events: https://pptr.dev/api/puppeteer.pageevent
     this.#pptrPage.on('domcontentloaded', this.#dclHandler);
     this.#pptrPage.on('load', this.#loadHandler);
     this.#pptrPage.on('framenavigated', this.#frameNavigatedHandler);
+  }
+
+  async init() {
+    // Only setup visibility tracking if visibility script is injected
+    if (this.#options.injectVisibilityScript) {
+      this.#scriptsOnCreate.push(visibilityScript);
+      await this.#setupVisibilityTracking();
+    }
+
+    await this.#executeScriptsOnCreate();
+
+    if (this.#options.userAgentInfo) {
+      await this.#pptrPage.setUserAgent(this.#options.userAgentInfo);
+    }
   }
 
   // #region meta info
@@ -464,8 +470,10 @@ export class Tab extends EventEmitter<TabEventsMap> {
   async #executeScriptsOnCreate() {
     try {
       const script = iife(this.#scriptsOnCreate.join('\n'));
-      await this.#pptrPage.evaluateOnNewDocument(script);
-      await this.#pptrPage.evaluate(script);
+      await Promise.race([
+        this.#pptrPage.evaluateOnNewDocument(script),
+        this.#pptrPage.evaluate(script),
+      ]);
     } catch (error) {
       console.warn('Failed to execute script on create:', error);
     }
