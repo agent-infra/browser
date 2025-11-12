@@ -1,5 +1,5 @@
 <div align="right">
-  <b>简体中文</b> | <a href="README.md">English</a>
+  <b>简体中文</b> | <a href="./README.md">English</a>
 </div>
 
 # @agent-infra/browser
@@ -43,7 +43,7 @@ await browser.close();
 
 ## 完整文档
 
-有关详细的 API 文档和高级使用示例，请参考我们的[完整文档](../../docs/browser.zh-CN.md)。
+有关详细的 API 文档和高级使用示例，请参考我们的[完整文档](https://github.com/agent-infra/browser/blob/main/docs/browser.zh-CN.md)。
 
 ## 许可证
 
