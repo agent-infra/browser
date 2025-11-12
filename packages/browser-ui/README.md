@@ -1,5 +1,5 @@
 <div align="right">
-  <a href="README.zh-CN.md">简体中文</a> | <b>English</b>
+  <a href="https://github.com/agent-infra/browser/blob/main/packages/browser-ui/README.zh-CN.md">简体中文</a> | <b>English</b>
 </div>
 
 # @agent-infra/browser-ui
